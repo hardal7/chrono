@@ -3,9 +3,9 @@ set -e
 
 echo "Running migrations"
 
-for file in /app/migrations/*; do
+for file in /migrations/*; do
   echo "Applying $file..."
-  psql -U $POSTGRES_USER -d $POSTGRES_DB -f $file
+  psql -h $POSTGRES_DB -U $POSTGRES_USER -d $POSTGRES_DB -f $file
 done
 
 echo "Migrations completed"

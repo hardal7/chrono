@@ -1,20 +1,39 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: chat-db
+    container_name: study-db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - .:/app
-  app:
+      - .:/app     
+      - /usr/local/db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: "sh -c 'pg_isready -U $DB_USER'"
+      interval: 1s
+      retries: 5
+  migrate:
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    image: postgres:17-alpine
+    container_name: study-migrate
+    depends_on: 
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations     
+      - ./scripts/migrate.sh:/app/migrate.sh
+    entrypoint: ["/app/migrate.sh"]
+  api:
     image: golang:alpine
     ports:
       - "${PORT}:${PORT}"
-    container_name: chat-app
+    container_name: study-api
     depends_on:
-      - db
+      - migrate
     volumes:
       - .:/app
-    command: sh -c "apk add --no-cache make && make run -C /app && ./app/scripts/migrate.sh"
+    command: sh -c "apk add --no-cache make && make run -C /app"
