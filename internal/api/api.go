@@ -10,14 +10,14 @@ import (
 
 func RunAPIServer() {
 	router := http.NewServeMux()
-	router.HandleFunc("POST /register", middleware.LogRequest(CreateRegisterRequest))
-	router.HandleFunc("POST /login", middleware.LogRequest(CreateLoginRequest))
-	router.HandleFunc("POST /account", middleware.LogRequest(middleware.Authenticate(CreateEditAccountRequest)))
+	router.HandleFunc("POST /register", CreateRegisterRequest)
+	router.HandleFunc("POST /login", CreateLoginRequest)
+	router.HandleFunc("POST /account", CreateEditAccountRequest)
 
 	logger.Info("Starting server on port: " + config.App.Port)
 	server := http.Server{
 		Addr:    ":" + config.App.Port,
-		Handler: router,
+		Handler: middleware.LogRequest(router),
 	}
 	err := server.ListenAndServe()
 	if err != nil {

@@ -9,10 +9,10 @@ import (
 	logger "github.com/hardal7/study/internal/util"
 )
 
-func Authenticate(next http.HandlerFunc) http.HandlerFunc {
-	logger.Info("Authenticating user")
+func Authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Authenticating user")
 
-	return func(w http.ResponseWriter, r *http.Request) {
 		tokenCookie, err := r.Cookie("Authorization")
 		if err == http.ErrNoCookie {
 			logger.Info("No token provided")
@@ -51,5 +51,5 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 				next.ServeHTTP(w, r.WithContext(ctx))
 			}
 		}
-	}
+	})
 }

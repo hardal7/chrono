@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"chat/internal/model"
 	"context"
 
+	"github.com/hardal7/study/internal/model"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -20,15 +20,36 @@ func IsDuplicateUser(ctx context.Context, user model.User) (bool, error) {
 }
 
 func CreateUser(ctx context.Context, user model.User) error {
-	query := "INSERT INTO users (email, username, password, created_at, updated_at)\nVALUES ($1, $2, $3, $4, $5);"
+	query := "INSERT INTO users (email, username, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5);"
 	_, err := DB.Exec(ctx, query, user.Email, user.Username, user.Password, user.CreatedAt, user.UpdatedAt)
 
 	return err
 }
 
-func GetUser(ctx context.Context, lr model.LoginRequest) (model.User, error) {
-	query := "SELECT * FROM users WHERE (email = $1 OR username = $2);"
-	row, err := DB.Query(ctx, query, lr.Email, lr.Username)
+func DeleteUser(ctx context.Context, user model.User) error {
+	query := "DELETE FROM users WHERE username = $1;"
+	_, err := DB.Exec(ctx, query, user.Username)
+
+	return err
+}
+
+func UpdateUser(ctx context.Context, user model.User) error {
+	query := "UPDATE users SET username = $1, password = $2 WHERE id = $3;"
+	_, err := DB.Exec(ctx, query, user.Username, user.Password, user.ID)
+
+	return err
+}
+
+func GetUserByUsername(ctx context.Context, username string) (model.User, error) {
+	query := "SELECT * FROM users WHERE username = $1 LIMIT 1;"
+	row, err := DB.Query(ctx, query, username)
+	user, err := pgx.CollectOneRow(row, pgx.RowToStructByName[model.User])
+	return user, err
+}
+
+func GetUserByID(ctx context.Context, userid int) (model.User, error) {
+	query := "SELECT * FROM users WHERE id = $1 LIMIT 1;"
+	row, err := DB.Query(ctx, query, userid)
 	user, err := pgx.CollectOneRow(row, pgx.RowToStructByName[model.User])
 	return user, err
 }

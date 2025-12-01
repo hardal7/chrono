@@ -20,7 +20,7 @@ const (
 func Login(w http.ResponseWriter, r *http.Request, lr model.LoginRequest) {
 	logger.Info("Logging user with username: " + lr.Username)
 
-	user, err := repository.GetUserByUsername(r.Context(), lr)
+	user, err := repository.GetUserByUsername(r.Context(), lr.Username)
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())
@@ -60,8 +60,8 @@ func Login(w http.ResponseWriter, r *http.Request, lr model.LoginRequest) {
 			Secure:   true,
 			SameSite: http.SameSiteLaxMode,
 		}
+		logger.Info("Logged user and sent token")
 		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
-		logger.Info("Logged user and sent token")
 	}
 }
