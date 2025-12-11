@@ -34,8 +34,8 @@ func DeleteUser(ctx context.Context, user model.User) error {
 }
 
 func UpdateUser(ctx context.Context, user model.User) error {
-	query := "UPDATE users SET username = $1, password = $2 WHERE id = $3;"
-	_, err := DB.Exec(ctx, query, user.Username, user.Password, user.ID)
+	query := "UPDATE users SET username = $1, password = $2 WHERE id = $3; UPDATE users SET updated_at = $4"
+	_, err := DB.Exec(ctx, query, user.Username, user.Password, user.ID, user.UpdatedAt)
 
 	return err
 }
