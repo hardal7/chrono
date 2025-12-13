@@ -19,8 +19,8 @@ func IsDuplicateSession(ctx context.Context, session model.Session) (bool, error
 }
 
 func CreateSession(ctx context.Context, session model.Session) error {
-	query := "INSERT INTO sessions (name, password, admin_id, user_ids, expiry, created_at, updated_at) VALUES ($1, $2, $3, $4, $5);"
-	_, err := DB.Exec(ctx, query, session.Name, session.Password, session.Admin, session.Users, session.Expiry, session.CreatedAt, session.UpdatedAt)
+	query := "INSERT INTO sessions (name, password, expiry, created_at, updated_at) VALUES ($1, $2, $3, $4, $5);"
+	_, err := DB.Exec(ctx, query, session.Name, session.Password, session.Expiry, session.CreatedAt, session.UpdatedAt)
 
 	return err
 }

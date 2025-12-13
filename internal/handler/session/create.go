@@ -27,10 +27,8 @@ func Create(w http.ResponseWriter, r *http.Request, csr model.CreateSessionReque
 	}
 
 	session := model.Session{
-		Name:     csr.Name,
-		Password: string(passwordHash),
-		// TODO: Use auth middleware beforehand to get userid
-		// Admin: ,
+		Name:      csr.Name,
+		Password:  string(passwordHash),
 		Expiry:    time.Now().Add(time.Minute * time.Duration(csr.Expiry)),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
