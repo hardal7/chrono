@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/hardal7/study/internal/config"
-	"github.com/hardal7/study/internal/handler/user"
-	"github.com/hardal7/study/internal/middleware"
-	logger "github.com/hardal7/study/internal/util"
+	"github.com/hardal7/chrono/internal/config"
+	"github.com/hardal7/chrono/internal/handler/user"
+	"github.com/hardal7/chrono/internal/middleware"
+	logger "github.com/hardal7/chrono/internal/util"
 )
 
 func RunAPIServer() {

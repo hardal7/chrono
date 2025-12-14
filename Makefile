@@ -1,4 +1,4 @@
-APP_NAME=study
+APP_NAME=chrono
 BUILD_DIR=bin
 
 .PHONY: build run clean migrate

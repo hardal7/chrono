@@ -1,4 +1,4 @@
-module github.com/hardal7/study
+module github.com/hardal7/chrono
 
 go 1.25.4
 

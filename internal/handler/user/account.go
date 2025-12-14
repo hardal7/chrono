@@ -3,9 +3,9 @@ package user
 import (
 	"net/http"
 
-	"github.com/hardal7/study/internal/model"
-	"github.com/hardal7/study/internal/repository"
-	logger "github.com/hardal7/study/internal/util"
+	"github.com/hardal7/chrono/internal/model"
+	"github.com/hardal7/chrono/internal/repository"
+	logger "github.com/hardal7/chrono/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
