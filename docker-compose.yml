@@ -22,6 +22,11 @@ services:
       POSTGRES_USER: ${DB_USER}
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    image: postgres:17-alpine
+    container_name: chrono-migrate
+    depends_on: 
+      db:
+        condition: service_healthy
     volumes:
       - ./migrations:/srv/migrations     
       - ./scripts/migrate.sh:/srv/migrate.sh
