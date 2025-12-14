@@ -18,8 +18,9 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountReq
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	} else {
+		logger.Info("Editing account with username: " + user.Username)
 		if er.DeleteAccount {
-			logger.Info("Deleting account with username" + user.Username)
+			logger.Info("Deleting account with username: " + user.Username)
 			err := repository.DeleteUser(r.Context(), user)
 			if err != nil {
 				logger.Info("Failed to delete account")
@@ -34,7 +35,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountReq
 			user.UpdatedAt = time.Now()
 			if er.NewUsername != "" {
 				user.Username = er.NewUsername
-				logger.Info("Changing account username from " + user.Username + " to " + er.NewUsername)
+				logger.Info("Changed username to " + er.NewUsername)
 			}
 			if er.NewPassword != "" {
 				logger.Info("Changing account password")

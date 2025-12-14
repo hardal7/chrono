@@ -11,17 +11,23 @@ import (
 )
 
 func RunAPIServer() {
-	router := http.NewServeMux()
-	router.HandleFunc("POST /register", CreateRequest(user.Register, "register user"))
-	router.HandleFunc("POST /login", CreateRequest(user.Login, "log user in"))
-	router.HandleFunc("POST /account", CreateRequest(user.EditAccount, "edit user account"))
+	root := http.NewServeMux()
 
-	// router.HandleFunc("POST /session", CreateRequest(session.CreateSession, "create session"))
+	public := http.NewServeMux()
+	public.HandleFunc("POST /register", CreateRequest(user.Register, "register user"))
+	public.HandleFunc("POST /login", CreateRequest(user.Login, "log user in"))
+	root.Handle("/register", public)
+	root.Handle("/login", public)
+
+	protected := http.NewServeMux()
+	protected.HandleFunc("POST /account", CreateRequest(user.EditAccount, "edit user account"))
+	// protected.HandleFunc("POST /session", CreateRequest(session.CreateSession, "create session"))
+	root.Handle("/", middleware.Authenticate(protected))
 
 	logger.Info("Starting server on port: " + config.App.Port)
 	server := http.Server{
 		Addr:    ":" + config.App.Port,
-		Handler: middleware.LogRequest(router),
+		Handler: middleware.LogRequest(root),
 	}
 	err := server.ListenAndServe()
 	if err != nil {
