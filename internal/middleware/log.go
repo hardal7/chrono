@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	logger "github.com/hardal7/study/internal/util"
+	logger "github.com/hardal7/chrono/internal/util"
 )
 
 func LogRequest(next http.Handler) http.Handler {

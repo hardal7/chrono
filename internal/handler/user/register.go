@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	logger "github.com/hardal7/study/internal/util"
+	logger "github.com/hardal7/chrono/internal/util"
 
-	"github.com/hardal7/study/internal/model"
-	"github.com/hardal7/study/internal/repository"
+	"github.com/hardal7/chrono/internal/model"
+	"github.com/hardal7/chrono/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 

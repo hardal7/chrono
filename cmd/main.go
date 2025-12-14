@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/hardal7/study/internal/api"
-	"github.com/hardal7/study/internal/config"
-	"github.com/hardal7/study/internal/repository"
-	logger "github.com/hardal7/study/internal/util"
+	"github.com/hardal7/chrono/internal/api"
+	"github.com/hardal7/chrono/internal/config"
+	"github.com/hardal7/chrono/internal/repository"
+	logger "github.com/hardal7/chrono/internal/util"
 )
 
 func init() {

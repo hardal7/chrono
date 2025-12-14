@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/hardal7/study/internal/model"
+	"github.com/hardal7/chrono/internal/model"
 	"github.com/jackc/pgx/v5"
 )
 

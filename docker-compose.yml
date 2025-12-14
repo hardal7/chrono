@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: study-db
+    container_name: chrono-db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -19,7 +19,7 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     image: postgres:17-alpine
-    container_name: study-migrate
+    container_name: chrono-migrate
     depends_on: 
       db:
         condition: service_healthy
@@ -31,7 +31,7 @@ services:
     image: golang:alpine
     ports:
       - "${PORT}:${PORT}"
-    container_name: study-api
+    container_name: chrono-api
     depends_on:
       - migrate
     volumes:
