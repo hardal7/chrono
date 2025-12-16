@@ -14,26 +14,42 @@ services:
       interval: 1s
       retries: 5
   migrate:
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      PGPASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
     image: postgres:17-alpine
     container_name: chrono-migrate
     depends_on: 
       db:
         condition: service_healthy
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ./migrations:/migrations     
       - ./scripts/migrate.sh:/app/migrate.sh
     entrypoint: ["/app/migrate.sh"]
-  api:
+  app:
     image: golang:alpine
+    container_name: chrono-app
     ports:
-      - "${PORT}:${PORT}"
-    container_name: chrono-api
+      - "${APP_PORT}"
     depends_on:
       - migrate
     volumes:
       - .:/app
     command: sh -c "apk add --no-cache make && make run -C /app"
+    labels:
+      - "traefik.http.routers.chrono-app.rule=Host(`chrono.localhost`)"
+  reverse-proxy:
+    image: traefik:v3.6
+    container_name: reverse-proxy
+    depends_on:
+      - app
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
