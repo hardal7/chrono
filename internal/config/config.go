@@ -29,7 +29,7 @@ func Load() {
 	}
 
 	App = Config{
-		Port:        os.Getenv("PORT"),
+		Port:        os.Getenv("APP_PORT"),
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_HOST:     os.Getenv("DB_HOST"),
 		DB_USER:     os.Getenv("DB_USER"),
