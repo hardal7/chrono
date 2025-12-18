@@ -8,27 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func getConnString() string {
-	return "host=" + config.App.DB_HOST +
-		" user=" + config.App.DB_USER +
-		" password=" + config.App.DB_PASSWORD +
-		" dbname=" + config.App.DB_NAME +
-		" port=" + config.App.DB_PORT +
-		" sslmode=disable"
-}
-
 var DB *pgxpool.Pool
 
 func CreateDBConnection() {
 	logger.Info("Connecting to database server at: " + config.App.DB_HOST)
 	var err error
-	DB, err = pgxpool.New(context.Background(), getConnString())
+	DB, err = pgxpool.New(context.Background(), getConnectionString())
 
 	if err != nil {
 		DB.Close()
 		logger.Error("Failed to create connection pool")
 		logger.Debug(err.Error())
 	}
+	logger.Info("Created connection pool")
 
 	if err := DB.Ping(context.Background()); err != nil {
 		DB.Close()
@@ -36,5 +28,14 @@ func CreateDBConnection() {
 		logger.Debug(err.Error())
 	}
 
-	logger.Info("Connected to database server at: " + config.App.DB_HOST)
+	logger.Info("Connecting to database server at: " + config.App.DB_HOST)
+}
+
+func getConnectionString() string {
+	return "host=" + config.App.DB_HOST +
+		" user=" + config.App.DB_USER +
+		" password=" + config.App.DB_PASSWORD +
+		" dbname=" + config.App.DB_NAME +
+		" port=" + config.App.DB_PORT +
+		" sslmode=disable"
 }
