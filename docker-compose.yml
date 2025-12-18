@@ -7,7 +7,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - .:/app     
       - /usr/local/db-data:/var/lib/postgresql/data
     healthcheck:
       test: "sh -c 'pg_isready -U $DB_USER'"
@@ -24,26 +23,27 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./migrations:/migrations     
-      - ./scripts/migrate.sh:/app/migrate.sh
-    entrypoint: ["/app/migrate.sh"]
-  app:
-    image: golang:alpine
-    container_name: chrono-app
+      - ./migrations:/srv/migrations     
+      - ./scripts/migrate.sh:/srv/migrate.sh
+    entrypoint: ["/srv/migrate.sh"]
+  api:
+    build:
+      dockerfile: Dockerfile
+    container_name: chrono-api
     ports:
       - "${APP_PORT}"
     depends_on:
       - migrate
     volumes:
-      - .:/app
-    command: sh -c "apk add --no-cache make && make run -C /app"
+      - .:/srv
+    command: sh -c "make run -C /srv"
     labels:
-      - "traefik.http.routers.chrono-app.rule=Host(`chrono.localhost`)"
+      - "traefik.http.routers.chrono-api.rule=Host(`chrono.localhost`)"
   reverse-proxy:
     image: traefik:v3.6
     container_name: reverse-proxy
     depends_on:
-      - app
+      - api
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
