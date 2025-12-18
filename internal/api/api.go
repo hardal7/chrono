@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/hardal7/chrono/internal/config"
@@ -34,19 +33,4 @@ func RunAPIServer() {
 		logger.Error("Failed to start server")
 		logger.Debug(err.Error())
 	}
-}
-
-func CreateRequest[v any](f func(http.ResponseWriter, *http.Request, v), operation string) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var req v
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			logger.Info("Failed to " + operation)
-			logger.Info("Failed to decode JSON")
-			logger.Debug(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		} else {
-			f(w, r, req)
-		}
-	})
 }
