@@ -10,7 +10,7 @@ import (
 )
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountRequest) {
-	user, err := repository.GetUserByID(r.Context(), r.Context().Value("userid").(int))
+	user, err := repository.Get[model.User](r.Context(), r.Context().Value("userid").(int), "users")
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())
@@ -20,7 +20,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountReq
 		logger.Info("Editing account with username: " + user.Username)
 		if er.DeleteAccount {
 			logger.Info("Deleting account with username: " + user.Username)
-			err := repository.DeleteUser(r.Context(), user)
+			err := repository.Delete(r.Context(), user, "users")
 			if err != nil {
 				logger.Info("Failed to delete account")
 				logger.Debug(err.Error())
@@ -46,7 +46,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountReq
 				}
 				user.Password = string(passwordHash)
 			}
-			err := repository.UpdateUser(r.Context(), user)
+			err := repository.Update(r.Context(), user, "users")
 			if err != nil {
 				logger.Info("Failed to change account details")
 				logger.Debug(err.Error())

@@ -28,9 +28,9 @@ func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 	}
 }
 
-func Get[T any](ctx context.Context, v any, table string) (T, error) {
+func Get[T any](ctx context.Context, id int, table string) (T, error) {
 	query := "SELECT * FROM " + table + " WHERE id = $1 LIMIT 1;"
-	row, err := DB.Query(ctx, query, parseModel(v).ID)
+	row, err := DB.Query(ctx, query, id)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }

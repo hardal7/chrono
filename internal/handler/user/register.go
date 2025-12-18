@@ -34,7 +34,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 		UpdatedAt: time.Now(),
 	}
 
-	isDuplicate, err := repository.IsDuplicateUser(r.Context(), user)
+	isDuplicate, err := repository.IsDuplicate(r.Context(), user, "users")
 	if err != nil {
 		logger.Info("Failed to check if user " + user.Username + " is duplicate")
 		logger.Debug(err.Error())
@@ -45,7 +45,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 		http.Error(w, "User is already registered", http.StatusBadRequest)
 		return
 	} else {
-		if err := repository.CreateUser(r.Context(), user); err != nil {
+		if err := repository.Create(r.Context(), user, "users"); err != nil {
 			logger.Info("Failed to create user: " + rr.Username)
 			logger.Debug(err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
