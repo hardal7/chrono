@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
@@ -31,6 +32,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountReq
 				w.WriteHeader(http.StatusOK)
 			}
 		} else {
+			user.UpdatedAt = time.Now()
 			if er.NewUsername != "" {
 				user.Username = er.NewUsername
 				logger.Info("Changed username to " + er.NewUsername)
