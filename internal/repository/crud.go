@@ -62,8 +62,8 @@ func parseModel(v any) CRUDObject {
 	structValue := reflect.ValueOf(v)
 	object.ID = strconv.FormatInt(structValue.Field(0).Int(), 10)
 	object.NumberOfFields = structType.NumField() - 1
-	object.FieldNames = make([]string, structType.NumField())
-	object.FieldValues = make([]any, structType.NumField())
+	object.FieldNames = make([]string, object.NumberOfFields)
+	object.FieldValues = make([]any, object.NumberOfFields)
 
 	for i := 1; i < structType.NumField(); i++ {
 		object.FieldValues[i-1] = structValue.Field(i).Interface()
