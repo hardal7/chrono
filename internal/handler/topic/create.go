@@ -19,7 +19,7 @@ func Create(w http.ResponseWriter, r *http.Request, tr model.CreateTopicRequest)
 		UpdatedAt: time.Now(),
 	}
 
-	isDuplicate, err := repository.IsDuplicateTopic(r.Context(), topic)
+	isDuplicate, err := repository.IsDuplicate(r.Context(), topic, "topics")
 	if err != nil {
 		logger.Info("Failed to check if topic " + topic.Name + " is duplicate")
 		logger.Debug(err.Error())
@@ -30,7 +30,7 @@ func Create(w http.ResponseWriter, r *http.Request, tr model.CreateTopicRequest)
 		http.Error(w, "Topic exists", http.StatusBadRequest)
 		return
 	} else {
-		if err := repository.CreateTopic(r.Context(), topic); err != nil {
+		if err := repository.Create(r.Context(), topic, "topics"); err != nil {
 			logger.Info("Failed to create topic: " + tr.Name)
 			logger.Debug(err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
