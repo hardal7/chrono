@@ -10,7 +10,7 @@ import (
 )
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountRequest) {
-	user, err := repository.Get[model.User](r.Context(), r.Context().Value("userid").(int), "users")
+	user, err := repository.Get[model.User](r.Context(), r.Context().Value("userID").(int), "users")
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())

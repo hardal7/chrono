@@ -29,3 +29,8 @@ type EditTopicRequest struct {
 	NewName     string `json:"new_name"`
 	DeleteTopic bool   `json:"delete"`
 }
+
+type TrackTopicRequest struct {
+	Topic string    `json:"topic"`
+	Time  time.Time `json:"time"`
+}

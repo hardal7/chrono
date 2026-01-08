@@ -47,7 +47,7 @@ func Authenticate(next http.Handler) http.Handler {
 			} else {
 				userID := int(claims["sub"].(float64))
 				logger.Info("Authenticated user")
-				ctx := context.WithValue(r.Context(), "userid", userID)
+				ctx := context.WithValue(r.Context(), "userID", userID)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			}
 		}

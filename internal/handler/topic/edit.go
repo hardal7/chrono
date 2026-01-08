@@ -8,7 +8,7 @@ import (
 	logger "github.com/hardal7/chrono/internal/util"
 )
 
-func EditTopic(w http.ResponseWriter, r *http.Request, tr model.EditTopicRequest) {
+func Edit(w http.ResponseWriter, r *http.Request, tr model.EditTopicRequest) {
 	topic, err := repository.GetTopicByName(r.Context(), tr.Name)
 	if err != nil {
 		logger.Info("Failed to get topic")
