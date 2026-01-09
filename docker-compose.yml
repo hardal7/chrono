@@ -1,6 +1,5 @@
 services:
   db:
-    restart: unless-stopped
     image: postgres:17-alpine
     container_name: chrono-db
     environment:
@@ -13,6 +12,7 @@ services:
       test: "sh -c 'pg_isready -U $DB_USER'"
       interval: 1s
       retries: 5
+
   migrate:
     image: postgres:17-alpine
     container_name: chrono-migrate
@@ -27,12 +27,12 @@ services:
       - ./migrations:/srv/migrations     
       - ./scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
+
   api:
-    restart: unless-stopped
     build:
       dockerfile: Dockerfile
     container_name: chrono-api
-    ports:
+    expose:
       - "${APP_PORT}"
     depends_on:
       - migrate
@@ -41,17 +41,10 @@ services:
     command: sh -c "make run -C /srv"
     labels:
       - "traefik.http.routers.chrono-api.rule=Host(`chrono.localhost`)"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://chrono.localhost:${APP_PORT}/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+
   reverse-proxy:
-    restart: unless-stopped
     image: traefik:v3.6
     container_name: reverse-proxy
-    depends_on:
-      - api
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -61,16 +54,26 @@ services:
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
   prometheus:
-    restart: unless-stopped
     container_name: prometheus
     image: prom/prometheus
     volumes:
       - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+
+  loki: 
+    image: grafana/loki
+    container_name: loki
+    command: "-config.file=/etc/loki/config.yaml"
+    ports:
+      - "3100:3100"
+    volumes:
+      - /srv/loki:/srv/loki
+      - ./configs/loki.yml:/etc/loki/config.yaml
+    
   grafana:
-    restart: unless-stopped
     image: grafana/grafana-enterprise
     container_name: grafana
     environment:
