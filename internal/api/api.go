@@ -8,10 +8,14 @@ import (
 	"github.com/hardal7/chrono/internal/handler/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func RunAPIServer() {
 	root := http.NewServeMux()
+
+	// TODO: Don't expose metrics to non-admin
+	root.Handle("/metrics", promhttp.Handler())
 
 	public := http.NewServeMux()
 	public.HandleFunc("POST /register", CreateRequest(user.Register, "register user"))

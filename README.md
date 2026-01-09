@@ -17,4 +17,4 @@ Then run the backend service using Docker Compose, use the following command (ru
 
 ## Contributing
 
-All contributions are welcome, kindly open a new issue or pull request. To get started contributing, read the [CONTRIBUTING.md](https://github.com/hardal7/chrono/docs/CONTRIBUTING.md) file for on overview on the overall project structure.
+All contributions are welcome, kindly open a new issue or pull request. To get started contributing, read the [CONTRIBUTING.md](https://github.com/hardal7/chrono/blob/main/docs/CONTRIBUTING.md) file for on overview on the overall project structure.
