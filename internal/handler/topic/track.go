@@ -14,7 +14,9 @@ func Track(w http.ResponseWriter, r *http.Request, tr model.TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
 
 	topicUser, err := repository.GetTopicUserByName(r.Context(), tr.Topic, r.Context().Value("userID").(int))
+	topicUser.UpdatedAt = time.Now()
 	if err != nil {
+		// TODO: Create if not exists in DB
 		logger.Warn(err.Error())
 	} else {
 		topicUser.TimeTracked = topicUser.TimeTracked.Add(time.Duration(tr.Time.Unix()))

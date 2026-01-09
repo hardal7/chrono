@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
@@ -11,6 +12,7 @@ import (
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountRequest) {
 	user, err := repository.Get[model.User](r.Context(), r.Context().Value("userID").(int), "users")
+	user.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())
