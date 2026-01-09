@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
 
+	logger "github.com/hardal7/chrono/internal/util"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -18,6 +20,7 @@ type CRUDObject struct {
 
 func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 	query := "SELECT COUNT(1) FROM " + table + " WHERE id = $1;"
+	logger.Debug("Running query: " + query)
 	var exists int
 	err := DB.QueryRow(ctx, query, parseModel(v).ID).Scan(&exists)
 
@@ -30,6 +33,7 @@ func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 
 func Get[T any](ctx context.Context, id int, table string) (T, error) {
 	query := "SELECT * FROM " + table + " WHERE id = $1 LIMIT 1;"
+	logger.Debug("Running query: " + query)
 	row, err := DB.Query(ctx, query, id)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
@@ -37,6 +41,7 @@ func Get[T any](ctx context.Context, id int, table string) (T, error) {
 
 func Delete(ctx context.Context, v any, table string) error {
 	query := "DELETE FROM " + table + " WHERE ID = $1;"
+	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).ID)
 
 	return err
@@ -44,6 +49,7 @@ func Delete(ctx context.Context, v any, table string) error {
 
 func Create(ctx context.Context, v any, table string) error {
 	query := "INSERT INTO " + table + createQueryValues(parseModel(v)) + ";"
+	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).FieldValues...)
 
 	return err
@@ -51,7 +57,13 @@ func Create(ctx context.Context, v any, table string) error {
 
 func Update(ctx context.Context, v any, table string) error {
 	query := "UPDATE " + table + " SET " + updateQueryValues(parseModel(v)) + ";"
-	_, err := DB.Exec(ctx, query, tidyFields(parseModel(v)).FieldValues...)
+	logger.Debug("Running query: " + query)
+	for i := 0; i != tidyFields(parseModel(v)).NumberOfFields; i++ {
+		fmt.Printf("%T\n", tidyFields(parseModel(v)).FieldValues[i])
+		fmt.Printf("%v\n", tidyFields(parseModel(v)).FieldNames[i])
+	}
+	request := tidyFields(parseModel(v))
+	_, err := DB.Exec(ctx, query, request.FieldValues...)
 
 	return err
 }
@@ -101,9 +113,9 @@ func createQueryValues(object CRUDObject) string {
 func updateQueryValues(object CRUDObject) string {
 	object = tidyFields(object)
 	var valueString string
-	// SQL VALUES start from 1 hence i+1 is necessary here to offset
-	for i := 0; i < object.NumberOfFields; i++ {
-		if i != object.NumberOfFields-1 {
+	for i := 0; i < object.NumberOfFields-1; i++ {
+		// SQL VALUES start from 1 hence i+1 is necessary here to offset
+		if i != object.NumberOfFields-2 {
 			valueString += object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + ", "
 		} else {
 			valueString += object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + " "
@@ -116,26 +128,31 @@ func updateQueryValues(object CRUDObject) string {
 
 func tidyFields(object CRUDObject) CRUDObject {
 	var cleanObject CRUDObject
-	cleanObject.ID = object.ID
 
-	var nonEmptyFields int
+	nonEmptyFields := 0
 	for i := 0; i < object.NumberOfFields; i++ {
-		var emptyField bool
+		emptyField := false
 		if reflect.ValueOf(object.FieldValues[i]).Kind() == reflect.TypeFor[time.Time]().Kind() {
-			if !object.FieldValues[i].(time.Time).IsZero() {
-				emptyField = false
+			if object.FieldValues[i].(time.Time).IsZero() {
+				emptyField = true
 			}
-		} else if object.FieldValues[i] != "" {
-			emptyField = false
+		} else if object.FieldValues[i] == "" {
+			emptyField = true
 		}
 
 		if !emptyField {
-			cleanObject.FieldValues[nonEmptyFields] = object.FieldValues[i]
-			cleanObject.FieldNames[nonEmptyFields] = object.FieldNames[i]
+			cleanObject.FieldValues = append(cleanObject.FieldValues, object.FieldValues[i])
+			cleanObject.FieldNames = append(cleanObject.FieldNames, object.FieldNames[i])
 			nonEmptyFields++
 		}
-		cleanObject.NumberOfFields = nonEmptyFields
 	}
+
+	cleanObject.ID = object.ID
+	cleanObject.FieldValues = append(cleanObject.FieldValues, object.ID)
+	cleanObject.FieldNames = append(cleanObject.FieldNames, "id")
+	nonEmptyFields++
+
+	cleanObject.NumberOfFields = nonEmptyFields
 
 	return cleanObject
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hardal7/chrono/internal/config"
+	"github.com/hardal7/chrono/internal/handler/topic"
 	"github.com/hardal7/chrono/internal/handler/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	logger "github.com/hardal7/chrono/internal/util"
@@ -20,6 +21,9 @@ func RunAPIServer() {
 
 	protected := http.NewServeMux()
 	protected.HandleFunc("POST /account", CreateRequest(user.EditAccount, "edit user account"))
+	protected.HandleFunc("POST /topic/create", CreateRequest(topic.Create, "create topic"))
+	protected.HandleFunc("POST /topic/edit", CreateRequest(topic.Edit, "edit topic"))
+	protected.HandleFunc("POST /topic/track", CreateRequest(topic.Track, "track topic"))
 	// protected.HandleFunc("POST /session", CreateRequest(session.CreateSession, "create session"))
 	root.Handle("/", middleware.Authenticate(protected))
 
