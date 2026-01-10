@@ -2,4 +2,4 @@
 .crt
 .key
 bin
-db-data
+certs

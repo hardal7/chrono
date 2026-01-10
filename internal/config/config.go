@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Port        string
+	AdminPort   string
 	DB_PORT     string
 	DB_HOST     string
 	DB_USER     string
@@ -30,6 +31,7 @@ func Load() {
 
 	App = Config{
 		Port:        os.Getenv("APP_PORT"),
+		AdminPort:   "9010",
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_HOST:     os.Getenv("DB_HOST"),
 		DB_USER:     os.Getenv("DB_USER"),

@@ -12,10 +12,10 @@ import (
 )
 
 func RunAPIServer() {
-	root := http.NewServeMux()
+	admin := http.NewServeMux()
+	admin.Handle("/metrics", promhttp.Handler())
 
-	// TODO: Don't expose metrics to non-admin
-	root.Handle("/metrics", promhttp.Handler())
+	root := http.NewServeMux()
 
 	public := http.NewServeMux()
 	public.HandleFunc("POST /register", CreateRequest(user.Register, "register user"))
@@ -28,14 +28,28 @@ func RunAPIServer() {
 	protected.HandleFunc("POST /topic/create", CreateRequest(topic.Create, "create topic"))
 	protected.HandleFunc("POST /topic/edit", CreateRequest(topic.Edit, "edit topic"))
 	protected.HandleFunc("POST /topic/track", CreateRequest(topic.Track, "track topic"))
-	// protected.HandleFunc("POST /session", CreateRequest(session.CreateSession, "create session"))
 	root.Handle("/", middleware.Authenticate(protected))
 
-	logger.Info("Starting server on port: " + config.App.Port)
 	server := http.Server{
 		Addr:    ":" + config.App.Port,
 		Handler: middleware.LogRequest(root),
 	}
+
+	adminServer := http.Server{
+		Addr:    ":" + config.App.AdminPort,
+		Handler: middleware.LogRequest(admin),
+	}
+
+	go func() {
+		logger.Info("Starting admin server on port: " + config.App.AdminPort)
+		err := adminServer.ListenAndServe()
+		if err != nil {
+			logger.Error("Failed to start admin server")
+			logger.Debug(err.Error())
+		}
+	}()
+
+	logger.Info("Starting server on port: " + config.App.Port)
 	err := server.ListenAndServe()
 	if err != nil {
 		logger.Error("Failed to start server")

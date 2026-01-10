@@ -24,7 +24,7 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./migrations:/srv/migrations     
+      - ./migrations:/srv/migrations
       - ./scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
 
@@ -34,25 +34,26 @@ services:
     container_name: chrono-api
     expose:
       - "${APP_PORT}"
+    ports:
+      - "9010:9010"
     depends_on:
       - migrate
     volumes:
       - .:/srv
     command: sh -c "make run -C /srv"
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.chrono-api.rule=Host(`chrono.localhost`)"
+      - "logging=promtail"
 
   reverse-proxy:
     image: traefik:v3.6
     container_name: reverse-proxy
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:${APP_PORT}"
     ports:
       - "${APP_PORT}:80"
       - "8080:8080"
     volumes:
+      - ./configs/traefik.yml:/etc/traefik/traefik.yaml
       - /var/run/docker.sock:/var/run/docker.sock
 
   prometheus:
@@ -72,6 +73,15 @@ services:
     volumes:
       - /srv/loki:/srv/loki
       - ./configs/loki.yml:/etc/loki/config.yaml
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - ./configs/promtail.yml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
     
   grafana:
     image: grafana/grafana-enterprise
@@ -85,3 +95,5 @@ services:
     volumes:
       - /srv/grafana:/var/lib/grafana
       - ./configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+    labels:
+      - "traefik.enable=true"

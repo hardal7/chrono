@@ -19,9 +19,10 @@ func LogRequest(next http.Handler) http.Handler {
 		duration := time.Since(start)
 		method := r.Method
 		endpoint := r.URL.Path
+		address := r.RemoteAddr
 		status := ww.status
 
-		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + duration.String())
+		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
 	})
