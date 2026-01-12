@@ -10,13 +10,12 @@ type Topic struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-type TopicUser struct {
-	ID          int       `db:"id"`
-	UserID      int       `db:"user_id"`
-	TopicID     int       `db:"topic_id"`
-	TimeTracked time.Time `db:"time_tracked"`
-	CreatedAt   time.Time `db:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at"`
+type TopicEvent struct {
+	ID          int `db:"id"`
+	UserID      int `db:"user_id"`
+	TopicID     int `db:"topic_id"`
+	TimeTracked int `db:"time_tracked"`
+	Date        int `db:"date"`
 }
 
 type CreateTopicRequest struct {
@@ -33,4 +32,5 @@ type EditTopicRequest struct {
 type TrackTopicRequest struct {
 	Topic string    `json:"topic"`
 	Time  time.Time `json:"time"`
+	Date  time.Time `json:"date"`
 }

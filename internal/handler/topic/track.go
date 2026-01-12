@@ -2,7 +2,6 @@ package topic
 
 import (
 	"net/http"
-	"time"
 
 	logger "github.com/hardal7/chrono/internal/util"
 
@@ -12,16 +11,25 @@ import (
 
 func Track(w http.ResponseWriter, r *http.Request, tr model.TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
-
-	topicUser, err := repository.GetTopicUserByName(r.Context(), tr.Topic, r.Context().Value("userID").(int))
-	topicUser.UpdatedAt = time.Now()
+	topic, err := repository.GetTopicByName(r.Context(), tr.Topic)
 	if err != nil {
-		// TODO: Create if not exists in DB
-		logger.Warn(err.Error())
+		logger.Info("Topic not found")
+		http.Error(w, "Topic not found", http.StatusBadRequest)
 	} else {
-		topicUser.TimeTracked = topicUser.TimeTracked.Add(time.Duration(tr.Time.Unix()))
-		repository.Update(r.Context(), topicUser, "topic_users")
-		logger.Info("Tracked time")
-		w.WriteHeader(http.StatusOK)
+		topicEvent := model.TopicEvent{
+			UserID:      r.Context().Value("userID").(int),
+			TopicID:     topic.ID,
+			TimeTracked: int(tr.Time.Unix()),
+			Date:        int(tr.Date.Unix()),
+		}
+		if err := repository.Create(r.Context(), topicEvent, "topic_events"); err != nil {
+			logger.Info("Failed to track time")
+			logger.Debug(err.Error())
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		} else {
+			logger.Info("Tracked time")
+			w.WriteHeader(http.StatusCreated)
+		}
 	}
 }

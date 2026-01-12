@@ -11,6 +11,10 @@ Move the example environment file to `.env`:
 
     mv .env.example .env
 
+Run the configuration script in `scripts`:
+
+    ./scripts/config.sh
+
 Then run the backend service using Docker Compose, use the following command (run with root privileges):
 
     docker compose up
