@@ -34,3 +34,14 @@ type TrackTopicRequest struct {
 	Time  time.Time `json:"time"`
 	Date  time.Time `json:"date"`
 }
+
+type TopicEventRequest struct {
+	Topic string `json:"topic"`
+	Date  []int  `json:"date"`
+}
+
+type TopicEventResponse struct {
+	Topics       []string `json:"topics"`
+	TimesTracked []int    `json:"times_tracked"`
+	Dates        []int    `json:"dates"`
+}

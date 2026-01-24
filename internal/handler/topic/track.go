@@ -15,6 +15,7 @@ func Track(w http.ResponseWriter, r *http.Request, tr model.TrackTopicRequest) {
 	if err != nil {
 		logger.Info("Topic not found")
 		http.Error(w, "Topic not found", http.StatusBadRequest)
+		return
 	} else {
 		topicEvent := model.TopicEvent{
 			UserID:      r.Context().Value("userID").(int),

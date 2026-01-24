@@ -25,6 +25,7 @@ CREATE TABLE topics (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+INSERT INTO topics (name, created_by_userid) VALUES ('General', 1);
 
 CREATE TABLE topic_events (
     id SERIAL PRIMARY KEY,

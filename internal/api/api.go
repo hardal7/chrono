@@ -28,6 +28,7 @@ func RunAPIServer() {
 	protected.HandleFunc("POST /topic/create", CreateRequest(topic.Create, "create topic"))
 	protected.HandleFunc("POST /topic/edit", CreateRequest(topic.Edit, "edit topic"))
 	protected.HandleFunc("POST /topic/track", CreateRequest(topic.Track, "track topic"))
+	protected.HandleFunc("GET /topic/events", CreateRequest(topic.GetEvents, "get topic events"))
 	root.Handle("/", middleware.Authenticate(protected))
 
 	server := http.Server{

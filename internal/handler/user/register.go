@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	bcryptCost int = 10
+	bcryptCost   int    = 10
+	defaultTopic string = "General"
 )
 
 func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) {
@@ -52,6 +53,15 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
+			user, _ = repository.GetUserByUsername(r.Context(), rr.Username)
+			defaultTopic, _ := repository.GetTopicByName(r.Context(), defaultTopic)
+			topicEvent := model.TopicEvent{
+				UserID:      user.ID,
+				TopicID:     defaultTopic.ID,
+				TimeTracked: 0,
+				Date:        int(time.Now().Unix()),
+			}
+			repository.Create(r.Context(), topicEvent, "topic_events")
 			w.WriteHeader(http.StatusCreated)
 		}
 	}

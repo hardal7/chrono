@@ -13,3 +13,10 @@ func GetTopicByName(ctx context.Context, name string) (model.Topic, error) {
 	topic, err := pgx.CollectOneRow(row, pgx.RowToStructByName[model.Topic])
 	return topic, err
 }
+
+func GetTopicEventsByUserID(ctx context.Context, userid int) ([]model.TopicEvent, error) {
+	query := "SELECT * FROM topic_events WHERE user_id = $1;"
+	rows, err := DB.Query(ctx, query, userid)
+	topicEvents, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.TopicEvent])
+	return topicEvents, err
+}
