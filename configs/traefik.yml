@@ -4,6 +4,9 @@ api:
 providers:
   docker:
     exposedByDefault: false
+  file:
+    filename: /etc/traefik/traefik_dynamic.yml
+    watch: true
 entryPoints:
   web:
     address: ":80"
