@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/config"
 	"github.com/hardal7/chrono/internal/handler/topic"
 	"github.com/hardal7/chrono/internal/handler/user"
@@ -12,48 +13,39 @@ import (
 )
 
 func RunAPIServer() {
-	admin := http.NewServeMux()
-	admin.Handle("/metrics", promhttp.Handler())
+	adminRouter := chi.NewRouter()
+	adminRouter.Handle("/metrics", promhttp.Handler())
 
-	root := http.NewServeMux()
+	mainRouter := chi.NewRouter()
+	mainRouter.Use(middleware.LogRequest)
 
-	public := http.NewServeMux()
-	public.HandleFunc("POST /register", CreateRequest(user.Register, "register user"))
-	public.HandleFunc("POST /login", CreateRequest(user.Login, "log user in"))
-	root.Handle("/register", public)
-	root.Handle("/login", public)
+	mainRouter.Group(func(r chi.Router) {
+		r.Post("/register", CreateRequest(user.Register, "register user"))
+		r.Post("/login", CreateRequest(user.Login, "log user in"))
+	})
 
-	protected := http.NewServeMux()
-	protected.HandleFunc("POST /account", CreateRequest(user.EditAccount, "edit user account"))
-	protected.HandleFunc("POST /topic/create", CreateRequest(topic.Create, "create topic"))
-	protected.HandleFunc("POST /topic/edit", CreateRequest(topic.Edit, "edit topic"))
-	protected.HandleFunc("POST /topic/track", CreateRequest(topic.Track, "track topic"))
-	protected.HandleFunc("GET /topic/events", CreateRequest(topic.GetEvents, "get topic events"))
-	root.Handle("/", middleware.Authenticate(protected))
+	mainRouter.Group(func(r chi.Router) {
+		r.Use(middleware.Authenticate)
 
-	server := http.Server{
-		Addr:    ":" + config.App.Port,
-		Handler: middleware.LogRequest(root),
-	}
+		r.Post("/account", CreateRequest(user.EditAccount, "edit user account"))
 
-	adminServer := http.Server{
-		Addr:    ":" + config.App.AdminPort,
-		Handler: middleware.LogRequest(admin),
-	}
+		r.Route("/topics", func(r chi.Router) {
+			r.Post("/create", CreateRequest(topic.Create, "create topic"))
+			r.Post("/edit", CreateRequest(topic.Edit, "edit topic"))
+			r.Post("/track", CreateRequest(topic.Track, "track topic"))
+			r.Get("/events", CreateRequest(topic.GetEvents, "get topic events"))
+		})
+	})
 
-	go func() {
-		logger.Info("Starting admin server on port: " + config.App.AdminPort)
-		err := adminServer.ListenAndServe()
-		if err != nil {
-			logger.Error("Failed to start admin server")
-			logger.Debug(err.Error())
-		}
-	}()
+	go runServer("main", config.App.Port, mainRouter)
+	runServer("admin", config.App.AdminPort, adminRouter)
+}
 
-	logger.Info("Starting server on port: " + config.App.Port)
-	err := server.ListenAndServe()
+func runServer(name, port string, router *chi.Mux) {
+	logger.Info("Starting " + name + " server on port: " + port)
+	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
-		logger.Error("Failed to start server")
+		logger.Error("Failed to start " + name + " server")
 		logger.Debug(err.Error())
 	}
 }
