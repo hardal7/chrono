@@ -19,10 +19,10 @@ type CRUDObject struct {
 }
 
 func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
-	query := "SELECT COUNT(1) FROM " + table + " WHERE id = $1;"
+	query := "SELECT COUNT(1) FROM $1 WHERE id = $2;"
 	logger.Debug("Running query: " + query)
 	var exists int
-	err := DB.QueryRow(ctx, query, parseModel(v).ID).Scan(&exists)
+	err := DB.QueryRow(ctx, query, table, parseModel(v).ID).Scan(&exists)
 
 	if exists == 0 {
 		return false, err
@@ -31,18 +31,32 @@ func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 	}
 }
 
+func Find[T any](ctx context.Context, table, field, record string) (T, error) {
+	query := "SELECT * FROM $1 WHERE $2 = $3 LIMIT 1;"
+	row, err := DB.Query(ctx, query, table, field, record)
+	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
+	return model, err
+}
+
+func FindMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
+	query := "SELECT * FROM $1 WHERE $2 = $3 LIMIT 1;"
+	row, err := DB.Query(ctx, query, table, field, record)
+	models, err := pgx.CollectRows(row, pgx.RowToStructByName[T])
+	return models, err
+}
+
 func Get[T any](ctx context.Context, id int, table string) (T, error) {
-	query := "SELECT * FROM " + table + " WHERE id = $1 LIMIT 1;"
+	query := "SELECT * FROM $1 WHERE id = $2 LIMIT 1;"
 	logger.Debug("Running query: " + query)
-	row, err := DB.Query(ctx, query, id)
+	row, err := DB.Query(ctx, query, table, id)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
 func Delete(ctx context.Context, v any, table string) error {
-	query := "DELETE FROM " + table + " WHERE ID = $1;"
+	query := "DELETE FROM $1 WHERE ID = $2;"
 	logger.Debug("Running query: " + query)
-	_, err := DB.Exec(ctx, query, parseModel(v).ID)
+	_, err := DB.Exec(ctx, query, table, parseModel(v).ID)
 
 	return err
 }

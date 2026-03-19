@@ -7,7 +7,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sessions (
+CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
     password TEXT,

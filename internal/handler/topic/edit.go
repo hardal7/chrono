@@ -10,7 +10,7 @@ import (
 )
 
 func Edit(w http.ResponseWriter, r *http.Request, tr model.EditTopicRequest) {
-	topic, err := repository.GetTopicByName(r.Context(), tr.Name)
+	topic, err := repository.Find[model.Topic](r.Context(), "topics", "name", tr.Name)
 	topic.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get topic")

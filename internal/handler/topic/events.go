@@ -13,7 +13,7 @@ import (
 func GetEvents(w http.ResponseWriter, r *http.Request, te model.TopicEventRequest) {
 	logger.Info("Getting topic events")
 	userID := r.Context().Value("userID").(int)
-	topicEvents, err := repository.GetTopicEventsByUserID(r.Context(), userID)
+	topicEvents, err := repository.FindMultiple[model.TopicEvent](r.Context(), "topic_events", "user_id", string(userID))
 	if err != nil {
 		logger.Info("Failed to get topic events")
 		logger.Debug(err.Error())

@@ -11,7 +11,7 @@ import (
 
 func Track(w http.ResponseWriter, r *http.Request, tr model.TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
-	topic, err := repository.GetTopicByName(r.Context(), tr.Topic)
+	topic, err := repository.Find[model.Topic](r.Context(), "topics", "name", tr.Topic)
 	if err != nil {
 		logger.Info("Topic not found")
 		http.Error(w, "Topic not found", http.StatusBadRequest)

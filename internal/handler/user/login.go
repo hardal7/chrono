@@ -20,7 +20,7 @@ const (
 func Login(w http.ResponseWriter, r *http.Request, lr model.LoginRequest) {
 	logger.Info("Logging user with username: " + lr.Username)
 
-	user, err := repository.GetUserByUsername(r.Context(), lr.Username)
+	user, err := repository.Find[model.User](r.Context(), "users", "username", lr.Username)
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())

@@ -53,8 +53,8 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
-			user, _ = repository.GetUserByUsername(r.Context(), rr.Username)
-			defaultTopic, _ := repository.GetTopicByName(r.Context(), defaultTopic)
+			user, _ = repository.Find[model.User](r.Context(), "users", "username", rr.Username)
+			defaultTopic, _ := repository.Find[model.Topic](r.Context(), "topics", "name", defaultTopic)
 			topicEvent := model.TopicEvent{
 				UserID:      user.ID,
 				TopicID:     defaultTopic.ID,
