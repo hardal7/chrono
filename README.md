@@ -11,9 +11,9 @@ Move the example environment file to `.env`:
 
     mv .env.example .env
 
-Run the configuration script in `scripts`:
+Run the volumes script in `scripts` to create the volumes in the host machine:
 
-    ./scripts/config.sh
+    ./scripts/volumes.sh
 
 Then run the backend service using Docker Compose, use the following command (run with root privileges):
 

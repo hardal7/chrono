@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - /srv/db:/var/lib/postgresql/data
+      - /srv/db:/var/lib/postgresql/data:rw
+      - ./configs/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     healthcheck:
       test: "sh -c 'pg_isready -U $DB_USER'"
       interval: 1s
@@ -53,17 +54,18 @@ services:
     container_name: traefik
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
-      - ./configs/traefik.yml:/etc/traefik/traefik.yaml
-      - ./configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml
+      - ./configs/traefik.yml:/etc/traefik/traefik.yaml:ro
+      - ./configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock
 
   prometheus:
     container_name: prometheus
     image: prom/prometheus
     volumes:
-      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
 
@@ -74,14 +76,14 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - /srv/loki:/srv/loki
-      - ./configs/loki.yml:/etc/loki/config.yaml
+      - /srv/loki:/srv/loki:rw
+      - ./configs/loki.yml:/etc/loki/config.yaml:ro
 
   promtail:
     image: grafana/promtail
     container_name: promtail
     volumes:
-      - ./configs/promtail.yml:/etc/promtail/docker-config.yaml
+      - ./configs/promtail.yml:/etc/promtail/docker-config.yaml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/docker-config.yaml
@@ -96,7 +98,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /srv/grafana:/var/lib/grafana
-      - ./configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - /srv/grafana:/var/lib/grafana:rw
+      - ./configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
     labels:
       - "traefik.enable=true"
