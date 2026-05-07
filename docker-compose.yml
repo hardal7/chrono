@@ -51,7 +51,6 @@ services:
       - "traefik.http.routers.chrono-api.rule=Host(`${DOMAIN}`)"
       - "traefik.http.services.chrono-api.loadbalancer.server.port=${APP_PORT}"
       - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,latencyCheck@file"
-      - "logging=promtail"
 
   traefik:
     image: traefik:v3.6
@@ -87,15 +86,24 @@ services:
       - /srv/loki:/srv/loki:rw
       - ./configs/loki.yml:/etc/loki/config.yaml:ro
 
-  promtail:
-    image: grafana/promtail
-    container_name: promtail
+  alloy:
+    image: grafana/alloy
     volumes:
-      - ./configs/promtail.yml:/etc/promtail/docker-config.yaml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers
+      - ./configs/alloy.conf:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock
-    command: -config.file=/etc/promtail/docker-config.yaml
-    
+    environment:
+      LOKI_HOST: loki:3100
+    depends_on:
+      - loki
+    command:
+      - "run"
+      - "/etc/alloy/config.alloy"
+      - "--storage.path=/var/lib/alloy/data"
+      - "--server.http.listen-addr=0.0.0.0:3200"
+      - "--stability.level=experimental"
+    ports:
+      - "3200:3200"
+
   grafana:
     image: grafana/grafana-enterprise
     container_name: grafana
