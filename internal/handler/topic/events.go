@@ -3,6 +3,7 @@ package topic
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/hardal7/chrono/internal/model"
 	logger "github.com/hardal7/chrono/internal/util"
@@ -13,7 +14,7 @@ import (
 func GetEvents(w http.ResponseWriter, r *http.Request, te model.TopicEventRequest) {
 	logger.Info("Getting topic events")
 	userID := r.Context().Value("userID").(int)
-	topicEvents, err := repository.FindMultiple[model.TopicEvent](r.Context(), "topic_events", "user_id", string(userID))
+	topicEvents, err := repository.FindMultiple[model.TopicEvent](r.Context(), "topic_events", "user_id", strconv.Itoa(userID))
 	if err != nil {
 		logger.Info("Failed to get topic events")
 		logger.Debug(err.Error())

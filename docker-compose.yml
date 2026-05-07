@@ -44,6 +44,10 @@ services:
     command: sh -c "make run -C /srv"
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.chrono-api.entrypoints=web"
+      - "traefik.http.routers.chrono-api.tls=true"
+      - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
+      - "traefik.http.routers.chrono-api.entrypoints=websecure"
       - "traefik.http.routers.chrono-api.rule=Host(`${DOMAIN}`)"
       - "traefik.http.services.chrono-api.loadbalancer.server.port=${APP_PORT}"
       - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,latencyCheck@file"
@@ -52,6 +56,9 @@ services:
   traefik:
     image: traefik:v3.6
     container_name: traefik
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+    command: "--certificatesresolvers.cloudflare.acme.email=${CF_EMAIL}"
     ports:
       - "80:80"
       - "443:443"
@@ -59,6 +66,7 @@ services:
     volumes:
       - ./configs/traefik.yml:/etc/traefik/traefik.yaml:ro
       - ./configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
+      - ./certs:/var/traefik.certs:rw
       - /var/run/docker.sock:/var/run/docker.sock
 
   prometheus:
