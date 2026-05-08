@@ -19,7 +19,7 @@ func LogRequest(next http.Handler) http.Handler {
 		duration := time.Since(start)
 		method := r.Method
 		endpoint := r.URL.Path
-		address := r.RemoteAddr
+		address := r.Header.Get("X-Forwarded-For")
 		status := ww.status
 
 		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())

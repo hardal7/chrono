@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17
     container_name: chrono-db
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -71,6 +71,9 @@ services:
   prometheus:
     container_name: prometheus
     image: prom/prometheus
+    command: 
+    - "--log.level=warn"
+    - "--config.file=/etc/prometheus/prometheus.yml"
     volumes:
       - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
@@ -88,6 +91,7 @@ services:
 
   alloy:
     image: grafana/alloy
+    container_name: alloy
     volumes:
       - ./configs/alloy.conf:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock

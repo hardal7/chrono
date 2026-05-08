@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/config"
+	"github.com/hardal7/chrono/internal/handler/health"
 	"github.com/hardal7/chrono/internal/handler/topic"
 	"github.com/hardal7/chrono/internal/handler/user"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -22,6 +23,7 @@ func RunAPIServer() {
 	mainRouter.Group(func(r chi.Router) {
 		r.Post("/register", CreateRequest(user.Register, "register user"))
 		r.Post("/login", CreateRequest(user.Login, "log user in"))
+		r.Get("/health", http.HandlerFunc(health.Ping))
 	})
 
 	mainRouter.Group(func(r chi.Router) {
