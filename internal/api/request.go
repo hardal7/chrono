@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func CreateRequest[T any](f func(http.ResponseWriter, *http.Request, T), operation ...string) http.HandlerFunc {

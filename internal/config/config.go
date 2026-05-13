@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/joho/godotenv"
 )
 

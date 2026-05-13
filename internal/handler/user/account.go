@@ -6,7 +6,7 @@ import (
 
 	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 

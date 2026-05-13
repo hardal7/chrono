@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/hardal7/chrono/internal/config"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

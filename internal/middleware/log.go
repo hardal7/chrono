@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

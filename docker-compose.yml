@@ -45,9 +45,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.chrono-api.entrypoints=web"
-      - "traefik.http.routers.chrono-api.tls=true"
-      - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
-      - "traefik.http.routers.chrono-api.entrypoints=websecure"
+      # - "traefik.http.routers.chrono-api.tls=true"
+      # - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
+      # - "traefik.http.routers.chrono-api.entrypoints=websecure"
       - "traefik.http.routers.chrono-api.rule=Host(`${DOMAIN}`)"
       - "traefik.http.services.chrono-api.loadbalancer.server.port=${APP_PORT}"
       - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,latencyCheck@file"

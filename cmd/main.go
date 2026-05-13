@@ -4,7 +4,7 @@ import (
 	"github.com/hardal7/chrono/internal/api"
 	"github.com/hardal7/chrono/internal/config"
 	"github.com/hardal7/chrono/internal/repository"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func init() {

@@ -5,24 +5,18 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 )
 
-type CRUDObject struct {
-	ID             string
-	NumberOfFields int
-	FieldNames     []string
-	FieldValues    []any
-}
-
 func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE id = $1;", table)
+	query := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE id = %s;", table, parseModel(v).ID)
 	logger.Debug("Running query: " + query)
 	var exists int
-	err := DB.QueryRow(ctx, query, parseModel(v).ID).Scan(&exists)
+	err := DB.QueryRow(ctx, query).Scan(&exists)
 
 	if exists == 0 {
 		return false, err
@@ -32,37 +26,37 @@ func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 }
 
 func Find[T any](ctx context.Context, table, field, record string) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE $1 = $2 LIMIT 1;", table)
-	row, err := DB.Query(ctx, query, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = %s LIMIT 1;", table, field, record)
+	row, err := DB.Query(ctx, query)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
 func FindMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE $1 = $2 LIMIT 1;", table)
-	row, err := DB.Query(ctx, query, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = %s LIMIT 1;", table, field, record)
+	row, err := DB.Query(ctx, query)
 	models, err := pgx.CollectRows(row, pgx.RowToStructByName[T])
 	return models, err
 }
 
 func Get[T any](ctx context.Context, id int, table string) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 LIMIT 1;", table)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = %s LIMIT 1;", table, strconv.Itoa(id))
 	logger.Debug("Running query: " + query)
-	row, err := DB.Query(ctx, query, id)
+	row, err := DB.Query(ctx, query)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
 func Delete(ctx context.Context, v any, table string) error {
-	query := fmt.Sprintf("DELETE * FROM %s WHERE id = $1 LIMIT 1;", table)
+	query := fmt.Sprintf("DELETE * FROM %s WHERE id = %s LIMIT 1;", table, parseModel(v).ID)
 	logger.Debug("Running query: " + query)
-	_, err := DB.Exec(ctx, query, parseModel(v).ID)
+	_, err := DB.Exec(ctx, query)
 
 	return err
 }
 
 func Create(ctx context.Context, v any, table string) error {
-	query := "INSERT INTO " + table + createQueryValues(parseModel(v)) + ";"
+	query := fmt.Sprintf("INSERT INTO %s %s;", table, createQueryValues(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).FieldValues...)
 
@@ -70,7 +64,7 @@ func Create(ctx context.Context, v any, table string) error {
 }
 
 func Update(ctx context.Context, v any, table string) error {
-	query := "UPDATE " + table + " SET " + updateQueryValues(parseModel(v)) + ";"
+	query := fmt.Sprintf("UPDATE %s SET %s;", table, updateQueryValues(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	for i := 0; i != tidyFields(parseModel(v)).NumberOfFields; i++ {
 		fmt.Printf("%T\n", tidyFields(parseModel(v)).FieldValues[i])
@@ -80,6 +74,13 @@ func Update(ctx context.Context, v any, table string) error {
 	_, err := DB.Exec(ctx, query, request.FieldValues...)
 
 	return err
+}
+
+type CRUDObject struct {
+	ID             string
+	NumberOfFields int
+	FieldNames     []string
+	FieldValues    []any
 }
 
 func parseModel(v any) CRUDObject {
@@ -99,45 +100,45 @@ func parseModel(v any) CRUDObject {
 }
 
 func createQueryValues(object CRUDObject) string {
-	var valueString string
+	var valueString strings.Builder
 	for i := 0; i < object.NumberOfFields; i++ {
 		if i == 0 {
-			valueString += (" (" + object.FieldNames[i] + ", ")
+			valueString.WriteString(("(" + object.FieldNames[i] + ", "))
 		} else if i != object.NumberOfFields-1 {
-			valueString += (object.FieldNames[i] + ", ")
+			valueString.WriteString((object.FieldNames[i] + ", "))
 		} else {
-			valueString += (object.FieldNames[i] + ") ")
+			valueString.WriteString((object.FieldNames[i] + ") "))
 		}
 	}
 
-	valueString += "VALUES"
+	valueString.WriteString("VALUES")
 	for i := 0; i < object.NumberOfFields; i++ {
 		if i == 0 {
 			// SQL VALUES start from 1 hence i+1 is necessary here to offset
-			valueString += (" (" + "$" + strconv.Itoa(i+1) + ", ")
+			valueString.WriteString((" (" + "$" + strconv.Itoa(i+1) + ", "))
 		} else if i != object.NumberOfFields-1 {
-			valueString += ("$" + strconv.Itoa(i+1) + ", ")
+			valueString.WriteString(("$" + strconv.Itoa(i+1) + ", "))
 		} else {
-			valueString += ("$" + strconv.Itoa(i+1) + ")")
+			valueString.WriteString(("$" + strconv.Itoa(i+1) + ")"))
 		}
 	}
-	return valueString
+	return valueString.String()
 }
 
 func updateQueryValues(object CRUDObject) string {
 	object = tidyFields(object)
-	var valueString string
+	var valueString strings.Builder
 	for i := 0; i < object.NumberOfFields-1; i++ {
 		// SQL VALUES start from 1 hence i+1 is necessary here to offset
 		if i != object.NumberOfFields-2 {
-			valueString += object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + ", "
+			valueString.WriteString(object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + ", ")
 		} else {
-			valueString += object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + " "
+			valueString.WriteString(object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + " ")
 		}
 	}
 
-	valueString += ("WHERE id = $" + strconv.Itoa(object.NumberOfFields))
-	return valueString
+	valueString.WriteString(("WHERE id = $" + strconv.Itoa(object.NumberOfFields)))
+	return valueString.String()
 }
 
 func tidyFields(object CRUDObject) CRUDObject {

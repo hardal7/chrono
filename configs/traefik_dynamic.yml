@@ -5,4 +5,7 @@ http:
         average: 100
     latencyCheck:
       circuitBreaker:
-        expression: "LatencyAtQuantileMS(50.0) > 100"
+        expression: "LatencyAtQuantileMS(95.0) > 500"
+    limitBody:
+      buffering:
+        maxRequestBodyBytes: 10485760

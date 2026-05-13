@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hardal7/chrono/internal/model"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
 )

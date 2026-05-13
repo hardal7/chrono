@@ -9,7 +9,7 @@ import (
 	"github.com/hardal7/chrono/internal/handler/topic"
 	"github.com/hardal7/chrono/internal/handler/user"
 	"github.com/hardal7/chrono/internal/middleware"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/config"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/hardal7/chrono/internal/model"

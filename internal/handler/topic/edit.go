@@ -6,7 +6,7 @@ import (
 
 	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
-	logger "github.com/hardal7/chrono/internal/util"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func Edit(w http.ResponseWriter, r *http.Request, tr model.EditTopicRequest) {
