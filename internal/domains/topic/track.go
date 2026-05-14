@@ -5,19 +5,19 @@ import (
 
 	"github.com/hardal7/chrono/internal/util/logger"
 
-	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
 )
 
-func Track(w http.ResponseWriter, r *http.Request, tr model.TrackTopicRequest) {
+func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
-	topic, err := repository.Find[model.Topic](r.Context(), "topics", "name", tr.Topic)
+	topic, err := repository.Find[Topic](r.Context(), "topics", "name", tr.Topic)
 	if err != nil {
 		logger.Info("Topic not found")
+		logger.Debug(err.Error())
 		http.Error(w, "Topic not found", http.StatusBadRequest)
 		return
 	} else {
-		topicEvent := model.TopicEvent{
+		topicEvent := TopicEvent{
 			UserID:      r.Context().Value("userID").(int),
 			TopicID:     topic.ID,
 			TimeTracked: int(tr.Time.Unix()),

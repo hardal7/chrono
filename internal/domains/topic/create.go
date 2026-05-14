@@ -6,17 +6,15 @@ import (
 
 	"github.com/hardal7/chrono/internal/util/logger"
 
-	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
 )
 
-func Create(w http.ResponseWriter, r *http.Request, tr model.CreateTopicRequest) {
-	user, _ := repository.Get[model.User](r.Context(), r.Context().Value("userID").(int), "users")
+func Create(w http.ResponseWriter, r *http.Request, tr CreateTopicRequest) {
 	logger.Info("Creating topic with name: " + tr.Name)
 
-	topic := model.Topic{
+	topic := Topic{
 		Name:      tr.Name,
-		CreatedBy: user.ID,
+		CreatedBy: r.Context().Value("userID").(int),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

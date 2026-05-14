@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func CreateRequest[T any](f func(http.ResponseWriter, *http.Request, T), operation ...string) http.HandlerFunc {
+func Create[T any](f func(http.ResponseWriter, *http.Request, T), operation ...string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request T
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

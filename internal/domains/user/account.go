@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func EditAccount(w http.ResponseWriter, r *http.Request, er model.EditAccountRequest) {
-	user, err := repository.Get[model.User](r.Context(), r.Context().Value("userID").(int), "users")
+func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
+	user, err := repository.Get[User](r.Context(), r.Context().Value("userID").(int), "users")
 	user.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get user")

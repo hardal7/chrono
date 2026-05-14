@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/hardal7/chrono/internal/config"
+	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 

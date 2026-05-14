@@ -1,4 +1,4 @@
-package model
+package topic
 
 import "time"
 

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hardal7/chrono/internal/domains/topic"
 	"github.com/hardal7/chrono/internal/util/logger"
 
-	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,7 +16,7 @@ const (
 	defaultTopic string = "General"
 )
 
-func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) {
+func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 	logger.Info("Registering user with username: " + rr.Username)
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rr.Password), bcryptCost)
@@ -27,7 +27,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 		return
 	}
 
-	user := model.User{
+	user := User{
 		Email:     rr.Email,
 		Username:  rr.Username,
 		Password:  string(passwordHash),
@@ -43,7 +43,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 		return
 	} else if isDuplicate {
 		logger.Info("User " + user.Username + " is already registered")
-		http.Error(w, "User is already registered", http.StatusBadRequest)
+		http.Error(w, "User is already registered", http.StatusConflict)
 		return
 	} else {
 		if err := repository.Create(r.Context(), user, "users"); err != nil {
@@ -53,11 +53,11 @@ func Register(w http.ResponseWriter, r *http.Request, rr model.RegisterRequest) 
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
-			user, _ = repository.Find[model.User](r.Context(), "users", "username", rr.Username)
-			defaultTopic, _ := repository.Find[model.Topic](r.Context(), "topics", "name", defaultTopic)
-			topicEvent := model.TopicEvent{
+			user, _ = repository.Find[User](r.Context(), "users", "username", rr.Username)
+			firstTopic, _ := repository.Find[topic.Topic](r.Context(), "topics", "name", defaultTopic)
+			topicEvent := topic.TopicEvent{
 				UserID:      user.ID,
-				TopicID:     defaultTopic.ID,
+				TopicID:     firstTopic.ID,
 				TimeTracked: 0,
 				Date:        int(time.Now().Unix()),
 			}

@@ -4,39 +4,35 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/hardal7/chrono/internal/config"
-	"github.com/hardal7/chrono/internal/handler/health"
-	"github.com/hardal7/chrono/internal/handler/topic"
-	"github.com/hardal7/chrono/internal/handler/user"
+	"github.com/hardal7/chrono/internal/domains/health"
+	"github.com/hardal7/chrono/internal/domains/topic"
+	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/util/config"
+	"github.com/hardal7/chrono/internal/util/handler"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func RunAPIServer() {
+func Serve() {
 	adminRouter := chi.NewRouter()
 	adminRouter.Handle("/metrics", promhttp.Handler())
 
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(middleware.LogRequest)
 
+	// Public Routes
 	mainRouter.Group(func(r chi.Router) {
-		r.Post("/register", CreateRequest(user.Register, "register user"))
-		r.Post("/login", CreateRequest(user.Login, "log user in"))
+		r.Post("/register", handler.Create(user.Register, "register user"))
+		r.Post("/login", handler.Create(user.Login, "log user in"))
 		r.Get("/health", http.HandlerFunc(health.Ping))
 	})
 
+	// Protected Routes
 	mainRouter.Group(func(r chi.Router) {
 		r.Use(middleware.Authenticate)
-
-		r.Post("/account", CreateRequest(user.EditAccount, "edit user account"))
-
-		r.Route("/topics", func(r chi.Router) {
-			r.Post("/create", CreateRequest(topic.Create, "create topic"))
-			r.Post("/edit", CreateRequest(topic.Edit, "edit topic"))
-			r.Post("/track", CreateRequest(topic.Track, "track topic"))
-			r.Get("/events", CreateRequest(topic.GetEvents, "get topic events"))
-		})
+		r.Route("/user", user.Routes)
+		r.Route("/topic", topic.Routes)
 	})
 
 	go runServer("main", config.App.Port, mainRouter)

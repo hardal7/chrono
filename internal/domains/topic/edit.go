@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hardal7/chrono/internal/model"
 	"github.com/hardal7/chrono/internal/repository"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func Edit(w http.ResponseWriter, r *http.Request, tr model.EditTopicRequest) {
-	topic, err := repository.Find[model.Topic](r.Context(), "topics", "name", tr.Name)
+func Edit(w http.ResponseWriter, r *http.Request, tr EditTopicRequest) {
+	topic, err := repository.Find[Topic](r.Context(), "topics", "name", tr.Name)
 	topic.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get topic")
