@@ -8,7 +8,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - /srv/db:/var/lib/postgresql/data:rw
-      - ./configs/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./configs/postgresql.conf:/etc/postgresql.conf
+    command: "-c config_file=/etc/postgresql.conf"
     healthcheck:
       test: "sh -c 'pg_isready -U $DB_USER'"
       interval: 1s

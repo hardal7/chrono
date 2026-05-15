@@ -27,25 +27,25 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		return
 	}
 
-	user := User{
-		Email:     rr.Email,
-		Username:  rr.Username,
-		Password:  string(passwordHash),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	isDuplicate, err := repository.IsDuplicate(r.Context(), user, "users")
-	if err != nil {
-		logger.Info("Failed to check if user " + user.Username + " is duplicate")
+	// TODO: Not only query by username but also the other fields
+	user, err := repository.Find[User](r.Context(), "users", "username", rr.Username)
+	if user.ID != 0 {
+		logger.Info("User " + rr.Username + " is already registered")
+		http.Error(w, "User is already registered", http.StatusConflict)
+		return
+	} else if err != nil {
+		logger.Info("Failed to check if user" + user.Username + " is duplicate")
 		logger.Debug(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
-	} else if isDuplicate {
-		logger.Info("User " + user.Username + " is already registered")
-		http.Error(w, "User is already registered", http.StatusConflict)
-		return
 	} else {
+		user = User{
+			Email:     rr.Email,
+			Username:  rr.Username,
+			Password:  string(passwordHash),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
 		if err := repository.Create(r.Context(), user, "users"); err != nil {
 			logger.Info("Failed to create user: " + rr.Username)
 			logger.Debug(err.Error())

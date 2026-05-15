@@ -13,7 +13,7 @@ import (
 )
 
 func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE id = %s;", table, parseModel(v).ID)
+	query := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE id = '%s';", table, parseModel(v).ID)
 	logger.Debug("Running query: " + query)
 	var exists int
 	err := DB.QueryRow(ctx, query).Scan(&exists)
@@ -26,21 +26,23 @@ func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
 }
 
 func Find[T any](ctx context.Context, table, field, record string) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = %s LIMIT 1;", table, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
+	logger.Debug("Running query: " + query)
 	row, err := DB.Query(ctx, query)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
 func FindMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = %s LIMIT 1;", table, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
+	logger.Debug("Running query: " + query)
 	row, err := DB.Query(ctx, query)
 	models, err := pgx.CollectRows(row, pgx.RowToStructByName[T])
 	return models, err
 }
 
 func Get[T any](ctx context.Context, id int, table string) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id = %s LIMIT 1;", table, strconv.Itoa(id))
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = '%s' LIMIT 1;", table, strconv.Itoa(id))
 	logger.Debug("Running query: " + query)
 	row, err := DB.Query(ctx, query)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
@@ -48,7 +50,7 @@ func Get[T any](ctx context.Context, id int, table string) (T, error) {
 }
 
 func Delete(ctx context.Context, v any, table string) error {
-	query := fmt.Sprintf("DELETE * FROM %s WHERE id = %s LIMIT 1;", table, parseModel(v).ID)
+	query := fmt.Sprintf("DELETE * FROM %s WHERE id = '%s' LIMIT 1;", table, parseModel(v).ID)
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query)
 
