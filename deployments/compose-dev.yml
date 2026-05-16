@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - /srv/db:/var/lib/postgresql/data:rw
-      - ./configs/postgresql.conf:/etc/postgresql.conf
+      - ../configs/postgresql.conf:/etc/postgresql.conf
     command: "-c config_file=/etc/postgresql.conf"
     healthcheck:
       test: "sh -c 'pg_isready -U $DB_USER'"
@@ -26,13 +26,14 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./migrations:/srv/migrations
-      - ./scripts/migrate.sh:/srv/migrate.sh
+      - ../migrations:/srv/migrations
+      - ../scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
 
   api:
     build:
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: deployments/Dockerfile
     container_name: chrono-api
     expose:
       - "${APP_PORT}"
@@ -41,7 +42,7 @@ services:
     depends_on:
       - migrate
     volumes:
-      - .:/srv
+      - ../:/srv
     command: sh -c "make run -C /srv"
     labels:
       - "traefik.enable=true"
@@ -64,9 +65,9 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - ./configs/traefik.yml:/etc/traefik/traefik.yaml:ro
-      - ./configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
-      - ./certs:/var/traefik.certs:rw
+      - ../configs/traefik.yml:/etc/traefik/traefik.yaml:ro
+      - ../configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
+      - ../certs:/var/traefik.certs:rw
       - /var/run/docker.sock:/var/run/docker.sock
 
   prometheus:
@@ -76,7 +77,7 @@ services:
     - "--log.level=warn"
     - "--config.file=/etc/prometheus/prometheus.yml"
     volumes:
-      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
 
@@ -88,13 +89,13 @@ services:
       - "3100:3100"
     volumes:
       - /srv/loki:/srv/loki:rw
-      - ./configs/loki.yml:/etc/loki/config.yaml:ro
+      - ../configs/loki.yml:/etc/loki/config.yaml:ro
 
   alloy:
     image: grafana/alloy
     container_name: alloy
     volumes:
-      - ./configs/alloy.conf:/etc/alloy/config.alloy
+      - ../configs/alloy.conf:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       LOKI_HOST: loki:3100
@@ -110,7 +111,7 @@ services:
       - "3200:3200"
 
   grafana:
-    image: grafana/grafana-enterprise
+    image: grafana/grafana-oss
     container_name: grafana
     environment:
       GF_LOG_LEVEL: warn
@@ -120,6 +121,6 @@ services:
       - "3000:3000"
     volumes:
       - /srv/grafana:/var/lib/grafana:rw
-      - ./configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ../configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
     labels:
       - "traefik.enable=true"

@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+echo "Creating volumes"
+
 sudo mkdir -p /srv/grafana /srv/loki /srv/db
 
 sudo chown -R 472:472 /srv/grafana

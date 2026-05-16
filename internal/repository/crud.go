@@ -12,19 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func IsDuplicate(ctx context.Context, v any, table string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE id = '%s';", table, parseModel(v).ID)
-	logger.Debug("Running query: " + query)
-	var exists int
-	err := DB.QueryRow(ctx, query).Scan(&exists)
-
-	if exists == 0 {
-		return false, err
-	} else {
-		return true, err
-	}
-}
-
 func Find[T any](ctx context.Context, table, field, record string) (T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
 	logger.Debug("Running query: " + query)

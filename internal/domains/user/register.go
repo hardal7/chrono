@@ -6,6 +6,7 @@ import (
 
 	"github.com/hardal7/chrono/internal/domains/topic"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/hardal7/chrono/internal/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -33,7 +34,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		logger.Info("User " + rr.Username + " is already registered")
 		http.Error(w, "User is already registered", http.StatusConflict)
 		return
-	} else if err != nil {
+	} else if err != pgx.ErrNoRows {
 		logger.Info("Failed to check if user" + user.Username + " is duplicate")
 		logger.Debug(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

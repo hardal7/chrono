@@ -1,0 +1,15 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image: alpine
+  script:
+    - make build
+
+test:
+  stage: test
+  image: alpine
+  script:
+    - make test-up

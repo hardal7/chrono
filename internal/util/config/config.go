@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"testing"
 
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/joho/godotenv"
@@ -21,12 +22,16 @@ type Config struct {
 var App Config
 
 func Load() {
-	logger.Info("Loading environment variables")
-	err := godotenv.Load()
-
-	if err != nil {
-		logger.Error("Failed to load .env variables")
-		logger.Debug(err.Error())
+	if testing.Testing() == false {
+		logger.Info("Loading environment variables")
+		err := godotenv.Load()
+		if err != nil {
+			logger.Error("Failed to load .env variables")
+			logger.Debug(err.Error())
+		}
+	} else {
+		logger.Info("Loading environment variables skipped.")
+		logger.Warn("Running in test environment")
 	}
 
 	App = Config{

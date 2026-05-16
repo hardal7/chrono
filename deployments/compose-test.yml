@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:17
+    container_name: test-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ../configs/postgresql.conf:/etc/postgresql.conf
+    command: "-c config_file=/etc/postgresql.conf"
+    healthcheck:
+      test: "sh -c 'pg_isready -U $DB_USER'"
+      interval: 1s
+      retries: 5
+
+  migrate:
+    image: postgres:17-alpine
+    container_name: test-migrate
+    depends_on: 
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ../migrations:/srv/migrations
+      - ../scripts/migrate.sh:/srv/migrate.sh
+    entrypoint: ["/srv/migrate.sh"]
+
+  api:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    container_name: test-api
+    depends_on:
+      - migrate
+    volumes:
+      - ../:/srv
+    entrypoint: ["/srv/scripts/test.sh"]

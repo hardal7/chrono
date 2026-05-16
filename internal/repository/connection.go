@@ -17,15 +17,15 @@ func CreateDBConnection() {
 
 	if err != nil {
 		DB.Close()
-		logger.Error("Failed to create connection pool")
 		logger.Debug(err.Error())
+		logger.Error("Failed to create connection pool")
 	}
 	logger.Info("Created connection pool")
 
 	if err := DB.Ping(context.Background()); err != nil {
 		DB.Close()
-		logger.Error("Failed to connect to connection pool")
 		logger.Debug(err.Error())
+		logger.Error("Failed to connect to connection pool")
 	}
 
 	logger.Info("Connecting to database server at: " + config.App.DB_HOST)
