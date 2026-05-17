@@ -1,10 +1,8 @@
 package user
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/hardal7/chrono/internal/util/handler"
@@ -17,17 +15,110 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegister(t *testing.T) {
-	product := User{Email: "mail@com", Username: "johndoe", Password: "strongpassword"}
-	payload, _ := json.Marshal(product)
+	registerTest.Run(t)
+}
 
-	res := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", "/register", bytes.NewBuffer(payload))
-	if err != nil {
-		t.Fatal("Failed to make request " + err.Error())
-	}
-
-	handler.Create(Register, "register user")(res, req)
-	if res.Code != http.StatusCreated {
-		t.Errorf("Expected status code %v, got %v", http.StatusCreated, res.Code)
-	}
+var registerTest = test.Test{
+	Method:   http.MethodPost,
+	Endpoint: "/register",
+	Handler:  handler.Create(Register, "register user"),
+	Cases: []test.Case{
+		{
+			Name: "successful register",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "johndoe",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusCreated,
+		},
+		{
+			Name: "duplicate user",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "johndoe",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusConflict,
+		},
+		{
+			Name: "missing email",
+			Body: User{
+				Username: "johndoe",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "missing username",
+			Body: User{
+				Email:    "john@mail.com",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "missing password",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "johndoe",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name:           "empty body",
+			Body:           User{},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "invalid email",
+			Body: User{
+				Email:    "not-an-email",
+				Username: "johndoe",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "short password",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "johndoe",
+				Password: "123",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "invalid username",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "@@@",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "sql injection attempt",
+			Body: User{
+				Email:    "john@mail.com",
+				Username: "'; DROP TABLE users;--",
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name: "extremely long input",
+			Body: User{
+				Email:    strings.Repeat("a", 5000) + "@mail.com",
+				Username: strings.Repeat("u", 5000),
+				Password: "strongpassword",
+			},
+			ExpectedStatus: http.StatusBadRequest,
+		},
+		{
+			Name:           "malformed json",
+			RawBody:        `{"email":"john@mail.com","username":`,
+			ExpectedStatus: http.StatusBadRequest,
+		},
+	},
 }

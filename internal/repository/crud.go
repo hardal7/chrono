@@ -45,7 +45,7 @@ func Delete(ctx context.Context, v any, table string) error {
 }
 
 func Create(ctx context.Context, v any, table string) error {
-	query := fmt.Sprintf("INSERT INTO %s %s;", table, createQueryValues(parseModel(v)))
+	query := fmt.Sprintf("INSERT INTO %s %s;", table, buildCreateQuery(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).FieldValues...)
 
@@ -53,7 +53,7 @@ func Create(ctx context.Context, v any, table string) error {
 }
 
 func Update(ctx context.Context, v any, table string) error {
-	query := fmt.Sprintf("UPDATE %s SET %s;", table, updateQueryValues(parseModel(v)))
+	query := fmt.Sprintf("UPDATE %s SET %s;", table, buildUpdateString(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	for i := 0; i != tidyFields(parseModel(v)).NumberOfFields; i++ {
 		fmt.Printf("%T\n", tidyFields(parseModel(v)).FieldValues[i])
@@ -65,15 +65,16 @@ func Update(ctx context.Context, v any, table string) error {
 	return err
 }
 
-type CRUDObject struct {
+type sqlObject struct {
 	ID             string
 	NumberOfFields int
 	FieldNames     []string
 	FieldValues    []any
 }
 
-func parseModel(v any) CRUDObject {
-	var object CRUDObject
+// Takes a generic model and returns an sqlObject
+func parseModel(v any) sqlObject {
+	var object sqlObject
 	structType := reflect.TypeOf(v)
 	structValue := reflect.ValueOf(v)
 	object.ID = strconv.FormatInt(structValue.Field(0).Int(), 10)
@@ -88,9 +89,9 @@ func parseModel(v any) CRUDObject {
 	return object
 }
 
-func createQueryValues(object CRUDObject) string {
+func buildCreateQuery(object sqlObject) string {
 	var valueString strings.Builder
-	for i := 0; i < object.NumberOfFields; i++ {
+	for i := range object.NumberOfFields {
 		if i == 0 {
 			valueString.WriteString(("(" + object.FieldNames[i] + ", "))
 		} else if i != object.NumberOfFields-1 {
@@ -101,7 +102,7 @@ func createQueryValues(object CRUDObject) string {
 	}
 
 	valueString.WriteString("VALUES")
-	for i := 0; i < object.NumberOfFields; i++ {
+	for i := range object.NumberOfFields {
 		if i == 0 {
 			// SQL VALUES start from 1 hence i+1 is necessary here to offset
 			valueString.WriteString((" (" + "$" + strconv.Itoa(i+1) + ", "))
@@ -114,10 +115,10 @@ func createQueryValues(object CRUDObject) string {
 	return valueString.String()
 }
 
-func updateQueryValues(object CRUDObject) string {
+func buildUpdateString(object sqlObject) string {
 	object = tidyFields(object)
 	var valueString strings.Builder
-	for i := 0; i < object.NumberOfFields-1; i++ {
+	for i := range object.NumberOfFields - 1 {
 		// SQL VALUES start from 1 hence i+1 is necessary here to offset
 		if i != object.NumberOfFields-2 {
 			valueString.WriteString(object.FieldNames[i] + " = $" + strconv.Itoa(i+1) + ", ")
@@ -130,12 +131,14 @@ func updateQueryValues(object CRUDObject) string {
 	return valueString.String()
 }
 
-func tidyFields(object CRUDObject) CRUDObject {
-	var cleanObject CRUDObject
+// Cleans fields of an sqlObject where where values are uninitialized
+func tidyFields(object sqlObject) sqlObject {
+	var cleanObject sqlObject
 
 	nonEmptyFields := 0
-	for i := 0; i < object.NumberOfFields; i++ {
+	for i := range object.NumberOfFields {
 		emptyField := false
+		// For fields with value types time.Time, the uninitialized value is different than 0
 		if reflect.ValueOf(object.FieldValues[i]).Kind() == reflect.TypeFor[time.Time]().Kind() {
 			if object.FieldValues[i].(time.Time).IsZero() {
 				emptyField = true

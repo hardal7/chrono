@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	bcryptCost   int    = 10
-	defaultTopic string = "General"
+	bcryptCost    int    = 10
+	notRegistered int    = 0
+	defaultTopic  string = "General"
 )
 
 func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
@@ -30,7 +31,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 
 	// TODO: Not only query by username but also the other fields
 	user, err := repository.Find[User](r.Context(), "users", "username", rr.Username)
-	if user.ID != 0 {
+	if user.ID != notRegistered {
 		logger.Info("User " + rr.Username + " is already registered")
 		http.Error(w, "User is already registered", http.StatusConflict)
 		return
