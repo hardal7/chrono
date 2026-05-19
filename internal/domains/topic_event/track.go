@@ -1,8 +1,9 @@
-package topic
+package topicevent
 
 import (
 	"net/http"
 
+	"github.com/hardal7/chrono/internal/domains/topic"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -10,7 +11,7 @@ import (
 
 func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
-	topic, err := repository.Find[Topic](r.Context(), "topics", "name", tr.Topic)
+	topic, err := repository.Find[topic.Topic](r.Context(), "topics", "name", tr.Topic)
 	if err != nil {
 		logger.Info("Topic not found")
 		logger.Debug(err.Error())

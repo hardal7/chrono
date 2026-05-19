@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/domains/health"
 	"github.com/hardal7/chrono/internal/domains/topic"
+	topicevent "github.com/hardal7/chrono/internal/domains/topic_event"
 	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
@@ -33,6 +34,7 @@ func Serve() {
 		r.Use(middleware.Authenticate)
 		r.Route("/user", user.Routes)
 		r.Route("/topic", topic.Routes)
+		r.Route("/topic-event", topicevent.Routes)
 	})
 
 	go runServer("main", config.App.Port, mainRouter)

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hardal7/chrono/internal/domains/topic"
+	topicevent "github.com/hardal7/chrono/internal/domains/topic_event"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 
@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	bcryptCost    int    = 10
-	notRegistered int    = 0
-	defaultTopic  string = "General"
+	bcryptCost    int = 10
+	notRegistered int = 0
 )
 
 func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
@@ -56,14 +55,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		} else {
 			logger.Info("Registered user: " + rr.Username)
 			user, _ = repository.Find[User](r.Context(), "users", "username", rr.Username)
-			firstTopic, _ := repository.Find[topic.Topic](r.Context(), "topics", "name", defaultTopic)
-			topicEvent := topic.TopicEvent{
-				UserID:      user.ID,
-				TopicID:     firstTopic.ID,
-				TimeTracked: 0,
-				Date:        int(time.Now().Unix()),
-			}
-			repository.Create(r.Context(), topicEvent, "topic_events")
+			topicevent.Initialize(user.ID, r.Context())
 			w.WriteHeader(http.StatusCreated)
 		}
 	}

@@ -1,10 +1,11 @@
-package topic
+package topicevent
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/hardal7/chrono/internal/domains/topic"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -27,7 +28,7 @@ func GetEvents(w http.ResponseWriter, r *http.Request, te TopicEventRequest) {
 		for i := range topicEvents {
 			response.Dates[i] = topicEvents[i].Date
 			response.TimesTracked[i] = topicEvents[i].TimeTracked
-			topic, _ := repository.Get[Topic](r.Context(), topicEvents[i].TopicID, "topics")
+			topic, _ := repository.Get[topic.Topic](r.Context(), topicEvents[i].TopicID, "topics")
 			response.Topics[i] = topic.Name
 		}
 		json.NewEncoder(w).Encode(response)
