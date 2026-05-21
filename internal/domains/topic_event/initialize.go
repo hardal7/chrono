@@ -10,7 +10,7 @@ import (
 
 const defaultTopic string = "General"
 
-func Initialize(userID int, ctx context.Context) {
+func Initialize(userID int, ctx context.Context) error {
 	firstTopic, _ := repository.Find[topic.Topic](ctx, "topics", "name", defaultTopic)
 	topicEvent := TopicEvent{
 		UserID:      userID,
@@ -18,5 +18,6 @@ func Initialize(userID int, ctx context.Context) {
 		TimeTracked: 0,
 		Date:        int(time.Now().Unix()),
 	}
-	repository.Create(ctx, topicEvent, "topic_events")
+	err := repository.Create(ctx, topicEvent, "topic_events")
+	return err
 }

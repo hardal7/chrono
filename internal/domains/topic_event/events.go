@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hardal7/chrono/internal/domains/topic"
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -13,7 +14,7 @@ import (
 
 func GetEvents(w http.ResponseWriter, r *http.Request, te TopicEventRequest) {
 	logger.Info("Getting topic events")
-	userID := r.Context().Value("userID").(int)
+	userID := r.Context().Value(middleware.UserID).(int)
 	topicEvents, err := repository.FindMultiple[TopicEvent](r.Context(), "topic_events", "user_id", strconv.Itoa(userID))
 	if err != nil {
 		logger.Info("Failed to get topic events")

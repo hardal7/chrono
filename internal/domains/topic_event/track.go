@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hardal7/chrono/internal/domains/topic"
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -19,7 +20,7 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 		return
 	} else {
 		topicEvent := TopicEvent{
-			UserID:      r.Context().Value("userID").(int),
+			UserID:      r.Context().Value(middleware.UserID).(int),
 			TopicID:     topic.ID,
 			TimeTracked: int(tr.Time.Unix()),
 			Date:        int(tr.Date.Unix()),

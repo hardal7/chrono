@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -25,7 +26,7 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	} else {
 		topic := Topic{
 			Name:      cr.Name,
-			CreatedBy: r.Context().Value("userID").(int),
+			CreatedBy: r.Context().Value(middleware.UserID).(int),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}

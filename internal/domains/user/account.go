@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/repository"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
-	user, err := repository.Get[User](r.Context(), r.Context().Value("userID").(int), "users")
+	user, err := repository.Get[User](r.Context(), r.Context().Value(middleware.UserID).(int), "users")
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())
@@ -63,7 +64,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 }
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
-	user, err := repository.Get[User](r.Context(), r.Context().Value("userID").(int), "users")
+	user, err := repository.Get[User](r.Context(), r.Context().Value(middleware.UserID).(int), "users")
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())

@@ -22,16 +22,18 @@ type Config struct {
 var App Config
 
 func Load() {
-	if testing.Testing() == false {
-		logger.Info("Loading environment variables")
-		err := godotenv.Load()
-		if err != nil {
-			logger.Error("Failed to load .env variables")
-			logger.Debug(err.Error())
-		}
+	var file string
+	if !testing.Testing() {
+		file = ".env"
 	} else {
-		logger.Info("Loading environment variables skipped.")
+		file = "/srv/.env.test"
 		logger.Warn("Running in test environment")
+	}
+	logger.Info("Loading environment variables")
+	err := godotenv.Load(file)
+	if err != nil {
+		logger.Error("Failed to load environment variables")
+		logger.Debug(err.Error())
 	}
 
 	App = Config{

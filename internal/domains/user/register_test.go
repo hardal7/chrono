@@ -21,7 +21,7 @@ func TestRegister(t *testing.T) {
 var registerTest = test.Test{
 	Method:   http.MethodPost,
 	Endpoint: "/register",
-	Handler:  handler.Create(Register, "register user"),
+	Handler:  handler.Create(Register),
 	Cases: []test.Case{
 		{
 			Name: "successful register",

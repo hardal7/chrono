@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	topicevent "github.com/hardal7/chrono/internal/domains/topic_event"
+	"github.com/hardal7/chrono/internal/domains/topic_event"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 
@@ -55,7 +55,13 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		} else {
 			logger.Info("Registered user: " + rr.Username)
 			user, _ = repository.Find[User](r.Context(), "users", "username", rr.Username)
-			topicevent.Initialize(user.ID, r.Context())
+			err := topicevent.Initialize(user.ID, r.Context())
+			if err != nil {
+
+				logger.Info("Failed to initialize topic events for user: " + rr.Username)
+				logger.Debug(err.Error())
+				logger.Warn("Continuing with errors")
+			}
 			w.WriteHeader(http.StatusCreated)
 		}
 	}

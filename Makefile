@@ -14,20 +14,24 @@ run: build
 migrate:
 	go run internal/migration/migration.go
 
+lint:
+	golangci-lint run
+
 test:
-	godotenv -f .env.test go test -v ./internal/...
+	go test -v ./internal/...
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-dev-up:
-	$(DOCKER) --env-file .env -f deployments/compose-dev.yml up
-
 dev-down:
 	$(DOCKER) --env-file .env -f deployments/compose-dev.yml down
 
-test-up:
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up
+dev-up: dev-down
+	$(DOCKER) --env-file .env -f deployments/compose-dev.yml up
 
 test-down:
 	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml down
+
+test-up: test-down
+	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up
+	# --exit-code-from api
