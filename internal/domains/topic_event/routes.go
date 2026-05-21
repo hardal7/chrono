@@ -6,6 +6,6 @@ import (
 )
 
 func Routes(r chi.Router) {
-	r.Post("/track", handler.Create(Track, "track topic"))
-	r.Get("/events", handler.Create(GetEvents, "get topic events"))
+	r.Post("/track", handler.Create(Track))
+	r.Get("/events", handler.Create(GetEvents))
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/domains/health"
 	"github.com/hardal7/chrono/internal/domains/topic"
-	topicevent "github.com/hardal7/chrono/internal/domains/topic_event"
+	"github.com/hardal7/chrono/internal/domains/topic_event"
 	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
@@ -24,9 +24,9 @@ func Serve() {
 
 	// Public Routes
 	mainRouter.Group(func(r chi.Router) {
-		r.Post("/register", handler.Create(user.Register, "register user"))
-		r.Post("/login", handler.Create(user.Login, "log user in"))
-		r.Get("/health", http.HandlerFunc(health.Ping))
+		r.Post("/register", handler.Create(user.Register))
+		r.Post("/login", handler.Create(user.Login))
+		r.Get("/health", health.Ping)
 	})
 
 	// Protected Routes

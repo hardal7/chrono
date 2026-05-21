@@ -4,10 +4,10 @@ import "time"
 
 type User struct {
 	ID        int       `db:"id"`
-	Email     string    `db:"email"`
-	Username  string    `db:"username"`
-	Password  string    `db:"password"`
-	CreatedAt time.Time `db:"created_at"`
+	Email     string    `db:"email"      json:"email"`
+	Username  string    `db:"username"   json:"username"`
+	Password  string    `db:"password"   json:"password"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -11,13 +12,13 @@ import (
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
 	user, err := repository.Get[User](r.Context(), r.Context().Value("userID").(int), "users")
-	user.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get user")
 		logger.Debug(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	} else {
+		user.UpdatedAt = time.Now()
 		logger.Info("Editing account with username: " + user.Username)
 		if er.DeleteAccount {
 			logger.Info("Deleting account with username: " + user.Username)
@@ -58,5 +59,26 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 				w.WriteHeader(http.StatusOK)
 			}
 		}
+	}
+}
+
+func GetAccount(w http.ResponseWriter, r *http.Request) {
+	user, err := repository.Get[User](r.Context(), r.Context().Value("userID").(int), "users")
+	if err != nil {
+		logger.Info("Failed to get user")
+		logger.Debug(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(user)
+	if err != nil {
+		logger.Info("Could not create JSON response")
+		logger.Debug(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} else {
+		logger.Info("Sent account details")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 	}
 }

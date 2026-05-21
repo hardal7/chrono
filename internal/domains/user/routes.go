@@ -6,5 +6,6 @@ import (
 )
 
 func Routes(r chi.Router) {
-	r.Post("/account", handler.Create(EditAccount, "edit user account"))
+	r.Post("/account", handler.Create(EditAccount))
+	r.Get("/account", GetAccount)
 }

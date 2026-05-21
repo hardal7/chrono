@@ -6,6 +6,6 @@ import (
 )
 
 func Routes(r chi.Router) {
-	r.Post("/create", handler.Create(Create, "create topic"))
-	r.Post("/edit", handler.Create(Edit, "edit topic"))
+	r.Post("/create", handler.Create(Create))
+	r.Post("/edit", handler.Create(Edit))
 }

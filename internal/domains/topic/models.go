@@ -10,12 +10,12 @@ type Topic struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-type CreateTopicRequest struct {
+type CreateRequest struct {
 	ID   int    `db:"id"`
 	Name string `json:"name"`
 }
 
-type EditTopicRequest struct {
+type EditRequest struct {
 	Name        string `json:"name"`
 	NewName     string `json:"new_name"`
 	DeleteTopic bool   `json:"delete"`

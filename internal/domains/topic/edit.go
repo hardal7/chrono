@@ -8,8 +8,8 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func Edit(w http.ResponseWriter, r *http.Request, tr EditTopicRequest) {
-	topic, err := repository.Find[Topic](r.Context(), "topics", "name", tr.Name)
+func Edit(w http.ResponseWriter, r *http.Request, er EditRequest) {
+	topic, err := repository.Find[Topic](r.Context(), "topics", "name", er.Name)
 	topic.UpdatedAt = time.Now()
 	if err != nil {
 		logger.Info("Failed to get topic")
@@ -18,7 +18,7 @@ func Edit(w http.ResponseWriter, r *http.Request, tr EditTopicRequest) {
 		return
 	} else {
 		logger.Info("Editing topic with name: " + topic.Name)
-		if tr.DeleteTopic {
+		if er.DeleteTopic {
 			logger.Info("Deleting topic with name: " + topic.Name)
 			err := repository.Delete(r.Context(), topic, "topics")
 			if err != nil {
@@ -31,9 +31,9 @@ func Edit(w http.ResponseWriter, r *http.Request, tr EditTopicRequest) {
 				w.WriteHeader(http.StatusOK)
 			}
 		} else {
-			if tr.NewName != "" {
-				topic.Name = tr.NewName
-				logger.Info("Changed topic name to " + tr.NewName)
+			if er.NewName != "" {
+				topic.Name = er.NewName
+				logger.Info("Changed topic name to " + er.NewName)
 			}
 			err := repository.Update(r.Context(), topic, "topics")
 			if err != nil {
