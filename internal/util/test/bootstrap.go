@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/hardal7/chrono/internal/repository"
+	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -9,5 +9,5 @@ import (
 func Bootstrap() {
 	logger.Init()
 	config.Load()
-	repository.CreateDBConnection()
+	db.CreateConnection()
 }

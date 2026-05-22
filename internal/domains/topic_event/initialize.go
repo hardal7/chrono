@@ -5,18 +5,18 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/domains/topic"
-	"github.com/hardal7/chrono/internal/repository"
 )
 
 const defaultTopic string = "General"
 
 func Initialize(userID int, ctx context.Context) error {
-	firstTopic, _ := repository.Find[topic.Topic](ctx, "topics", "name", defaultTopic)
+	firstTopic, _ := topic.Repo.FindByName(ctx, defaultTopic)
 	topicEvent := TopicEvent{
 		UserID:      userID,
 		TopicID:     firstTopic.ID,
 		TimeTracked: 0,
 		Date:        int(time.Now().Unix()),
 	}
-	return repository.Create(ctx, topicEvent, "topic_events")
+	err := Repo.Create(ctx, topicEvent)
+	return err
 }

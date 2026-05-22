@@ -9,7 +9,6 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/hardal7/chrono/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,14 +25,13 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		ErrHashPassword.Handle(w, err)
 		return
 	}
-
-	user, err := repository.Find[User](r.Context(), "users", "username", rr.Username)
+	user, err := Repo.FindByUsername(r.Context(), rr.Username)
 	if user.ID != notRegistered {
 		ErrAlreadyRegistered.Handle(w, err)
 		return
 		// TODO: Check if this works as well
 	} else if err != pgx.ErrNoRows {
-		e.ErrCheckIfDuplicate.Handle(w, err, "user")
+		e.ErrCheckIfDuplicate.Handle(w, err, table)
 		return
 	} else {
 		user = User{
@@ -43,12 +41,13 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-		if err := repository.Create(r.Context(), user, "users"); err != nil {
-			e.ErrCreate.Handle(w, err, "user")
+		if err := Repo.Create(r.Context(), user); err != nil {
+			e.ErrCreate.Handle(w, err, table)
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
-			user, _ = repository.Find[User](r.Context(), "users", "username", rr.Username)
+			// TODO: Handle this error
+			user, _ := Repo.FindByUsername(r.Context(), rr.Username)
 			err := topicevent.Initialize(user.ID, r.Context())
 			if err != nil {
 				// TODO

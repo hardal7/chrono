@@ -1,4 +1,4 @@
-package repository
+package db
 
 import (
 	"context"
@@ -12,31 +12,24 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Find[T any](ctx context.Context, table, field, record string) (T, error) {
+// TODO: Reformat this code
+func Get[T any](ctx context.Context, table, field, record string) (T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
 	logger.Debug("Running query: " + query)
-	row, err := DB.Query(ctx, query)
+	row, _ := DB.Query(ctx, query)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
-func FindMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
+func GetMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
 	logger.Debug("Running query: " + query)
-	row, err := DB.Query(ctx, query)
+	row, _ := DB.Query(ctx, query)
 	models, err := pgx.CollectRows(row, pgx.RowToStructByName[T])
 	return models, err
 }
 
-func Get[T any](ctx context.Context, table string, id int) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id = '%s' LIMIT 1;", table, strconv.Itoa(id))
-	logger.Debug("Running query: " + query)
-	row, err := DB.Query(ctx, query)
-	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
-	return model, err
-}
-
-func Delete(ctx context.Context, v any, table string) error {
+func Delete(ctx context.Context, table string, v any) error {
 	query := fmt.Sprintf("DELETE * FROM %s WHERE id = '%s' LIMIT 1;", table, parseModel(v).ID)
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query)
@@ -44,7 +37,7 @@ func Delete(ctx context.Context, v any, table string) error {
 	return err
 }
 
-func Create(ctx context.Context, v any, table string) error {
+func Create(ctx context.Context, table string, v any) error {
 	query := fmt.Sprintf("INSERT INTO %s %s;", table, buildCreateQuery(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).FieldValues...)
@@ -52,7 +45,7 @@ func Create(ctx context.Context, v any, table string) error {
 	return err
 }
 
-func Update(ctx context.Context, v any, table string) error {
+func Update(ctx context.Context, table string, v any) error {
 	query := fmt.Sprintf("UPDATE %s SET %s;", table, buildUpdateString(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	for i := 0; i != tidyFields(parseModel(v)).NumberOfFields; i++ {

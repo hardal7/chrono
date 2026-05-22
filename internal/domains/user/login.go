@@ -9,7 +9,6 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/hardal7/chrono/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,9 +17,9 @@ const jwtExpirationDays int = 30
 func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 	logger.Info("Logging user with username: " + lr.Username)
 
-	user, err := repository.Find[User](r.Context(), "users", "username", lr.Username)
+	user, err := Repo.FindByUsername(r.Context(), lr.Username)
 	if err != nil {
-		e.ErrNotFound.Handle(w, err, "user")
+		e.ErrNotFound.Handle(w, err, table)
 		return
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(lr.Password))

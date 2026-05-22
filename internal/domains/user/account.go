@@ -6,14 +6,13 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/repository"
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
-	user, err := repository.Get[User](r.Context(), "users", r.Context().Value(middleware.UserID).(int))
+	user, err := Repo.FindByID(r.Context(), r.Context().Value(middleware.UserID).(int))
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, "user")
 		return
@@ -22,9 +21,9 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 		logger.Info("Editing account with username: " + user.Username)
 		if er.DeleteAccount {
 			logger.Info("Deleting account with username: " + user.Username)
-			err := repository.Delete(r.Context(), user, "users")
+			err := Repo.Delete(r.Context(), user)
 			if err != nil {
-				e.ErrDelete.Handle(w, err, "user")
+				e.ErrDelete.Handle(w, err, table)
 				return
 			} else {
 				logger.Info("Deleted account")
@@ -44,9 +43,9 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 				}
 				user.Password = string(passwordHash)
 			}
-			err := repository.Update(r.Context(), user, "users")
+			err := Repo.Update(r.Context(), user)
 			if err != nil {
-				e.ErrUpdate.Handle(w, err, "user")
+				e.ErrUpdate.Handle(w, err, table)
 				return
 			} else {
 				logger.Info("Changed account details")
@@ -57,9 +56,9 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 }
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
-	user, err := repository.Get[User](r.Context(), "users", r.Context().Value(middleware.UserID).(int))
+	user, err := Repo.FindByID(r.Context(), r.Context().Value(middleware.UserID).(int))
 	if err != nil {
-		e.ErrNotFound.Handle(w, err, "user")
+		e.ErrNotFound.Handle(w, err, table)
 		return
 	}
 	response, err := json.Marshal(user)

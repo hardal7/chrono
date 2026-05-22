@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hardal7/chrono/internal/api"
-	"github.com/hardal7/chrono/internal/repository"
+	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -13,6 +13,6 @@ func init() {
 }
 
 func main() {
-	repository.CreateDBConnection()
+	db.CreateConnection()
 	api.Serve()
 }

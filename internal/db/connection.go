@@ -1,4 +1,4 @@
-package repository
+package db
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 var DB *pgxpool.Pool
 
-func CreateDBConnection() {
+func CreateConnection() {
 	logger.Info("Connecting to database server at: " + config.App.DB_HOST)
 	var err error
 	DB, err = pgxpool.New(context.Background(), getConnectionString())
