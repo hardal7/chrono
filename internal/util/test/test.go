@@ -29,12 +29,12 @@ func (test Test) Run(t *testing.T) {
 	for _, c := range test.Cases {
 		payload, err := c.marshalBody()
 		if err != nil {
-			logger.Error("Failed to marshal test body")
+			logger.Fatal("Failed to marshal test body", err)
 		}
 		res := httptest.NewRecorder()
 		req, err := http.NewRequest(test.Method, test.Endpoint, bytes.NewBuffer(payload))
 		if err != nil {
-			logger.Error("Failed to create test request")
+			logger.Fatal("Failed to create test request", err)
 		}
 		test.Handler(res, req)
 		assert.Equal(t, c.ExpectedStatus, res.Code, "Test case %q failed", c.Name)

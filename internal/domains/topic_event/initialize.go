@@ -18,6 +18,5 @@ func Initialize(userID int, ctx context.Context) error {
 		TimeTracked: 0,
 		Date:        int(time.Now().Unix()),
 	}
-	err := repository.Create(ctx, topicEvent, "topic_events")
-	return err
+	return repository.Create(ctx, topicEvent, "topic_events")
 }

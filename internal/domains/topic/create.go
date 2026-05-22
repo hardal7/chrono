@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/middleware"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -15,13 +16,12 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 
 	topic, err := repository.Find[Topic](r.Context(), "topics", "name", cr.Name)
 	if topic.ID != '0' {
+		// TODO: Use new error type
 		logger.Info("Topic with name " + cr.Name + " already exists")
 		http.Error(w, "Topic already exists", http.StatusBadRequest)
 		return
 	} else if err != nil {
-		logger.Info("Failed to check if topic" + topic.Name + " is duplicate")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrCheckIfDuplicate.Handle(w, err, "topic")
 		return
 	} else {
 		topic := Topic{
@@ -32,9 +32,7 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 		}
 
 		if err := repository.Create(r.Context(), topic, "topics"); err != nil {
-			logger.Info("Failed to create topic with name: " + cr.Name)
-			logger.Debug(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			e.ErrCreate.Handle(w, err, "topic")
 			return
 		} else {
 			logger.Info("Created topic: " + cr.Name)

@@ -28,7 +28,7 @@ func FindMultiple[T any](ctx context.Context, table, field, record string) ([]T,
 	return models, err
 }
 
-func Get[T any](ctx context.Context, id int, table string) (T, error) {
+func Get[T any](ctx context.Context, table string, id int) (T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = '%s' LIMIT 1;", table, strconv.Itoa(id))
 	logger.Debug("Running query: " + query)
 	row, err := DB.Query(ctx, query)

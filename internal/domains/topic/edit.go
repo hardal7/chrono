@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/repository"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -12,9 +13,7 @@ func Edit(w http.ResponseWriter, r *http.Request, er EditRequest) {
 	topic, err := repository.Find[Topic](r.Context(), "topics", "name", er.Name)
 	topic.UpdatedAt = time.Now()
 	if err != nil {
-		logger.Info("Failed to get topic")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrNotFound.Handle(w, err, "topic")
 		return
 	} else {
 		logger.Info("Editing topic with name: " + topic.Name)
@@ -22,9 +21,7 @@ func Edit(w http.ResponseWriter, r *http.Request, er EditRequest) {
 			logger.Info("Deleting topic with name: " + topic.Name)
 			err := repository.Delete(r.Context(), topic, "topics")
 			if err != nil {
-				logger.Info("Failed to delete topic")
-				logger.Debug(err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				e.ErrDelete.Handle(w, err, "topic")
 				return
 			} else {
 				logger.Info("Deleted topic")
@@ -37,9 +34,7 @@ func Edit(w http.ResponseWriter, r *http.Request, er EditRequest) {
 			}
 			err := repository.Update(r.Context(), topic, "topics")
 			if err != nil {
-				logger.Info("Failed to change topic details")
-				logger.Debug(err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				e.ErrUpdate.Handle(w, err, "topic")
 				return
 			} else {
 				logger.Info("Changed topic details")

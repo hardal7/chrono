@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/domains/topic_event"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 
@@ -22,22 +23,17 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rr.Password), bcryptCost)
 	if err != nil {
-		logger.Info("Failed to create user: Could not hash password")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrHashPassword.Handle(w, err)
 		return
 	}
 
-	// TODO: Not only query by username but also the other fields
 	user, err := repository.Find[User](r.Context(), "users", "username", rr.Username)
 	if user.ID != notRegistered {
-		logger.Info("User " + rr.Username + " is already registered")
-		http.Error(w, "User is already registered", http.StatusConflict)
+		ErrAlreadyRegistered.Handle(w, err)
 		return
+		// TODO: Check if this works as well
 	} else if err != pgx.ErrNoRows {
-		logger.Info("Failed to check if user" + user.Username + " is duplicate")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrCheckIfDuplicate.Handle(w, err, "user")
 		return
 	} else {
 		user = User{
@@ -48,16 +44,14 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 			UpdatedAt: time.Now(),
 		}
 		if err := repository.Create(r.Context(), user, "users"); err != nil {
-			logger.Info("Failed to create user: " + rr.Username)
-			logger.Debug(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			e.ErrCreate.Handle(w, err, "user")
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
 			user, _ = repository.Find[User](r.Context(), "users", "username", rr.Username)
 			err := topicevent.Initialize(user.ID, r.Context())
 			if err != nil {
-
+				// TODO
 				logger.Info("Failed to initialize topic events for user: " + rr.Username)
 				logger.Debug(err.Error())
 				logger.Warn("Continuing with errors")

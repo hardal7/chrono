@@ -7,16 +7,15 @@ import (
 
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/repository"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
-	user, err := repository.Get[User](r.Context(), r.Context().Value(middleware.UserID).(int), "users")
+	user, err := repository.Get[User](r.Context(), "users", r.Context().Value(middleware.UserID).(int))
 	if err != nil {
-		logger.Info("Failed to get user")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrNotFound.Handle(w, err, "user")
 		return
 	} else {
 		user.UpdatedAt = time.Now()
@@ -25,9 +24,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 			logger.Info("Deleting account with username: " + user.Username)
 			err := repository.Delete(r.Context(), user, "users")
 			if err != nil {
-				logger.Info("Failed to delete account")
-				logger.Debug(err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				e.ErrDelete.Handle(w, err, "user")
 				return
 			} else {
 				logger.Info("Deleted account")
@@ -42,18 +39,14 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 				logger.Info("Changing account password")
 				passwordHash, err := bcrypt.GenerateFromPassword([]byte(er.NewPassword), bcryptCost)
 				if err != nil {
-					logger.Info("Could not hash password")
-					logger.Debug(err.Error())
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					ErrHashPassword.Handle(w, err)
 					return
 				}
 				user.Password = string(passwordHash)
 			}
 			err := repository.Update(r.Context(), user, "users")
 			if err != nil {
-				logger.Info("Failed to change account details")
-				logger.Debug(err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				e.ErrUpdate.Handle(w, err, "user")
 				return
 			} else {
 				logger.Info("Changed account details")
@@ -64,22 +57,21 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 }
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
-	user, err := repository.Get[User](r.Context(), r.Context().Value(middleware.UserID).(int), "users")
+	user, err := repository.Get[User](r.Context(), "users", r.Context().Value(middleware.UserID).(int))
 	if err != nil {
-		logger.Info("Failed to get user")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrNotFound.Handle(w, err, "user")
 		return
 	}
 	response, err := json.Marshal(user)
 	if err != nil {
-		logger.Info("Could not create JSON response")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		e.ErrMarshalJSON.Handle(w, err)
 		return
 	} else {
 		logger.Info("Sent account details")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			e.ErrEncodeJSON.Handle(w, err)
+		}
 	}
 }

@@ -32,12 +32,12 @@ func Load() {
 	logger.Info("Loading environment variables")
 	err := godotenv.Load(file)
 	if err != nil {
-		logger.Error("Failed to load environment variables")
-		logger.Debug(err.Error())
+		logger.Fatal("Failed to load environment variables", err)
 	}
 
 	App = Config{
-		Port:        os.Getenv("APP_PORT"),
+		Port: os.Getenv("APP_PORT"),
+		// TODO: disgusting, but Prometheus does not allow env variables in its config.
 		AdminPort:   "9010",
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_HOST:     os.Getenv("DB_HOST"),

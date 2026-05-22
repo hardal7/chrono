@@ -19,19 +19,24 @@ func Init() {
 	))
 }
 
-func Debug(diagnostics string) {
-	slog.Debug(diagnostics)
+func Debug(msg string) {
+	slog.Debug(msg)
 }
 
-func Info(diagnostics string) {
-	slog.Info(diagnostics)
+func Info(msg string) {
+	slog.Info(msg)
 }
 
-func Warn(diagnostics string) {
-	slog.Warn(diagnostics)
+func Warn(msg string) {
+	slog.Warn(msg)
 }
 
-func Error(diagnostics string) {
-	slog.Error(diagnostics)
+func Error(msg string) {
+	slog.Error(msg)
+}
+
+func Fatal(diagnostic string, err error) {
+	slog.Error(diagnostic)
+	slog.Debug(err.Error())
 	os.Exit(1)
 }

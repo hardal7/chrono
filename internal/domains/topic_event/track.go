@@ -5,6 +5,7 @@ import (
 
 	"github.com/hardal7/chrono/internal/domains/topic"
 	"github.com/hardal7/chrono/internal/middleware"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/hardal7/chrono/internal/repository"
@@ -14,9 +15,7 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 	logger.Info("Tracking time for topic with name: " + tr.Topic)
 	topic, err := repository.Find[topic.Topic](r.Context(), "topics", "name", tr.Topic)
 	if err != nil {
-		logger.Info("Topic not found")
-		logger.Debug(err.Error())
-		http.Error(w, "Topic not found", http.StatusBadRequest)
+		e.ErrNotFound.Handle(w, err, "topic_events")
 		return
 	} else {
 		topicEvent := TopicEvent{
@@ -26,9 +25,7 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 			Date:        int(tr.Date.Unix()),
 		}
 		if err := repository.Create(r.Context(), topicEvent, "topic_events"); err != nil {
-			logger.Info("Failed to track time")
-			logger.Debug(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			e.ErrCreate.Handle(w, err, "topic_events")
 			return
 		} else {
 			logger.Info("Tracked time")

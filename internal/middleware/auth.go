@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/hardal7/chrono/internal/util/config"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -19,34 +20,25 @@ func Authenticate(next http.Handler) http.Handler {
 
 		tokenCookie, err := r.Cookie("Authorization")
 		if err == http.ErrNoCookie {
-			logger.Info("No token provided")
-			logger.Debug(err.Error())
-			http.Error(w, "No authorization token found", http.StatusUnauthorized)
+			ErrNoToken.Handle(w, err)
 			return
 		} else if err != nil {
-			logger.Info("Failed to get request cookie")
-			logger.Debug(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrRetrieveToken.Handle(w, err)
 			return
 		} else {
 			token, err := jwt.Parse(tokenCookie.Value, func(token *jwt.Token) (any, error) {
 				return []byte(config.App.JWT_SECRET), nil
 			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 			if err == jwt.ErrTokenExpired {
-				logger.Info("Token is expired")
-				logger.Debug(err.Error())
-				http.Error(w, "Token is expired", http.StatusUnauthorized)
+				ErrExpiredToken.Handle(w, err)
 				return
 			} else if err != nil {
-				logger.Info("Invalid Token")
-				logger.Debug(err.Error())
-				http.Error(w, "Invalid Token", http.StatusUnauthorized)
+				ErrInvalidToken.Handle(w, err)
 				return
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); !ok {
-				logger.Info("Failed to parse token")
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				ErrParseToken.Handle(w, err)
 				return
 			} else {
 				userID := int(claims["sub"].(float64))
@@ -56,4 +48,28 @@ func Authenticate(next http.Handler) http.Handler {
 			}
 		}
 	})
+}
+
+var ErrNoToken = e.Error{
+	InternalInfo: "No token provided",
+	Code:         http.StatusUnauthorized,
+	ExternalInfo: "No authorization token found",
+}
+var ErrRetrieveToken = e.Error{
+	InternalInfo: "Failed to retrieve authorization token",
+	Code:         http.StatusInternalServerError,
+}
+var ErrExpiredToken = e.Error{
+	InternalInfo: "Expired token provided",
+	Code:         http.StatusUnauthorized,
+	ExternalInfo: "Token is expired",
+}
+var ErrInvalidToken = e.Error{
+	InternalInfo: "Invalid token provided",
+	Code:         http.StatusUnauthorized,
+	ExternalInfo: "Token is invalid",
+}
+var ErrParseToken = e.Error{
+	InternalInfo: "Failed to parse token",
+	Code:         http.StatusInternalServerError,
 }

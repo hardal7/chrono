@@ -1,5 +1,6 @@
 .env
 .crt
 .key
+.gitlab-ci-local
 bin
 certs

@@ -11,9 +11,6 @@ build:
 run: build
 	./$(BUILD_DIR)/$(APP_NAME)
 
-migrate:
-	go run internal/migration/migration.go
-
 lint:
 	golangci-lint run
 

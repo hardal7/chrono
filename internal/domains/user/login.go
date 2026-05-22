@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hardal7/chrono/internal/util/config"
+	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -12,30 +13,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	jwtExpirationDays int = 30
-)
+const jwtExpirationDays int = 30
 
 func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 	logger.Info("Logging user with username: " + lr.Username)
 
 	user, err := repository.Find[User](r.Context(), "users", "username", lr.Username)
 	if err != nil {
-		logger.Info("Failed to get user")
-		logger.Debug(err.Error())
-		http.Error(w, "User not found", http.StatusNotFound)
+		e.ErrNotFound.Handle(w, err, "user")
 		return
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(lr.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		logger.Info("Login attempt with incorect password")
-		http.Error(w, "Incorrect Password", http.StatusUnauthorized)
+		ErrIncorrectPassword.Handle(w, err)
 		return
 	} else if err != nil {
-		logger.Info("Failed to compare password to hash")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrCompareHash.Handle(w, err)
 		return
 	}
 
@@ -45,9 +38,7 @@ func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 	})
 	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
 	if err != nil {
-		logger.Info("Failed to generate token")
-		logger.Debug(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrGenerateToken.Handle(w, err)
 		return
 	} else {
 		cookie := http.Cookie{
