@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/domains/health"
 	"github.com/hardal7/chrono/internal/domains/topic"
-	"github.com/hardal7/chrono/internal/domains/topic_event"
+	"github.com/hardal7/chrono/internal/domains/topicevent"
 	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"

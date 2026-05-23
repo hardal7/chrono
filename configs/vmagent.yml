@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "chrono-api"
+    static_configs:
+      - targets: ["chrono-api:9010"]
+  - job_name: 'victoria'
+    static_configs:
+      - targets: ['victoria:8428']

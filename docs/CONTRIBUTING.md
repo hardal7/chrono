@@ -6,11 +6,16 @@ Some important files include:
 
 `cmd/main.go`: Entry point of the application.\
 `utils/handler/handler.go`: Returns an HTTP handler function that decodes incoming API requests into structs.\
-`repository/connection.go`: Establishes and manages database connections.\
 
-Implementations are often standalone but there are helpers for basic CRUD:
+Database interactions are often written standalone but there also are helpers for basic CRUD:
 `utils/errors/crud.go`: Custom errors for CRUD
 `repository/crud.go`: Generic CRUD database implementation
-Take a look into the code for one of the handlers inside `internal/domains` to get an idea.
+
+These are the files that appear commonly in `internal/domains/*`:
+`routes.go`: Routing for the handlers
+`errors.go`: Custom errors specific to domain business logic
+`models.go`: Contains both model and DTO definitions
+`repository.go`: Repository definition and implementations for DB operations
+Rest of the files are generally handlers for their respective domains.
 
 For an overview of the database schema: see `docs/schema.sql`.

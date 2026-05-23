@@ -69,3 +69,76 @@ services:
       - ../configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
       - ../certs:/var/traefik.certs:rw
       - /var/run/docker.sock:/var/run/docker.sock
+
+  victoria:
+    image: victoriametrics/victoria-metrics
+    container_name: victoria
+    ports:
+      - "8428:8428"
+    volumes:
+      - /srv/victoria:/storage
+    command:
+      - -storageDataPath=/storage
+      - -retentionPeriod=90d
+      - -loggerLevel=WARN
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://127.0.0.1:8428/-/healthy']
+      interval: 1s
+      retries: 5
+
+  vmagent:
+    image: victoriametrics/vmagent
+    container_name: vmagent
+    depends_on:
+      victoria:
+        condition: service_healthy
+    ports:
+      - "8429:8429"
+    volumes:
+      - ../configs/vmagent.yml:/etc/vmagent/vmagent.yml
+      - /srv/vmagent:/vmagentdata
+    command:
+      - -promscrape.config=/etc/vmagent/vmagent.yml
+      - -remoteWrite.url=http://victoria:8428/api/v1/write
+      - -loggerLevel=WARN
+
+  victorialogs:
+    image: victoriametrics/victoria-logs
+    container_name: victorialogs
+    depends_on:
+      victoria:
+        condition: service_healthy
+    volumes:
+      - /srv/victoria-logs:/data
+    command:
+      - -storageDataPath=/data
+      - -retentionPeriod=14d
+      - -defaultMsgValue=empty
+      - -loggerLevel=WARN
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    environment:
+      VECTOR_LOG: warn
+    depends_on:
+      - victorialogs
+    volumes:
+      - ../configs/vector.yml:/etc/vector/vector.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    environment:
+      GF_PLUGINS_PREINSTALL: victoriametrics-logs-datasource
+      GF_LOG_LEVEL: warn
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    ports:
+      - "3000:3000"
+    volumes:
+      - /srv/grafana:/var/lib/grafana:rw
+      - ../configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+    labels:
+      - "traefik.enable=true"

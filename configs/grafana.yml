@@ -1,7 +1,10 @@
 datasources:
-  - name: Prometheus
+  - name: VictoriaMetrics
     type: prometheus
-    url: http://prometheus:9090
-  - name: Loki
-    type: loki
-    url: http://loki:3100
+    access: proxy
+    url: http://victoria:8428
+    isDefault: true
+  - name: VictoriaLogs
+    type: victoriametrics-logs-datasource
+    access: proxy
+    url: http://victorialogs:9428

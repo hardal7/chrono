@@ -15,7 +15,7 @@ Run the volumes script in `scripts` to create the volumes in the host machine:
 
     ./scripts/volumes.sh
 
-Then run the backend service using Docker Compose, use the following command (run with root privileges):
+Then run the backend service using Docker Compose, use the following command:
 
     make dev-up
 

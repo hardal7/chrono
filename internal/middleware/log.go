@@ -38,7 +38,6 @@ func (w *statusWriter) WriteHeader(status int) {
 	w.status = status
 }
 
-// TODO: Replace prometheus with VictoriaMetrics
 var (
 	httpRequestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{

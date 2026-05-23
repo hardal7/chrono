@@ -32,3 +32,9 @@ test-down:
 test-up: test-down
 	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up
 	# --exit-code-from api
+
+prod-down:
+	$(DOCKER) --env-file .env -f deployments/compose-prod.yml down
+
+prod-up: prod-down
+	$(DOCKER) --env-file .env -f deployments/compose-prod.yml up

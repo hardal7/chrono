@@ -1,0 +1,16 @@
+sources:
+  docker_logs:
+    type: docker_logs
+    exclude_containers: ["victorialogs", "vector"]
+sinks:
+  vlogs:
+    type: "http"
+    inputs: ["docker_logs"]
+    uri: http://victorialogs:9428/insert/jsonline?_stream_fields=host,container_name&_msg_field=message&_time_field=timestamp
+    compression: "gzip"
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    healthcheck:
+      enabled: false

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hardal7/chrono/internal/domains/topic_event"
+	"github.com/hardal7/chrono/internal/domains/topicevent"
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
@@ -27,6 +27,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 	}
 	user, err := Repo.FindByUsername(r.Context(), rr.Username)
 	if user.ID != notRegistered {
+		// TODO: Move to generic error
 		ErrAlreadyRegistered.Handle(w, err)
 		return
 		// TODO: Check if this works as well

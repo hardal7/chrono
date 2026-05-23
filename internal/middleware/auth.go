@@ -12,13 +12,14 @@ import (
 
 type Key string
 
+const AuthHeader string = "Authorization"
 const UserID Key = "userID"
 
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Authenticating user")
 
-		tokenCookie, err := r.Cookie("Authorization")
+		tokenCookie, err := r.Cookie(AuthHeader)
 		if err == http.ErrNoCookie {
 			ErrNoToken.Handle(w, err)
 			return
