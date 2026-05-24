@@ -12,10 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	bcryptCost    int = 10
-	notRegistered int = 0
-)
+const bcryptCost int = 10
 
 func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 	logger.Info("Registering user with username: " + rr.Username)
@@ -26,11 +23,9 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		return
 	}
 	user, err := Repo.FindByUsername(r.Context(), rr.Username)
-	if user.ID != notRegistered {
-		// TODO: Move to generic error
-		ErrAlreadyRegistered.Handle(w, err)
+	if user.ID != 0 {
+		e.ErrAlreadyExists.Handle(w, err, table)
 		return
-		// TODO: Check if this works as well
 	} else if err != pgx.ErrNoRows {
 		e.ErrCheckIfDuplicate.Handle(w, err, table)
 		return
@@ -47,7 +42,6 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 			return
 		} else {
 			logger.Info("Registered user: " + rr.Username)
-			// TODO: Handle this error
 			user, _ := Repo.FindByUsername(r.Context(), rr.Username)
 			err := topicevent.Initialize(user.ID, r.Context())
 			if err != nil {

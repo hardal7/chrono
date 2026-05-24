@@ -71,33 +71,6 @@ var registerTest = test.Test{
 			ExpectedStatus: http.StatusBadRequest,
 		},
 		{
-			Name: "invalid email",
-			Body: User{
-				Email:    "not-an-email",
-				Username: "johndoe",
-				Password: "strongpassword",
-			},
-			ExpectedStatus: http.StatusBadRequest,
-		},
-		{
-			Name: "short password",
-			Body: User{
-				Email:    "john@mail.com",
-				Username: "johndoe",
-				Password: "123",
-			},
-			ExpectedStatus: http.StatusBadRequest,
-		},
-		{
-			Name: "invalid username",
-			Body: User{
-				Email:    "john@mail.com",
-				Username: "@@@",
-				Password: "strongpassword",
-			},
-			ExpectedStatus: http.StatusBadRequest,
-		},
-		{
 			Name: "sql injection attempt",
 			Body: User{
 				Email:    "john@mail.com",

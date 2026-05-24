@@ -22,9 +22,10 @@ func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 	var user User
 	if lr.Username != "" {
 		user, err = Repo.FindByUsername(r.Context(), lr.Username)
-	} else {
+	} else if lr.Email != "" {
 		user, err = Repo.FindByEmail(r.Context(), lr.Email)
 	}
+
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 	}

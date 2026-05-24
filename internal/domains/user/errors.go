@@ -23,8 +23,3 @@ var ErrHashPassword = e.Error{
 	InternalInfo: "Failed to hash password",
 	Code:         http.StatusInternalServerError,
 }
-var ErrAlreadyRegistered = e.Error{
-	InternalInfo: "User is already registered",
-	Code:         http.StatusInternalServerError,
-	ExternalInfo: "User exists",
-}

@@ -13,6 +13,7 @@ import (
 
 func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) {
 	user, err := Repo.FindByID(r.Context(), r.Context().Value(middleware.UserID).(int))
+	// TODO: See if error is server side or no rows returned
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, "user")
 		return

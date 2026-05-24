@@ -12,20 +12,30 @@ type Error struct {
 	ExternalInfo string
 }
 
+func (e Error) Error() string {
+	return e.ExternalInfo
+}
+
 type ErrorWithResource struct {
 	Error    Error
 	Resource string
 }
 
-func (e Error) Handle(w http.ResponseWriter, debug error) {
+func (e Error) Handle(w http.ResponseWriter, debug any) {
 	if e.Code == http.StatusInternalServerError {
 		e.ExternalInfo = "Internal Server Error"
 		logger.Warn(e.InternalInfo)
 	} else {
 		logger.Error(e.InternalInfo)
 	}
+
 	if debug != nil {
-		logger.Debug(debug.Error())
+		switch v := debug.(type) {
+		case error:
+			logger.Debug(v.Error())
+		case string:
+			logger.Debug(v)
+		}
 	}
 	http.Error(w, e.ExternalInfo, e.Code)
 }

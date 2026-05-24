@@ -6,13 +6,20 @@ var ErrNotFound = ErrorWithResource{
 	Error: Error{
 		InternalInfo: "Failed to find resource: ",
 		Code:         http.StatusNotFound,
-		ExternalInfo: "User not found",
+		ExternalInfo: "Not found",
 	},
 }
 var ErrCheckIfDuplicate = ErrorWithResource{
 	Error: Error{
 		InternalInfo: "Failed to check if resource is duplicate: ",
 		Code:         http.StatusInternalServerError,
+	},
+}
+var ErrAlreadyExists = ErrorWithResource{
+	Error: Error{
+		InternalInfo: "Resource already exists: ",
+		Code:         http.StatusConflict,
+		ExternalInfo: "Already exists",
 	},
 }
 var ErrCreate = ErrorWithResource{

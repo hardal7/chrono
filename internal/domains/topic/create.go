@@ -13,10 +13,8 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	logger.Info("Creating topic with name: " + cr.Name)
 
 	topic, err := Repo.FindByName(r.Context(), cr.Name)
-	if topic.ID != '0' {
-		// TODO: Use new error type
-		logger.Info("Topic with name " + cr.Name + " already exists")
-		http.Error(w, "Topic already exists", http.StatusBadRequest)
+	if topic.ID != 0 {
+		e.ErrAlreadyExists.Handle(w, err, table)
 		return
 	} else if err != nil {
 		e.ErrCheckIfDuplicate.Handle(w, err, table)
