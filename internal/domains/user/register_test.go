@@ -26,8 +26,8 @@ var registerTest = test.Test{
 		{
 			Name: "successful register",
 			Body: User{
-				Email:    "john@mail.com",
-				Username: "johndoe",
+				Email:    "john2@mail.com",
+				Username: "john2doe",
 				Password: "strongpassword",
 			},
 			ExpectedStatus: http.StatusCreated,

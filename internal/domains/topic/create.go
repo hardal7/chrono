@@ -7,17 +7,15 @@ import (
 	"github.com/hardal7/chrono/internal/middleware"
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 )
 
 func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	logger.Info("Creating topic with name: " + cr.Name)
 
-	topic, err := Repo.FindByName(r.Context(), cr.Name)
-	if topic.ID != 0 {
+	_, err := Repo.FindByName(r.Context(), cr.Name)
+	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
-		return
-	} else if err != nil {
-		e.ErrCheckIfDuplicate.Handle(w, err, table)
 		return
 	} else {
 		topic := Topic{

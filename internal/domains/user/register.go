@@ -23,11 +23,8 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		return
 	}
 	user, err := Repo.FindByUsername(r.Context(), rr.Username)
-	if user.ID != 0 {
+	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
-		return
-	} else if err != pgx.ErrNoRows {
-		e.ErrCheckIfDuplicate.Handle(w, err, table)
 		return
 	} else {
 		user = User{
@@ -45,7 +42,6 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 			user, _ := Repo.FindByUsername(r.Context(), rr.Username)
 			err := topicevent.Initialize(user.ID, r.Context())
 			if err != nil {
-				// TODO
 				logger.Info("Failed to initialize topic events for user: " + rr.Username)
 				logger.Debug(err.Error())
 				logger.Warn("Continuing with errors")

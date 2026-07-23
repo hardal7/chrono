@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/hardal7/chrono/internal/middleware"
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -25,6 +26,7 @@ func Create[T any](f func(http.ResponseWriter, *http.Request, T)) http.HandlerFu
 			e.ErrBadRequest.Handle(w, nil)
 			return
 		} else {
+			middleware.CheckFields(w, request)
 			f(w, r, request)
 		}
 	})

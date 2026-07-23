@@ -27,7 +27,7 @@ services:
     volumes:
       - ../migrations:/srv/migrations
       - ../scripts/migrate.sh:/srv/migrate.sh
-    entrypoint: ["/srv/migrate.sh"]
+    entrypoint: ["/srv/migrate.sh", "test"]
 
   api:
     build:

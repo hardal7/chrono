@@ -21,7 +21,6 @@ func Serve() {
 
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(middleware.LogRequest)
-	mainRouter.Use(middleware.CheckFields)
 
 	// Public Routes
 	mainRouter.Group(func(r chi.Router) {

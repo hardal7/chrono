@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS topics (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+INSERT INTO topics (id, name, created_by_userid) VALUES (-1, 'General', -1);
 
 CREATE TABLE IF NOT EXISTS topic_events (
     id SERIAL PRIMARY KEY,

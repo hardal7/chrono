@@ -70,7 +70,7 @@ var loginTest = test.Test{
 				Username: "johndoe",
 				Password: "",
 			},
-			ExpectedStatus: http.StatusUnauthorized,
+			ExpectedStatus: http.StatusBadRequest,
 		},
 	},
 }

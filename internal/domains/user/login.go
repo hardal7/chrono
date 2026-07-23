@@ -28,6 +28,7 @@ func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
+		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(lr.Password))

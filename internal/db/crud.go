@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// TODO: Reformat this code
 func Get[T any](ctx context.Context, table, field, record string) (T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1 LIMIT 1;", table, field)
 	logger.Debug("Running query: " + query)

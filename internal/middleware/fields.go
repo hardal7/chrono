@@ -8,19 +8,15 @@ import (
 	e "github.com/hardal7/chrono/internal/util/errors"
 )
 
-func CheckFields(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		emptyFields := parseEmptyFields(r)
-		if len(emptyFields) != 0 {
-			msg := "Fields " + strings.Join(emptyFields, ", ") + " cannot be empty"
-			err := e.ErrBadRequest
-			err.ExternalInfo = msg
-			err.InternalInfo = err.ExternalInfo
-			err.Handle(w, nil)
-		} else {
-			next.ServeHTTP(w, r)
-		}
-	})
+func CheckFields(w http.ResponseWriter, T any) {
+	emptyFields := parseEmptyFields(T)
+	if len(emptyFields) != 0 {
+		msg := "Fields " + strings.Join(emptyFields, ", ") + " cannot be empty"
+		err := e.ErrBadRequest
+		err.ExternalInfo = msg
+		err.InternalInfo = err.ExternalInfo
+		err.Handle(w, nil)
+	}
 }
 
 func parseEmptyFields(v any) []string {
