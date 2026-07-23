@@ -14,31 +14,31 @@ import (
 
 // TODO: Reformat this code
 func Get[T any](ctx context.Context, table, field, record string) (T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1 LIMIT 1;", table, field)
 	logger.Debug("Running query: " + query)
-	row, _ := DB.Query(ctx, query)
+	row, _ := DB.Query(ctx, query, record)
 	model, err := pgx.CollectOneRow(row, pgx.RowToStructByName[T])
 	return model, err
 }
 
 func GetMultiple[T any](ctx context.Context, table, field, record string) ([]T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = '%s' LIMIT 1;", table, field, record)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1 LIMIT 1;", table, field)
 	logger.Debug("Running query: " + query)
-	row, _ := DB.Query(ctx, query)
+	row, _ := DB.Query(ctx, query, record)
 	models, err := pgx.CollectRows(row, pgx.RowToStructByName[T])
 	return models, err
 }
 
 func Delete(ctx context.Context, table string, v any) error {
-	query := fmt.Sprintf("DELETE * FROM %s WHERE id = '%s' LIMIT 1;", table, parseModel(v).ID)
+	query := fmt.Sprintf("DELETE * FROM %s WHERE id = $1 LIMIT 1;", table)
 	logger.Debug("Running query: " + query)
-	_, err := DB.Exec(ctx, query)
+	_, err := DB.Exec(ctx, query, parseModel(v).ID)
 
 	return err
 }
 
 func Create(ctx context.Context, table string, v any) error {
-	query := fmt.Sprintf("INSERT INTO %s %s;", table, buildCreateQuery(parseModel(v)))
+	query := fmt.Sprintf("INSERT INTO %s %s;", table, buildCreateString(parseModel(v)))
 	logger.Debug("Running query: " + query)
 	_, err := DB.Exec(ctx, query, parseModel(v).FieldValues...)
 
@@ -82,7 +82,7 @@ func parseModel(v any) sqlObject {
 	return object
 }
 
-func buildCreateQuery(object sqlObject) string {
+func buildCreateString(object sqlObject) string {
 	var valueString strings.Builder
 	for i := range object.NumberOfFields {
 		if i == 0 {
