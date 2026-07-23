@@ -73,7 +73,7 @@ var registerTest = test.Test{
 		{
 			Name: "sql injection attempt",
 			Body: User{
-				Email:    "john@mail.com",
+				Email:    "sqli@mail.com",
 				Username: "'; DROP TABLE users;--",
 				Password: "strongpassword",
 			},

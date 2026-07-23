@@ -4,7 +4,7 @@ import "net/http"
 
 var ErrNotFound = ErrorWithResource{
 	Error: Error{
-		InternalInfo: "Failed to find resource: ",
+		InternalInfo: "Failed to find resource in table: ",
 		Code:         http.StatusNotFound,
 		ExternalInfo: "Not found",
 	},

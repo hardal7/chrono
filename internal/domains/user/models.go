@@ -18,8 +18,8 @@ type RegisterRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	Email    string `json:"email" opt:"true"`
+	Username string `json:"username" opt:"true"`
 	Password string `json:"password"`
 }
 

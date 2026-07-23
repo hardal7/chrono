@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -23,24 +22,10 @@ func Create[T any](f func(http.ResponseWriter, *http.Request, T)) http.HandlerFu
 		r.Body = http.MaxBytesReader(w, r.Body, maxBytes)
 		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
-			ErrBadRequest.Handle(w, nil)
+			e.ErrBadRequest.Handle(w, nil)
 			return
 		} else {
-			emptyFields := parseEmptyFields(request)
-			if len(emptyFields) != 0 {
-				msg := "Fields " + strings.Join(emptyFields, ", ") + " cannot be empty"
-				err := ErrBadRequest
-				err.ExternalInfo = msg
-				err.InternalInfo = err.ExternalInfo
-				err.Handle(w, nil)
-			}
 			f(w, r, request)
 		}
 	})
-}
-
-var ErrBadRequest = e.Error{
-	InternalInfo: "Bad Request",
-	Code:         http.StatusBadRequest,
-	ExternalInfo: "Bad Request",
 }

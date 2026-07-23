@@ -37,8 +37,6 @@ services:
     container_name: chrono-api
     expose:
       - "${APP_PORT}"
-    ports:
-      - "9010:9010"
     depends_on:
       - migrate
     volumes:

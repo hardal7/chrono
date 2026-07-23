@@ -21,6 +21,7 @@ func Serve() {
 
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(middleware.LogRequest)
+	mainRouter.Use(middleware.CheckFields)
 
 	// Public Routes
 	mainRouter.Group(func(r chi.Router) {
@@ -29,7 +30,7 @@ func Serve() {
 		r.Get("/health", health.Ping)
 	})
 
-	// Protected Routes
+	// Authenticated Routes
 	mainRouter.Group(func(r chi.Router) {
 		r.Use(middleware.Authenticate)
 		r.Route("/user", user.Routes)

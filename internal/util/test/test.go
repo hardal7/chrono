@@ -36,6 +36,7 @@ func (test Test) Run(t *testing.T) {
 		if err != nil {
 			logger.Fatal("Failed to create test request", err)
 		}
+		logger.Info("=== RUNNING TEST: " + c.Name + " ===")
 		test.Handler(res, req)
 		assert.Equal(t, c.ExpectedStatus, res.Code, "Test case %q failed", c.Name)
 	}

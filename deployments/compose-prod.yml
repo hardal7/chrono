@@ -37,8 +37,7 @@ services:
     container_name: chrono-api
     expose:
       - "${APP_PORT}"
-    ports:
-      - "9010:9010"
+      - "${ADMIN_PORT}"
     depends_on:
       - migrate
     volumes:
@@ -73,8 +72,8 @@ services:
   victoria:
     image: victoriametrics/victoria-metrics
     container_name: victoria
-    ports:
-      - "8428:8428"
+    expose:
+      - "8428"
     volumes:
       - /srv/victoria:/storage
     command:
@@ -92,8 +91,10 @@ services:
     depends_on:
       victoria:
         condition: service_healthy
-    ports:
-      - "8429:8429"
+    environment:
+      ADMIN_PORT: ${ADMIN_PORT}
+    expose:
+      - "8429"
     volumes:
       - ../configs/vmagent.yml:/etc/vmagent/vmagent.yml
       - /srv/vmagent:/vmagentdata

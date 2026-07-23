@@ -12,7 +12,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Got ping")
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]string{
-		"message": "pong",
+		"message": "service is up",
 	}); err != nil {
 		e.ErrMarshalJSON.Handle(w, err)
 	}

@@ -36,9 +36,8 @@ func Load() {
 	}
 
 	App = Config{
-		Port: os.Getenv("APP_PORT"),
-		// TODO: disgusting, but Prometheus (also vmagent) does not allow env variables in its config.
-		AdminPort:   "9010",
+		Port:        os.Getenv("APP_PORT"),
+		AdminPort:   os.Getenv("ADMIN_PORT"),
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_HOST:     os.Getenv("DB_HOST"),
 		DB_USER:     os.Getenv("DB_USER"),
