@@ -7,5 +7,6 @@ import (
 
 func Routes(r chi.Router) {
 	r.Post("/account", handler.Create(EditAccount))
+	r.Post("/avatar", UploadAvatar)
 	r.Get("/account", GetAccount)
 }

@@ -4,3 +4,4 @@
 .gitlab-ci-local
 bin
 certs
+uploads

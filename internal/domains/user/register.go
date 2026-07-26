@@ -22,12 +22,12 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		ErrHashPassword.Handle(w, err)
 		return
 	}
-	user, err := Repo.FindByUsername(r.Context(), rr.Username)
+	_, err = Repo.FindByUsername(r.Context(), rr.Username)
 	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
 		return
 	} else {
-		user = User{
+		user := User{
 			Email:     rr.Email,
 			Username:  rr.Username,
 			Password:  string(passwordHash),
