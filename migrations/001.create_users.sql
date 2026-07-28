@@ -6,5 +6,3 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
-
-INSERT INTO users (id, email, username, password) VALUES (-1, '', '', '');

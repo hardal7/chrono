@@ -19,8 +19,8 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 		topicEvent := TopicEvent{
 			UserID:      r.Context().Value(middleware.UserID).(int),
 			TopicID:     topic.ID,
-			TimeTracked: int(tr.Time.Unix()),
-			Date:        int(tr.Date.Unix()),
+			TimeTracked: tr.TimeSeconds,
+			Date:        tr.Date,
 		}
 		if err := Repo.Create(r.Context(), topicEvent); err != nil {
 			e.ErrCreate.Handle(w, err, table)
