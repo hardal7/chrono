@@ -11,7 +11,7 @@ import (
 
 func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
 	logger.Info("Tracking time", "topicName", tr.Topic)
-	topic, err := topic.Repo.FindByName(r.Context(), tr.Topic)
+	topic, err := topic.Repo.FindUserTopic(r.Context(), r.Context().Value(middleware.UserID).(int), tr.Topic)
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 		return

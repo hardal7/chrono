@@ -18,6 +18,7 @@ func Create[T any](f func(http.ResponseWriter, *http.Request, T)) http.HandlerFu
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			e.ErrBadRequest.Handle(w, nil)
+			logger.Debug(err.Error())
 			return
 		}
 		logger.Trace(string(body))
