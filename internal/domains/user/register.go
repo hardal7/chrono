@@ -14,7 +14,7 @@ import (
 const bcryptCost int = 10
 
 func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
-	logger.Info("Registering user with username: " + rr.Username)
+	logger.Info("Registering user", "username", rr.Username)
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rr.Password), bcryptCost)
 	if err != nil {

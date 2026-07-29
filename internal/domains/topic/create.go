@@ -11,7 +11,7 @@ import (
 )
 
 func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
-	logger.Info("Creating topic with name: " + cr.Name)
+	logger.Info("Creating topic", "topicName", cr.Name)
 
 	_, err := Repo.FindByName(r.Context(), cr.Name)
 	if err != pgx.ErrNoRows {

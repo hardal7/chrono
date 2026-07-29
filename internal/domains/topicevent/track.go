@@ -10,7 +10,7 @@ import (
 )
 
 func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
-	logger.Info("Tracking time for topic with name: " + tr.Topic)
+	logger.Info("Tracking time", "topicName", tr.Topic)
 	topic, err := topic.Repo.FindByName(r.Context(), tr.Topic)
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)

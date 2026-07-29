@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	logger.Init()
 	config.Load()
+	logger.Init()
 }
 
 func main() {

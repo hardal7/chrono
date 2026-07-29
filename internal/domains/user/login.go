@@ -16,7 +16,7 @@ import (
 const jwtExpirationDays int = 30
 
 func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
-	logger.Info("Logging user with username: " + lr.Username)
+	logger.Info("Logging user", "username", lr.Username)
 
 	var err error
 	var user User

@@ -7,7 +7,7 @@ import (
 )
 
 func Bootstrap() {
-	logger.Init()
 	config.Load()
+	logger.Init()
 	db.CreateConnection()
 }

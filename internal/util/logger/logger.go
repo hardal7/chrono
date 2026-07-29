@@ -1,42 +1,73 @@
 package logger
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/lmittmann/tint"
 )
 
 func Init() {
 	w := os.Stderr
-
-	slog.SetDefault(slog.New(
+	logger := (slog.New(
 		tint.NewHandler(w, &tint.Options{
-			Level:      slog.LevelDebug,
+			Level: getLevel(config.App.LogLevel),
+			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.LevelKey && len(groups) == 0 {
+					level, ok := a.Value.Any().(slog.Level)
+					if ok && level <= LevelTrace {
+						return tint.Attr(1, slog.String(a.Key, "TRC"))
+					}
+				}
+				return a
+			},
 			TimeFormat: time.Kitchen,
 		}),
 	))
+	slog.SetDefault(logger)
 }
 
-func Debug(msg string) {
-	slog.Debug(msg)
+const LevelTrace = slog.Level(-8)
+
+func getLevel(level string) slog.Level {
+	switch level {
+	case "TRACE":
+		return LevelTrace
+	case "DEBUG":
+		return slog.LevelDebug
+	case "INFO":
+		return slog.LevelInfo
+	case "WARN":
+		return slog.LevelWarn
+	}
+	return slog.LevelDebug
 }
 
-func Info(msg string) {
-	slog.Info(msg)
+func Trace(msg string, args ...any) {
+	slog.Log(context.Background(), LevelTrace, msg, args...)
 }
 
-func Warn(msg string) {
-	slog.Warn(msg)
+func Debug(msg string, args ...any) {
+	slog.Debug(msg, args...)
 }
 
-func Error(msg string) {
+func Info(msg string, args ...any) {
+	slog.Info(msg, args...)
+}
+
+func Warn(msg string, args ...any) {
+	slog.Warn(msg, args...)
+}
+
+func Error(msg string, args ...any) {
+	slog.Error(msg, args...)
+}
+
+func Fatal(msg string, err error) {
 	slog.Error(msg)
-}
-
-func Fatal(diagnostic string, err error) {
-	slog.Error(diagnostic)
 	slog.Debug(err.Error())
 	os.Exit(1)
 }

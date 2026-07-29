@@ -15,7 +15,7 @@ func Edit(w http.ResponseWriter, r *http.Request, er EditRequest) {
 		e.ErrNotFound.Handle(w, err, table)
 		return
 	} else {
-		logger.Info("Editing topic with name: " + topic.Name)
+		logger.Info("Editing topic", "topicName", topic.Name)
 		if er.DeleteTopic {
 			logger.Info("Deleting topic with name: " + topic.Name)
 			err := Repo.Delete(r.Context(), topic)

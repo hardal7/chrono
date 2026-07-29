@@ -19,9 +19,9 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 		return
 	} else {
 		user.UpdatedAt = time.Now()
-		logger.Info("Editing account with username: " + user.Username)
+		logger.Info("Editing account", "username", user.Username)
 		if er.DeleteAccount {
-			logger.Info("Deleting account with username: " + user.Username)
+			logger.Info("Deleting account", "username", user.Username)
 			err := Repo.Delete(r.Context(), user)
 			if err != nil {
 				e.ErrDelete.Handle(w, err, table)
@@ -33,7 +33,7 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 		} else {
 			if er.NewUsername != "" {
 				user.Username = er.NewUsername
-				logger.Info("Changed username to " + er.NewUsername)
+				logger.Info("Changed username", "newUsername", er.NewUsername)
 			}
 			if er.NewPassword != "" {
 				logger.Info("Changing account password")
