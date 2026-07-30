@@ -5,6 +5,7 @@ import "time"
 type Topic struct {
 	ID        int       `db:"id"`
 	Name      string    `db:"name"`
+	TotalTime int       `db:"total_time_tracked_seconds"`
 	CreatedBy int       `db:"created_by_userid"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`

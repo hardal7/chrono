@@ -6,7 +6,7 @@ type TopicEvent struct {
 	ID          int       `db:"id"`
 	UserID      int       `db:"user_id"`
 	TopicID     int       `db:"topic_id"`
-	TimeTracked int       `db:"time_tracked"`
+	TimeTracked int       `db:"time_tracked_seconds"`
 	Date        time.Time `db:"date"`
 }
 

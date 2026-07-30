@@ -11,6 +11,7 @@ import (
 )
 
 type Repository interface {
+	TrackTime(ctx context.Context, time int, topicID string) error
 	FindUserTopic(ctx context.Context, userid int, topicName string) (Topic, error)
 	FindByName(ctx context.Context, name string) (Topic, error)
 	FindByID(ctx context.Context, id int) (Topic, error)
@@ -23,6 +24,13 @@ type repository struct{}
 var Repo Repository = repository{}
 
 const table string = "topics"
+
+func (r repository) TrackTime(ctx context.Context, time int, topicID string) error {
+	query := fmt.Sprintf("UPDATE %s SET %s = %s + $1 WHERE id = $2;", table, "total_time_tracked_seconds", "total_time_tracked_seconds")
+	logger.Debug(">", "query", query)
+	_, err := db.DB.Exec(ctx, query, time, topicID)
+	return err
+}
 
 func (r repository) FindUserTopic(ctx context.Context, userid int, topicName string) (Topic, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1 AND %s = $2 LIMIT 1;", table, "created_by_userid", "name")

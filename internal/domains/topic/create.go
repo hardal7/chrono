@@ -20,6 +20,7 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	} else {
 		topic := Topic{
 			Name:      cr.Name,
+			TotalTime: 0,
 			CreatedBy: r.Context().Value(middleware.UserID).(int),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),

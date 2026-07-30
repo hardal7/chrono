@@ -22,8 +22,8 @@ func GetEvents(w http.ResponseWriter, r *http.Request, te TopicEventRequest) {
 		for i := range topicEvents {
 			response.Dates[i] = topicEvents[i].Date
 			response.TimesTracked[i] = topicEvents[i].TimeTracked
-			topic, _ := topic.Repo.FindByID(r.Context(), topicEvents[i].TopicID)
-			response.Topics[i] = topic.Name
+			t, _ := topic.Repo.FindByID(r.Context(), topicEvents[i].TopicID)
+			response.Topics[i] = t.Name
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(response)
