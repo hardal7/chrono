@@ -10,7 +10,7 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func Track(w http.ResponseWriter, r *http.Request, tr TrackTopicRequest) {
+func Track(w http.ResponseWriter, r *http.Request, tr TrackRequest) {
 	logger.Info("Tracking time", "topic", tr.Topic)
 	t, err := topic.Repo.FindUserTopic(r.Context(), r.Context().Value(middleware.UserID).(int), tr.Topic)
 	if err != nil {

@@ -13,18 +13,18 @@ type Session struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-type CreateSessionRequest struct {
+type CreateRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	Expiry   int    `json:"expiry"`
 }
 
-type JoinSessionRequest struct {
+type JoinRequest struct {
 	SessionID string `json:"session_id"`
 	Password  string `json:"password"`
 }
 
-type EditSessionRequest struct {
+type EditRequest struct {
 	SessionID     int      `json:"id"`
 	NewName       string   `json:"name"`
 	NewPassword   string   `json:"password"`

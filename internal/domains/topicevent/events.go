@@ -10,7 +10,8 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func GetEvents(w http.ResponseWriter, r *http.Request, te TopicEventRequest) {
+func GetEvents(w http.ResponseWriter, r *http.Request, gr GetEventsRequest) {
+	// TODO: Don't return all events but only specified from the request "gr"
 	logger.Info("Getting topic events")
 	userID := r.Context().Value(middleware.UserID).(int)
 	topicEvents, err := Repo.GetAll(r.Context(), userID)
@@ -18,7 +19,7 @@ func GetEvents(w http.ResponseWriter, r *http.Request, te TopicEventRequest) {
 		e.ErrNotFound.Handle(w, err, table)
 		return
 	} else {
-		response := TopicEventResponse{}
+		response := GetEventsResponse{}
 		for i := range topicEvents {
 			response.Dates[i] = topicEvents[i].Date
 			response.TimesTracked[i] = topicEvents[i].TimeTracked

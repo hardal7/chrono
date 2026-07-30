@@ -21,3 +21,11 @@ type EditRequest struct {
 	NewName     string `json:"new_name"`
 	DeleteTopic bool   `json:"delete"`
 }
+
+type GetRequest struct {
+	Name string `json:"name"`
+}
+
+type GetResponse struct {
+	TotalTime int `json:"total_time_tracked_seconds"`
+}

@@ -13,7 +13,7 @@ import (
 func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	logger.Info("Creating topic", "topicName", cr.Name)
 
-	_, err := Repo.FindByName(r.Context(), cr.Name)
+	_, err := Repo.FindUserTopic(r.Context(), r.Context().Value(middleware.UserID).(int), cr.Name)
 	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
 		return

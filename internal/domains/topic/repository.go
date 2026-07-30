@@ -13,7 +13,7 @@ import (
 type Repository interface {
 	TrackTime(ctx context.Context, time int, topicID string) error
 	FindUserTopic(ctx context.Context, userid int, topicName string) (Topic, error)
-	FindByName(ctx context.Context, name string) (Topic, error)
+	// FindByName(ctx context.Context, name string) (Topic, error)
 	FindByID(ctx context.Context, id int) (Topic, error)
 	Create(ctx context.Context, topic Topic) error
 	Update(ctx context.Context, topic Topic) error
@@ -40,9 +40,9 @@ func (r repository) FindUserTopic(ctx context.Context, userid int, topicName str
 	return topic, err
 }
 
-func (r repository) FindByName(ctx context.Context, name string) (Topic, error) {
-	return db.Get[Topic](ctx, table, "name", name)
-}
+// func (r repository) FindByName(ctx context.Context, name string) (Topic, error) {
+// return db.Get[Topic](ctx, table, "name", name)
+// }
 func (r repository) FindByID(ctx context.Context, id int) (Topic, error) {
 	return db.Get[Topic](ctx, table, "id", strconv.Itoa(id))
 }
