@@ -39,6 +39,8 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 		} else {
 			logger.Info("Registered user: " + rr.Username)
 			w.WriteHeader(http.StatusCreated)
+			user, _ = Repo.FindByUsername(r.Context(), user.Username)
+			InitTopic(user)
 		}
 	}
 }

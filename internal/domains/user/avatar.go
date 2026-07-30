@@ -37,12 +37,20 @@ func UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createFile(fileBytes, strconv.Itoa(r.Context().Value(middleware.UserID).(int)))
+	err = createFile(fileBytes, strconv.Itoa(r.Context().Value(middleware.UserID).(int)))
+	if err != nil {
+		e.ErrCreate.Handle(w, err, "avatar file")
+	} else {
+		logger.Info("Uploaded avatar")
+	}
 }
 
 func createFile(fileBytes []byte, filename string) error {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		os.Mkdir(directory, dirPerm)
+		err = os.Mkdir(directory, dirPerm)
+		if err != nil {
+			return err
+		}
 	}
 	err := os.WriteFile(filepath.Join(directory, filename), fileBytes, filePerm)
 	if err != nil {

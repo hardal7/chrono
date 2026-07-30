@@ -7,7 +7,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - /srv/db:/var/lib/postgresql/data:rw
       - ../configs/postgresql.conf:/etc/postgresql.conf
     command: "-c config_file=/etc/postgresql.conf"
     healthcheck:
