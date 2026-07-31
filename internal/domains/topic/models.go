@@ -18,8 +18,8 @@ type CreateRequest struct {
 
 type EditRequest struct {
 	Name        string `json:"name"`
-	NewName     string `json:"new_name"`
-	DeleteTopic bool   `json:"delete"`
+	NewName     string `json:"new_name" opt:"true"`
+	DeleteTopic bool   `json:"delete" opt:"true"`
 }
 
 type GetRequest struct {

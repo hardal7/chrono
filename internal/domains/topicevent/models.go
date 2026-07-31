@@ -16,13 +16,17 @@ type TrackRequest struct {
 	Date        time.Time `json:"date"`
 }
 
-type GetEventsRequest struct {
-	Topic string `json:"topic"`
-	Date  []int  `json:"date"`
+type GetRequest struct {
+	Topic string `json:"topic" opt:"true"`
+	Date  []int  `json:"date" opt:"true"`
 }
 
-type GetEventsResponse struct {
+type GetResponse struct {
 	Topics       []string    `json:"topics"`
 	TimesTracked []int       `json:"times_tracked"`
 	Dates        []time.Time `json:"dates"`
+}
+
+type GetTodayResponse struct {
+	TotalTime int `json:"total_time"`
 }

@@ -33,5 +33,4 @@ CREATE TABLE topic_events (
     topic_id INT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
     time_tracked_seconds INT NOT NULL,
     date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (user_id, topic_id)
 );

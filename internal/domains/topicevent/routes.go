@@ -7,5 +7,6 @@ import (
 
 func Routes(r chi.Router) {
 	r.Post("/track", handler.Create(Track))
-	r.Get("/events", handler.Create(GetEvents))
+	r.Get("/get", handler.Create(Get))
+	r.Get("/today", GetToday)
 }

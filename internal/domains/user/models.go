@@ -24,7 +24,7 @@ type LoginRequest struct {
 }
 
 type EditAccountRequest struct {
-	NewUsername   string `json:"username"`
-	NewPassword   string `json:"password"`
-	DeleteAccount bool   `json:"delete"`
+	NewUsername   string `json:"username" opt:"true"`
+	NewPassword   string `json:"password" opt:"true"`
+	DeleteAccount bool   `json:"delete" opt:"true"`
 }
