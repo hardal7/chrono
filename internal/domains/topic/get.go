@@ -16,14 +16,13 @@ func Get(w http.ResponseWriter, r *http.Request, gr GetRequest) {
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 		return
-	} else {
-		response := GetResponse{
-			TotalTime: t.TotalTime,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(response)
-		if err != nil {
-			e.ErrEncodeJSON.Handle(w, err)
-		}
+	}
+	response := GetResponse{
+		TotalTime: t.TotalTime,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		e.ErrEncodeJSON.Handle(w, err)
 	}
 }

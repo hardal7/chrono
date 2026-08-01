@@ -17,21 +17,20 @@ func Create(w http.ResponseWriter, r *http.Request, cr CreateRequest) {
 	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
 		return
-	} else {
-		topic := Topic{
-			Name:      cr.Name,
-			TotalTime: 0,
-			CreatedBy: r.Context().Value(middleware.UserID).(int),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
+	}
+	topic := Topic{
+		Name:      cr.Name,
+		TotalTime: 0,
+		CreatedBy: r.Context().Value(middleware.UserID).(int),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-		if err := Repo.Create(r.Context(), topic); err != nil {
-			e.ErrCreate.Handle(w, err, table)
-			return
-		} else {
-			logger.Info("Created topic: " + cr.Name)
-			w.WriteHeader(http.StatusCreated)
-		}
+	if err := Repo.Create(r.Context(), topic); err != nil {
+		e.ErrCreate.Handle(w, err, table)
+		return
+	} else {
+		logger.Info("Created topic: " + cr.Name)
+		w.WriteHeader(http.StatusCreated)
 	}
 }

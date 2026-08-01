@@ -25,23 +25,22 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 	if err != pgx.ErrNoRows {
 		e.ErrAlreadyExists.Handle(w, err, table)
 		return
+	}
+	user := User{
+		Email:     rr.Email,
+		Username:  rr.Username,
+		Password:  string(passwordHash),
+		TotalTime: 0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	if err := Repo.Create(r.Context(), user); err != nil {
+		e.ErrCreate.Handle(w, err, table)
+		return
 	} else {
-		user := User{
-			Email:     rr.Email,
-			Username:  rr.Username,
-			Password:  string(passwordHash),
-			TotalTime: 0,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		if err := Repo.Create(r.Context(), user); err != nil {
-			e.ErrCreate.Handle(w, err, table)
-			return
-		} else {
-			logger.Info("Registered user: " + rr.Username)
-			w.WriteHeader(http.StatusCreated)
-			user, _ = Repo.FindByUsername(r.Context(), user.Username)
-			InitTopic(user)
-		}
+		logger.Info("Registered user: " + rr.Username)
+		w.WriteHeader(http.StatusCreated)
+		user, _ = Repo.FindByUsername(r.Context(), user.Username)
+		InitTopic(user)
 	}
 }

@@ -40,3 +40,9 @@ type GetTopUsersRequest struct {
 	Cursor int `json:"cursor"`
 	Limit  int `json:"limit"`
 }
+
+type GetTopUsersResponse struct {
+	Usernames  []string `json:"usernames"`
+	TotalTimes []int    `json:"total_times"`
+	TodayTimes []int    `json:"today_times"`
+}

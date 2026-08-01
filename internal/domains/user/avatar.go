@@ -40,6 +40,7 @@ func UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	err = createFile(fileBytes, strconv.Itoa(r.Context().Value(middleware.UserID).(int)))
 	if err != nil {
 		e.ErrCreate.Handle(w, err, "avatar file")
+		return
 	} else {
 		logger.Info("Uploaded avatar")
 	}

@@ -33,6 +33,7 @@ func Paginate(next http.Handler) http.Handler {
 
 		if req.Limit > 20 || req.Limit < 0 {
 			e.ErrBadRequest.Handle(w, "Invalid limit range")
+			return
 		}
 
 		next.ServeHTTP(w, r)

@@ -16,42 +16,41 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, "user")
 		return
-	} else {
-		user.UpdatedAt = time.Now()
-		logger.Info("Editing account", "username", user.Username)
-		if er.DeleteAccount {
-			logger.Info("Deleting account", "username", user.Username)
-			err := Repo.Delete(r.Context(), user)
-			if err != nil {
-				e.ErrDelete.Handle(w, err, table)
-				return
-			} else {
-				logger.Info("Deleted account")
-				w.WriteHeader(http.StatusOK)
-			}
+	}
+	user.UpdatedAt = time.Now()
+	logger.Info("Editing account", "username", user.Username)
+	if er.DeleteAccount {
+		logger.Info("Deleting account", "username", user.Username)
+		err := Repo.Delete(r.Context(), user)
+		if err != nil {
+			e.ErrDelete.Handle(w, err, table)
+			return
 		} else {
-			if er.NewUsername != "" {
-				user.Username = er.NewUsername
-				logger.Info("Changed username", "newUsername", er.NewUsername)
-			}
-			if er.NewPassword != "" {
-				logger.Info("Changing account password")
-				passwordHash, err := bcrypt.GenerateFromPassword([]byte(er.NewPassword), bcryptCost)
-				if err != nil {
-					ErrHashPassword.Handle(w, err)
-					return
-				}
-				user.Password = string(passwordHash)
-			}
-			err := Repo.Update(r.Context(), user)
-			if err != nil {
-				e.ErrUpdate.Handle(w, err, table)
-				return
-			} else {
-				logger.Info("Changed account details")
-				w.WriteHeader(http.StatusOK)
-			}
+			logger.Info("Deleted account")
+			w.WriteHeader(http.StatusOK)
+			return
 		}
+	}
+	if er.NewUsername != "" {
+		user.Username = er.NewUsername
+		logger.Info("Changed username", "newUsername", er.NewUsername)
+	}
+	if er.NewPassword != "" {
+		logger.Info("Changing account password")
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(er.NewPassword), bcryptCost)
+		if err != nil {
+			ErrHashPassword.Handle(w, err)
+			return
+		}
+		user.Password = string(passwordHash)
+	}
+	err = Repo.Update(r.Context(), user)
+	if err != nil {
+		e.ErrUpdate.Handle(w, err, table)
+		return
+	} else {
+		logger.Info("Changed account details")
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

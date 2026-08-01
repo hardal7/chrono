@@ -18,18 +18,17 @@ func Get(w http.ResponseWriter, r *http.Request, gr GetRequest) {
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 		return
-	} else {
-		response := GetResponse{}
-		for i := range topicEvents {
-			response.Dates[i] = topicEvents[i].Date
-			response.TimesTracked[i] = topicEvents[i].TimeTracked
-			t, _ := topic.Repo.FindByID(r.Context(), topicEvents[i].TopicID)
-			response.Topics[i] = t.Name
-		}
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(response)
-		if err != nil {
-			e.ErrEncodeJSON.Handle(w, err)
-		}
+	}
+	response := GetResponse{}
+	for i, v := range topicEvents {
+		response.Dates[i] = v.Date
+		response.TimesTracked[i] = v.TimeTracked
+		t, _ := topic.Repo.FindByID(r.Context(), v.TopicID)
+		response.Topics[i] = t.Name
+	}
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		e.ErrEncodeJSON.Handle(w, err)
 	}
 }

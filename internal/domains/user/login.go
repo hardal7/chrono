@@ -48,18 +48,17 @@ func Login(w http.ResponseWriter, r *http.Request, lr LoginRequest) {
 	if err != nil {
 		ErrGenerateToken.Handle(w, err)
 		return
-	} else {
-		cookie := http.Cookie{
-			Name:     middleware.AuthHeader,
-			Value:    tokenString,
-			Path:     "/",
-			MaxAge:   3600 * 24 * jwtExpirationDays,
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteLaxMode,
-		}
-		logger.Info("Logged user and sent token")
-		http.SetCookie(w, &cookie)
-		w.WriteHeader(http.StatusOK)
 	}
+	cookie := http.Cookie{
+		Name:     middleware.AuthHeader,
+		Value:    tokenString,
+		Path:     "/",
+		MaxAge:   3600 * 24 * jwtExpirationDays,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	logger.Info("Logged user and sent token")
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
 }

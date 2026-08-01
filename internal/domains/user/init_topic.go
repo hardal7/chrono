@@ -21,7 +21,6 @@ func InitTopic(u User) {
 	if err := topic.Repo.Create(context.Background(), t); err != nil {
 		logger.Warn("Failed to initialize first topic", "username", u.Username)
 		return
-	} else {
-		logger.Info("Initialized first topic", "username", u.Username)
 	}
+	logger.Info("Initialized first topic", "username", u.Username)
 }

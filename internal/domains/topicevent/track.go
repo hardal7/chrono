@@ -17,27 +17,26 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackRequest) {
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 		return
+	}
+	topicEvent := TopicEvent{
+		UserID:      r.Context().Value(middleware.UserID).(int),
+		TopicID:     t.ID,
+		TimeTracked: tr.TimeSeconds,
+		Date:        tr.Date,
+	}
+	if err := topic.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(t.ID)); err != nil {
+		e.ErrCreate.Handle(w, err, table)
+		return
+	}
+	if err := user.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(r.Context().Value(middleware.UserID).(int))); err != nil {
+		e.ErrCreate.Handle(w, err, table)
+		return
+	}
+	if err := Repo.Create(r.Context(), topicEvent); err != nil {
+		e.ErrCreate.Handle(w, err, table)
+		return
 	} else {
-		topicEvent := TopicEvent{
-			UserID:      r.Context().Value(middleware.UserID).(int),
-			TopicID:     t.ID,
-			TimeTracked: tr.TimeSeconds,
-			Date:        tr.Date,
-		}
-		if err := topic.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(t.ID)); err != nil {
-			e.ErrCreate.Handle(w, err, table)
-			return
-		}
-		if err := user.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(r.Context().Value(middleware.UserID).(int))); err != nil {
-			e.ErrCreate.Handle(w, err, table)
-			return
-		}
-		if err := Repo.Create(r.Context(), topicEvent); err != nil {
-			e.ErrCreate.Handle(w, err, table)
-			return
-		} else {
-			logger.Info("Tracked time", "topic", tr.Topic)
-			w.WriteHeader(http.StatusCreated)
-		}
+		logger.Info("Tracked time", "topic", tr.Topic)
+		w.WriteHeader(http.StatusCreated)
 	}
 }
