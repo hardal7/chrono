@@ -56,21 +56,21 @@ func EditAccount(w http.ResponseWriter, r *http.Request, er EditAccountRequest) 
 }
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
-	user, err := Repo.FindByID(r.Context(), r.Context().Value(middleware.UserID).(int))
+	u, err := Repo.FindByID(r.Context(), r.Context().Value(middleware.UserID).(int))
 	if err != nil {
 		e.ErrNotFound.Handle(w, err, table)
 		return
 	}
-	response, err := json.Marshal(user)
+	body := GetAccountResponse{
+		Username:  u.Username,
+		Email:     u.Email,
+		CreatedAt: u.CreatedAt,
+	}
+
+	logger.Info("Sent account details")
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(body)
 	if err != nil {
-		e.ErrMarshalJSON.Handle(w, err)
-		return
-	} else {
-		logger.Info("Sent account details")
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(response)
-		if err != nil {
-			e.ErrEncodeJSON.Handle(w, err)
-		}
+		e.ErrEncodeJSON.Handle(w, err)
 	}
 }

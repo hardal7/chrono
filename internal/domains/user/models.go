@@ -4,10 +4,11 @@ import "time"
 
 type User struct {
 	ID        int       `db:"id"`
-	Email     string    `db:"email"      json:"email"`
-	Username  string    `db:"username"   json:"username"`
-	Password  string    `db:"password"   json:"password"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	Email     string    `db:"email"`
+	Username  string    `db:"username"`
+	Password  string    `db:"password"`
+	TotalTime int       `db:"total_time_tracked_seconds"`
+	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
@@ -27,4 +28,15 @@ type EditAccountRequest struct {
 	NewUsername   string `json:"username" opt:"true"`
 	NewPassword   string `json:"password" opt:"true"`
 	DeleteAccount bool   `json:"delete" opt:"true"`
+}
+
+type GetAccountResponse struct {
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type GetTopUsersRequest struct {
+	Cursor int `json:"cursor"`
+	Limit  int `json:"limit"`
 }

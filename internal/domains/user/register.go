@@ -30,6 +30,7 @@ func Register(w http.ResponseWriter, r *http.Request, rr RegisterRequest) {
 			Email:     rr.Email,
 			Username:  rr.Username,
 			Password:  string(passwordHash),
+			TotalTime: 0,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}

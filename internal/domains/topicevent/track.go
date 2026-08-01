@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hardal7/chrono/internal/domains/topic"
+	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -24,6 +25,10 @@ func Track(w http.ResponseWriter, r *http.Request, tr TrackRequest) {
 			Date:        tr.Date,
 		}
 		if err := topic.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(t.ID)); err != nil {
+			e.ErrCreate.Handle(w, err, table)
+			return
+		}
+		if err := user.Repo.TrackTime(r.Context(), tr.TimeSeconds, strconv.Itoa(r.Context().Value(middleware.UserID).(int))); err != nil {
 			e.ErrCreate.Handle(w, err, table)
 			return
 		}

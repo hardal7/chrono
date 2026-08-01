@@ -3,6 +3,7 @@ CREATE TABLE users (
     email VARCHAR(64) NOT NULL UNIQUE,
     username VARCHAR(64) NOT NULL UNIQUE,
     password TEXT NOT NULL,
+    total_time_tracked_seconds INT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
