@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/lmittmann/tint"
@@ -24,7 +23,7 @@ func Init() {
 				}
 				return a
 			},
-			TimeFormat: time.Kitchen,
+			TimeFormat: "12:00:00",
 		}),
 	))
 	slog.SetDefault(logger)
@@ -66,7 +65,7 @@ func Error(msg string, args ...any) {
 	slog.Error(msg, args...)
 }
 
-func Fatal(msg string, err error) {
+func Fatal(msg string, err error, args ...any) {
 	slog.Error(msg)
 	slog.Debug(err.Error())
 	os.Exit(1)

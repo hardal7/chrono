@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 
-	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -20,19 +19,19 @@ func Paginate(next http.Handler) http.Handler {
 		logger.Debug("Paginating Request")
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			e.ErrBadRequest.Handle(w, err)
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 		r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 		var req listRequest
 		if err := json.Unmarshal(body, &req); err != nil {
-			e.ErrBadRequest.Handle(w, err)
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
 		if req.Limit > 20 || req.Limit < 0 {
-			e.ErrBadRequest.Handle(w, "Invalid limit range")
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 

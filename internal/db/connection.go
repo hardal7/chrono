@@ -1,17 +1,21 @@
-package db
+package conn
 
 import (
 	"context"
 
+	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *pgxpool.Pool
+var (
+	DB      *pgxpool.Pool
+	Queries *db.Queries
+)
 
 func CreateConnection() {
-	logger.Info("Connecting to database server at: " + config.App.DB_HOST)
+	logger.Info("Connecting to database server", "host", config.App.DB_HOST)
 	var err error
 	DB, err = pgxpool.New(context.Background(), getConnectionString())
 	if err != nil {
@@ -24,7 +28,8 @@ func CreateConnection() {
 		DB.Close()
 		logger.Fatal("Failed to connect to connection pool", err)
 	}
-	logger.Info("Connected to database server at: " + config.App.DB_HOST)
+	Queries = db.New(DB)
+	logger.Info("Connected to database server", "host", config.App.DB_HOST)
 }
 
 func getConnectionString() string {

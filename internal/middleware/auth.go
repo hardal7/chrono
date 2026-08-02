@@ -6,7 +6,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/hardal7/chrono/internal/util/config"
-	e "github.com/hardal7/chrono/internal/util/errors"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -21,25 +20,25 @@ func Authenticate(next http.Handler) http.Handler {
 
 		tokenCookie, err := r.Cookie(AuthHeader)
 		if err == http.ErrNoCookie {
-			ErrNoToken.Handle(w, err)
+			http.Error(w, "No token provided", http.StatusUnauthorized)
 			return
 		} else if err != nil {
-			ErrRetrieveToken.Handle(w, err)
+			http.Error(w, "Failed to retrieve token", http.StatusInternalServerError)
 			return
 		} else {
 			token, err := jwt.Parse(tokenCookie.Value, func(token *jwt.Token) (any, error) {
 				return []byte(config.App.JWT_SECRET), nil
 			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 			if err == jwt.ErrTokenExpired {
-				ErrExpiredToken.Handle(w, err)
+				http.Error(w, "Token is expired", http.StatusUnauthorized)
 				return
 			} else if err != nil {
-				ErrInvalidToken.Handle(w, err)
+				http.Error(w, "Token is invalid", http.StatusUnauthorized)
 				return
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); !ok {
-				ErrParseToken.Handle(w, err)
+				http.Error(w, "Failed to parse token", http.StatusInternalServerError)
 				return
 			} else {
 				userID := int(claims["sub"].(float64))
@@ -49,28 +48,4 @@ func Authenticate(next http.Handler) http.Handler {
 			}
 		}
 	})
-}
-
-var ErrNoToken = e.Error{
-	InternalInfo: "No token provided",
-	Code:         http.StatusUnauthorized,
-	ExternalInfo: "No authorization token found",
-}
-var ErrRetrieveToken = e.Error{
-	InternalInfo: "Failed to retrieve authorization token",
-	Code:         http.StatusInternalServerError,
-}
-var ErrExpiredToken = e.Error{
-	InternalInfo: "Expired token provided",
-	Code:         http.StatusUnauthorized,
-	ExternalInfo: "Token is expired",
-}
-var ErrInvalidToken = e.Error{
-	InternalInfo: "Invalid token provided",
-	Code:         http.StatusUnauthorized,
-	ExternalInfo: "Token is invalid",
-}
-var ErrParseToken = e.Error{
-	InternalInfo: "Failed to parse token",
-	Code:         http.StatusInternalServerError,
 }

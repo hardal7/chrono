@@ -4,13 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/hardal7/chrono/internal/domains/health"
-	"github.com/hardal7/chrono/internal/domains/topic"
-	"github.com/hardal7/chrono/internal/domains/topicevent"
-	"github.com/hardal7/chrono/internal/domains/user"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
-	"github.com/hardal7/chrono/internal/util/handler"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -23,19 +18,19 @@ func Serve() {
 	mainRouter.Use(middleware.LogRequest)
 	mainRouter.Use(middleware.Paginate)
 
-	// Public Routes
+	// Public routes
 	mainRouter.Group(func(r chi.Router) {
-		r.Post("/register", handler.Create(user.Register))
-		r.Post("/login", handler.Create(user.Login))
-		r.Get("/health", health.Ping)
+		r.Post("/register", RegisterUserHandler)
+		r.Post("/login", LoginUserHandler)
+		r.Get("/health", PingHandler)
 	})
 
-	// Authenticated Routes
+	// Authenticated routes
 	mainRouter.Group(func(r chi.Router) {
 		r.Use(middleware.Authenticate)
-		r.Route("/user", user.Routes)
-		r.Route("/topic", topic.Routes)
-		r.Route("/topic-event", topicevent.Routes)
+		r.Route("/user", UserRoute)
+		r.Route("/topic", TopicRoute)
+		r.Route("/topic-event", TopicEventRoute)
 	})
 
 	go runServer("main", config.App.Port, mainRouter)
@@ -43,9 +38,9 @@ func Serve() {
 }
 
 func runServer(name, port string, router *chi.Mux) {
-	logger.Info("Starting " + name + " server on port: " + port)
+	logger.Info("Started HTTP server", "type", name, "port", ":"+port)
 	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
-		logger.Fatal("Failed to start "+name+" server", err)
+		logger.Fatal("Fatal error on server", err, "type", name)
 	}
 }

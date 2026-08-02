@@ -26,7 +26,7 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ../migrations:/srv/migrations
+      - ../sql/migrations:/srv/migrations
       - ../scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
 
