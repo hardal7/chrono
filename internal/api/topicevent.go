@@ -22,6 +22,11 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	err = topicevent.Track(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to track topic event", http.StatusBadRequest)
@@ -33,6 +38,11 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return

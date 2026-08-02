@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -11,6 +12,8 @@ import (
 )
 
 func Serve() {
+	InitValidator()
+
 	adminRouter := chi.NewRouter()
 	adminRouter.Handle("/metrics", promhttp.Handler())
 
@@ -43,4 +46,10 @@ func runServer(name, port string, router *chi.Mux) {
 	if err != nil {
 		logger.Fatal("Fatal error on server", err, "type", name)
 	}
+}
+
+var validate *validator.Validate
+
+func InitValidator() {
+	validate = validator.New(validator.WithRequiredStructEnabled())
 }

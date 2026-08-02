@@ -3,21 +3,21 @@ package dto
 import "time"
 
 type RegisterUserRequest struct {
-	Email    string `json:"email"`
+	Email    string `json:"email" validate:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 type LoginUserRequest struct {
-	Email    string `json:"email" opt:"true"`
-	Username string `json:"username" opt:"true"`
+	Email    string `json:"email" validate:"email,omitempty"`
+	Username string `json:"username" validate:"omitempty"`
 	Password string `json:"password"`
 }
 
 type EditUserAccountRequest struct {
-	NewUsername   string `json:"username" opt:"true"`
-	NewPassword   string `json:"password" opt:"true"`
-	DeleteAccount bool   `json:"delete" opt:"true"`
+	NewUsername   string `json:"username" validate:"omitempty"`
+	NewPassword   string `json:"password" validate:"omitempty"`
+	DeleteAccount bool   `json:"delete" validate:"omitempty"`
 }
 
 type GetTopUsersRequest struct {
@@ -31,7 +31,7 @@ type GetTopUsersResponse struct {
 }
 
 type GetUserAccountResponse struct {
-	Email     string    `json:"email"`
+	Email     string    `json:"email" validate:"email"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }

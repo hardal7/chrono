@@ -22,6 +22,11 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	err = topic.Create(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to create topic", http.StatusBadRequest)
@@ -37,6 +42,12 @@ func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
 	err = topic.Edit(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to edit topic", http.StatusBadRequest)
@@ -52,6 +63,12 @@ func GetTopicHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
 	resp, err := topic.Get(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get topic", http.StatusBadRequest)

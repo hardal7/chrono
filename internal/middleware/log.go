@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,6 +14,14 @@ import (
 
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		logger.Trace(string(body))
+		r.Body = io.NopCloser(bytes.NewReader(body))
+
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}
 		next.ServeHTTP(ww, r)

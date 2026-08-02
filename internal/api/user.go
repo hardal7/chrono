@@ -23,6 +23,12 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
 	err = user.Register(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to register user", http.StatusBadRequest)
@@ -34,6 +40,11 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
@@ -67,6 +78,11 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	err = validate.Struct(req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	resp, err := user.GetTopUsers(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get top users", http.StatusBadRequest)
@@ -82,6 +98,11 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditUserAccountRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	err = validate.Struct(req)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return

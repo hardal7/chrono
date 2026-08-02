@@ -28,7 +28,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		if err == nil {
 			logger.Error("User already exists")
 			// TODO: Custom error types
-			return errors.New("User already exists")
+			return errors.New("user already exists")
 		} else {
 			logger.Error("Failed to check if user is duplicate", err)
 			return err

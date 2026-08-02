@@ -7,8 +7,8 @@ type CreateTopicRequest struct {
 
 type EditTopicRequest struct {
 	Name    string `json:"name"`
-	NewName string `json:"new_name" opt:"true"`
-	Delete  bool   `json:"delete" opt:"true"`
+	NewName string `json:"new_name" validate:"omitempty"`
+	Delete  bool   `json:"delete" validate:"omitempty"`
 }
 
 type GetTopicRequest struct {

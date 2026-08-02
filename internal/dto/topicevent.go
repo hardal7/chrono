@@ -9,8 +9,8 @@ type TrackTopicEventRequest struct {
 }
 
 type GetTopicEventsRequest struct {
-	Topic string      `json:"topic" opt:"true"`
-	Date  []time.Time `json:"date" opt:"true"`
+	Topic string      `json:"topic" validate:"omitempty"`
+	Date  []time.Time `json:"date" validate:"omitempty"`
 }
 type GetTopicEventsResponse struct {
 	Topics       []string    `json:"topics"`

@@ -12,6 +12,7 @@ import (
 
 func TestMain(m *testing.M) {
 	test.Bootstrap()
+	api.InitValidator()
 	m.Run()
 }
 func TestRegister(t *testing.T) {
