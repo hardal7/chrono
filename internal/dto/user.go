@@ -24,10 +24,14 @@ type GetTopUsersRequest struct {
 	Cursor int `json:"cursor"`
 	Limit  int `json:"limit"`
 }
+type TopUser struct {
+	Rank      int    `json:"rank"`
+	Username  string `json:"username"`
+	TotalTime int    `json:"total_time"`
+	TodayTime int    `json:"today_time"`
+}
 type GetTopUsersResponse struct {
-	Usernames  []string `json:"usernames"`
-	TotalTimes []int    `json:"total_times"`
-	TodayTimes []int    `json:"today_times"`
+	Users []TopUser `json:"users"`
 }
 
 type GetUserAccountResponse struct {

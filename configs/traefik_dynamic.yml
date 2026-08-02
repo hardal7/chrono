@@ -3,6 +3,7 @@ http:
     rateLimit:
       rateLimit:
         average: 100
+        burst: 100
     latencyCheck:
       circuitBreaker:
         expression: "LatencyAtQuantileMS(95.0) > 500"
