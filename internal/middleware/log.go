@@ -20,7 +20,6 @@ func LogRequest(next http.Handler) http.Handler {
 			return
 		}
 		r.Body = io.NopCloser(bytes.NewReader(body))
-
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}
 		next.ServeHTTP(ww, r)

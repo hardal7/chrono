@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/service/user"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -14,7 +15,7 @@ func UserRoute(r chi.Router) {
 	r.Post("/account", EditUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
 	r.Get("/account", GetUserAccountHandler)
-	r.Get("/top", GetTopUsersHandler)
+	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
