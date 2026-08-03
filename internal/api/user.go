@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/user"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func UserRoute(r chi.Router) {
@@ -20,11 +21,13 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -41,11 +44,13 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -61,12 +66,14 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := user.GetAccount(r.Context())
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Failed to get account details", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
@@ -75,11 +82,13 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopUsersRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -91,6 +100,7 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
@@ -99,11 +109,13 @@ func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditUserAccountRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

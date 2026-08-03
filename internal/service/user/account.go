@@ -16,6 +16,7 @@ import (
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(int32))
 	if err != nil {
+		logger.Error("Failed to get user", err)
 		return err
 	}
 	logger.Info("Editing account details", "username", u.Username)
@@ -23,6 +24,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		logger.Info("Deleting account", "username", u.Username)
 		err := conn.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(int32))
 		if err != nil {
+			logger.Error("Failed to delete user", err)
 			return err
 		}
 		logger.Info("Deleted account", "username", u.Username)
@@ -33,6 +35,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		logger.Info("Changing username", "username", u.Username, "newUsername", r.NewUsername)
 		_, err := conn.Queries.GetUserByUsername(ctx, r.NewUsername)
 		if err != pgx.ErrNoRows {
+			logger.Error("Account with username exists")
 			return errors.New("account with username exists")
 		}
 	}
@@ -40,6 +43,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		logger.Info("Changing account password")
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
 		if err != nil {
+			logger.Error("Failed to hash password", err)
 			return err
 		}
 		u.Password = string(passwordHash)
@@ -51,6 +55,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		Password: u.Password,
 	})
 	if err != nil {
+		logger.Error("Failed to update user", err)
 		return err
 	}
 	logger.Info("Edited account details")
@@ -60,6 +65,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
 	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(int32))
 	if err != nil {
+		logger.Error("Failed to get user", err)
 		return dto.GetUserAccountResponse{}, err
 	}
 	resp := dto.GetUserAccountResponse{

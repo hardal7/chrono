@@ -9,7 +9,7 @@ type RegisterUserRequest struct {
 }
 
 type LoginUserRequest struct {
-	Email    string `json:"email" validate:"email,omitempty"`
+	Email    string `json:"email" validate:"omitempty,email"`
 	Username string `json:"username" validate:"omitempty"`
 	Password string `json:"password"`
 }

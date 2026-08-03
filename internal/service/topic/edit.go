@@ -23,6 +23,7 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 		logger.Info("Deleting topic", "topicName", t.Name)
 		err := conn.Queries.DeleteTopic(ctx, t.ID)
 		if err != nil {
+			logger.Error("Failed to delete topic", err)
 			return err
 		}
 		logger.Info("Deleted topic")
@@ -39,6 +40,7 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 		TimeTrackedSeconds: t.TimeTrackedSeconds,
 	})
 	if err != nil {
+		logger.Error("Failed to update topic", err)
 		return err
 	}
 	logger.Info("Changed topic name", "newName", r.NewName)

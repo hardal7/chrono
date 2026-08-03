@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/topicevent"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func TopicEventRoute(r chi.Router) {
@@ -19,11 +20,13 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.TrackTopicEventRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -39,11 +42,13 @@ func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -55,6 +60,7 @@ func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
@@ -68,6 +74,7 @@ func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }

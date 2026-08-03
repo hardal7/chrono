@@ -19,6 +19,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		CreatedByUserid: ctx.Value(middleware.UserID).(int32),
 	})
 	if err != nil {
+		logger.Error("Failed to get topic by username", err)
 		return err
 	}
 	err = conn.Queries.TrackTopicTime(ctx, db.TrackTopicTimeParams{
@@ -27,6 +28,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		TimeTrackedSeconds: int32(r.TimeSeconds),
 	})
 	if err != nil {
+		logger.Error("Failed to track topic time", err)
 		return err
 	}
 	err = conn.Queries.TrackUserTime(ctx, db.TrackUserTimeParams{
@@ -34,6 +36,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		TimeTrackedSeconds: int32(r.TimeSeconds),
 	})
 	if err != nil {
+		logger.Error("Failed to track user time", err)
 		return err
 	}
 	err = conn.Queries.CreateTopicEvent(ctx, db.CreateTopicEventParams{
@@ -43,6 +46,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		Date:               pgtype.Timestamptz{Time: time.Now()},
 	})
 	if err != nil {
+		logger.Error("Failed to create topic event", err)
 		return err
 	}
 	logger.Info("Tracked time", "topic", r.Topic)

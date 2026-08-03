@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/topic"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func TopicRoute(r chi.Router) {
@@ -19,11 +20,13 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateTopicRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -39,11 +42,13 @@ func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditTopicRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -60,23 +65,26 @@ func GetTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = validate.Struct(req)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
 	resp, err := topic.Get(r.Context(), req)
 	if err != nil {
-		http.Error(w, "Failed to get topic", http.StatusBadRequest)
+		logger.Error(err.Error())
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
+		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }

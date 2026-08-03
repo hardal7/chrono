@@ -13,6 +13,7 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 	logger.Info("Getting topic events")
 	topicEvents, err := conn.Queries.GetAllTopicEvents(ctx, ctx.Value(middleware.UserID).(int32))
 	if err != nil {
+		logger.Error("Failed to get topic events", err)
 		return dto.GetTopicEventsResponse{}, err
 	}
 	resp := dto.GetTopicEventsResponse{}
@@ -26,5 +27,5 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 		}
 	}
 	logger.Info("Got topic events")
-	return resp, err
+	return resp, nil
 }

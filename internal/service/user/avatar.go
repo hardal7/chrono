@@ -24,18 +24,22 @@ func UploadAvatar(ctx context.Context, avatar io.Reader) error {
 
 	fileBytes, err := io.ReadAll(avatar)
 	if len(fileBytes) > maxBytes {
+		logger.Error("File size too large")
 		return err
 	}
 	if err != nil {
+		logger.Error("Failed to read file", err)
 		return err
 	}
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
+		logger.Error("Invalid filetype")
 		return err
 	}
 
 	err = createFile(fileBytes, strconv.Itoa(ctx.Value(middleware.UserID).(int)))
 	if err != nil {
+		logger.Error("Failed to create file", err)
 		return err
 	}
 	logger.Info("Uploaded avatar")

@@ -2,6 +2,7 @@ package topic
 
 import (
 	"context"
+	"errors"
 
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
@@ -15,8 +16,14 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 	logger.Info("Creating topic", "topicName", r.Name)
 
 	_, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{})
-	if err == pgx.ErrNoRows {
-		return err
+	if err != pgx.ErrNoRows {
+		if err == nil {
+			logger.Error("Topic with name exists")
+			return errors.New("topic with name exists")
+		} else {
+			logger.Error("Failed to find topic by username", err)
+			return err
+		}
 	}
 
 	err = conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
@@ -25,6 +32,7 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 		CreatedByUserid:    ctx.Value(middleware.UserID).(int32),
 	})
 	if err != nil {
+		logger.Error("Failed to create topic", err)
 		return err
 	}
 	logger.Info("Created topic", "topicName", r.Name)

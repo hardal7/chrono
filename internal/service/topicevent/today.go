@@ -13,6 +13,7 @@ func GetToday(ctx context.Context) (dto.GetTopicEventsTodayResponse, error) {
 	logger.Info("Getting total time tracked today")
 	topicEvents, err := conn.Queries.GetTopicEventsToday(ctx, ctx.Value(middleware.UserID).(int32))
 	if err != nil {
+		logger.Error("Failed to get topic events today", err)
 		return dto.GetTopicEventsTodayResponse{}, err
 	}
 	var totalTime int

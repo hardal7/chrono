@@ -19,7 +19,6 @@ func LogRequest(next http.Handler) http.Handler {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		logger.Trace(string(body))
 		r.Body = io.NopCloser(bytes.NewReader(body))
 
 		start := time.Now()
@@ -35,6 +34,7 @@ func LogRequest(next http.Handler) http.Handler {
 		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
+		logger.Trace(string(body))
 	})
 }
 

@@ -9,6 +9,7 @@ import (
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/service/topic"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 
@@ -29,13 +30,16 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		u, err = conn.Queries.GetUserByEmail(ctx, r.Email)
 	}
 	if err != nil {
+		logger.Error("Failed to get user", err)
 		return http.Cookie{}, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
+		logger.Error("Wrong password", err)
 		return http.Cookie{}, err
 	} else if err != nil {
+		logger.Error("Failed to hash password", err)
 		return http.Cookie{}, err
 	}
 
@@ -45,6 +49,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	})
 	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
 	if err != nil {
+		logger.Error("Failed to sign token", err)
 		return http.Cookie{}, err
 	}
 	cookie := http.Cookie{
@@ -57,7 +62,8 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	logger.Info("Logged user and sent token", "username", r.Username)
-	// Init topic if not init yet
-	// topic.InitFirst(ctx)
+	// Only Init topic if not init yet
+	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
+	topic.InitFirst(ctx)
 	return cookie, nil
 }

@@ -6,6 +6,7 @@ import (
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
@@ -14,6 +15,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		Limit:              int32(r.Limit),
 	})
 	if err != nil {
+		logger.Error("Failed to get users", err)
 		return dto.GetTopUsersResponse{}, err
 	} else {
 		resp := dto.GetTopUsersResponse{}
