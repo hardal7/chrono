@@ -3,6 +3,7 @@ package topicevent
 import (
 	"context"
 
+	"github.com/google/uuid"
 	conn "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -11,7 +12,7 @@ import (
 
 func GetToday(ctx context.Context) (dto.GetTopicEventsTodayResponse, error) {
 	logger.Info("Getting total time tracked today")
-	topicEvents, err := conn.Queries.GetTopicEventsToday(ctx, ctx.Value(middleware.UserID).(int32))
+	topicEvents, err := conn.Queries.GetTopicEventsToday(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get topic events today", err)
 		return dto.GetTopicEventsTodayResponse{}, err

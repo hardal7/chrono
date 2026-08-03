@@ -5,43 +5,46 @@
 package db
 
 import (
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Session struct {
-	ID             int32              `db:"id"`
-	Name           string             `db:"name"`
-	Password       pgtype.Text        `db:"password"`
-	OwnerID        int32              `db:"owner_id"`
-	ParticipantIds []int32            `db:"participant_ids"`
-	Expiry         pgtype.Timestamptz `db:"expiry"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
+	ID             uuid.UUID
+	Name           string
+	Password       pgtype.Text
+	OwnerID        uuid.UUID
+	ParticipantIds []uuid.UUID
+	Expiry         time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type Topic struct {
-	ID                 int32              `db:"id"`
-	Name               string             `db:"name"`
-	TimeTrackedSeconds int32              `db:"time_tracked_seconds"`
-	CreatedByUserid    int32              `db:"created_by_userid"`
-	CreatedAt          pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
+	ID                 uuid.UUID
+	Name               string
+	TimeTrackedSeconds int32
+	CreatedByUserid    uuid.UUID
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
 type TopicEvent struct {
-	ID                 int32              `db:"id"`
-	UserID             int32              `db:"user_id"`
-	TopicID            int32              `db:"topic_id"`
-	TimeTrackedSeconds int32              `db:"time_tracked_seconds"`
-	Date               pgtype.Timestamptz `db:"date"`
+	ID                 uuid.UUID
+	UserID             uuid.UUID
+	TopicID            uuid.UUID
+	TimeTrackedSeconds int32
+	Date               time.Time
 }
 
 type User struct {
-	ID                 int32              `db:"id"`
-	Email              string             `db:"email"`
-	Username           string             `db:"username"`
-	Password           string             `db:"password"`
-	TimeTrackedSeconds int32              `db:"time_tracked_seconds"`
-	CreatedAt          pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
+	ID                 uuid.UUID
+	Email              string
+	Username           string
+	Password           string
+	TimeTrackedSeconds int32
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
 }

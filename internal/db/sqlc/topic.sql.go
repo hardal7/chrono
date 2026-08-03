@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createTopic = `-- name: CreateTopic :exec
@@ -15,9 +17,9 @@ VALUES($1, $2, $3)
 `
 
 type CreateTopicParams struct {
-	Name               string `db:"name"`
-	TimeTrackedSeconds int32  `db:"time_tracked_seconds"`
-	CreatedByUserid    int32  `db:"created_by_userid"`
+	Name               string
+	TimeTrackedSeconds int32
+	CreatedByUserid    uuid.UUID
 }
 
 func (q *Queries) CreateTopic(ctx context.Context, arg CreateTopicParams) error {
@@ -30,7 +32,7 @@ DELETE FROM topics
 WHERE id = $1
 `
 
-func (q *Queries) DeleteTopic(ctx context.Context, id int32) error {
+func (q *Queries) DeleteTopic(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteTopic, id)
 	return err
 }
@@ -40,7 +42,7 @@ SELECT id, name, time_tracked_seconds, created_by_userid, created_at, updated_at
 WHERE id = $1
 `
 
-func (q *Queries) GetTopicByID(ctx context.Context, id int32) (Topic, error) {
+func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error) {
 	row := q.db.QueryRow(ctx, getTopicByID, id)
 	var i Topic
 	err := row.Scan(
@@ -60,8 +62,8 @@ WHERE name = $1 AND created_by_userid = $2
 `
 
 type GetTopicOfUserByNameParams struct {
-	Name            string `db:"name"`
-	CreatedByUserid int32  `db:"created_by_userid"`
+	Name            string
+	CreatedByUserid uuid.UUID
 }
 
 func (q *Queries) GetTopicOfUserByName(ctx context.Context, arg GetTopicOfUserByNameParams) (Topic, error) {
@@ -85,9 +87,9 @@ WHERE id = $1 AND created_by_userid = $2
 `
 
 type TrackTopicTimeParams struct {
-	ID                 int32 `db:"id"`
-	CreatedByUserid    int32 `db:"created_by_userid"`
-	TimeTrackedSeconds int32 `db:"time_tracked_seconds"`
+	ID                 uuid.UUID
+	CreatedByUserid    uuid.UUID
+	TimeTrackedSeconds int32
 }
 
 func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) error {
@@ -102,9 +104,9 @@ WHERE id = $1
 `
 
 type UpdateTopicParams struct {
-	ID                 int32  `db:"id"`
-	Name               string `db:"name"`
-	TimeTrackedSeconds int32  `db:"time_tracked_seconds"`
+	ID                 uuid.UUID
+	Name               string
+	TimeTrackedSeconds int32
 }
 
 func (q *Queries) UpdateTopic(ctx context.Context, arg UpdateTopicParams) error {

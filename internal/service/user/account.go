@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -14,7 +15,7 @@ import (
 )
 
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
-	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(int32))
+	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get user", err)
 		return err
@@ -22,7 +23,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	logger.Info("Editing account details", "username", u.Username)
 	if r.DeleteAccount {
 		logger.Info("Deleting account", "username", u.Username)
-		err := conn.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(int32))
+		err := conn.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 		if err != nil {
 			logger.Error("Failed to delete user", err)
 			return err
@@ -63,7 +64,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 }
 
 func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
-	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(int32))
+	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get user", err)
 		return dto.GetUserAccountResponse{}, err

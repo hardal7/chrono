@@ -3,6 +3,7 @@ package topic
 import (
 	"context"
 
+	"github.com/google/uuid"
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -13,7 +14,7 @@ import (
 func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 	t, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{
 		Name:            r.Name,
-		CreatedByUserid: ctx.Value(middleware.UserID).(int32),
+		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		return err

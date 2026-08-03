@@ -7,8 +7,9 @@ package db
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createTopicEvent = `-- name: CreateTopicEvent :exec
@@ -17,10 +18,10 @@ VALUES($1, $2, $3, $4)
 `
 
 type CreateTopicEventParams struct {
-	UserID             int32              `db:"user_id"`
-	TopicID            int32              `db:"topic_id"`
-	TimeTrackedSeconds int32              `db:"time_tracked_seconds"`
-	Date               pgtype.Timestamptz `db:"date"`
+	UserID             uuid.UUID
+	TopicID            uuid.UUID
+	TimeTrackedSeconds int32
+	Date               time.Time
 }
 
 func (q *Queries) CreateTopicEvent(ctx context.Context, arg CreateTopicEventParams) error {
@@ -38,7 +39,7 @@ DELETE FROM topic_events
 WHERE id = $1
 `
 
-func (q *Queries) DeleteTopicEvent(ctx context.Context, id int32) error {
+func (q *Queries) DeleteTopicEvent(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteTopicEvent, id)
 	return err
 }
@@ -48,13 +49,13 @@ SELECT id, user_id, topic_id, time_tracked_seconds, date FROM topic_events
 WHERE user_id = $1
 `
 
-func (q *Queries) GetAllTopicEvents(ctx context.Context, userID int32) ([]TopicEvent, error) {
+func (q *Queries) GetAllTopicEvents(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
 	rows, err := q.db.Query(ctx, getAllTopicEvents, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []TopicEvent
+	items := []TopicEvent{}
 	for rows.Next() {
 		var i TopicEvent
 		if err := rows.Scan(
@@ -79,13 +80,13 @@ SELECT id, user_id, topic_id, time_tracked_seconds, date FROM topic_events
 WHERE user_id = $1 AND DATE(date) = CURRENT_DATE
 `
 
-func (q *Queries) GetTopicEventsToday(ctx context.Context, userID int32) ([]TopicEvent, error) {
+func (q *Queries) GetTopicEventsToday(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
 	rows, err := q.db.Query(ctx, getTopicEventsToday, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []TopicEvent
+	items := []TopicEvent{}
 	for rows.Next() {
 		var i TopicEvent
 		if err := rows.Scan(
@@ -112,9 +113,9 @@ WHERE id = $1
 `
 
 type UpdateTopicEventParams struct {
-	ID                 int32              `db:"id"`
-	TimeTrackedSeconds int32              `db:"time_tracked_seconds"`
-	Date               pgtype.Timestamptz `db:"date"`
+	ID                 uuid.UUID
+	TimeTrackedSeconds int32
+	Date               time.Time
 }
 
 func (q *Queries) UpdateTopicEvent(ctx context.Context, arg UpdateTopicEventParams) error {

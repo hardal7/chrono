@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -15,10 +17,10 @@ VALUES($1, $2, $3, $4)
 `
 
 type CreateUserParams struct {
-	Email              string `db:"email"`
-	Username           string `db:"username"`
-	Password           string `db:"password"`
-	TimeTrackedSeconds int32  `db:"time_tracked_seconds"`
+	Email              string
+	Username           string
+	Password           string
+	TimeTrackedSeconds int32
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
@@ -36,7 +38,7 @@ DELETE FROM users
 WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }
@@ -49,8 +51,8 @@ LIMIT $2
 `
 
 type GetTopUsersParams struct {
-	TimeTrackedSeconds int32 `db:"time_tracked_seconds"`
-	Limit              int32 `db:"limit"`
+	TimeTrackedSeconds int32
+	Limit              int32
 }
 
 func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]User, error) {
@@ -59,7 +61,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	items := []User{}
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
@@ -106,7 +108,7 @@ SELECT id, email, username, password, time_tracked_seconds, created_at, updated_
 WHERE id = $1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
@@ -148,8 +150,8 @@ WHERE id = $1
 `
 
 type TrackUserTimeParams struct {
-	ID                 int32 `db:"id"`
-	TimeTrackedSeconds int32 `db:"time_tracked_seconds"`
+	ID                 uuid.UUID
+	TimeTrackedSeconds int32
 }
 
 func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) error {
@@ -164,10 +166,10 @@ WHERE id = $1
 `
 
 type UpdateUserParams struct {
-	ID       int32  `db:"id"`
-	Email    string `db:"email"`
-	Username string `db:"username"`
-	Password string `db:"password"`
+	ID       uuid.UUID
+	Email    string
+	Username string
+	Password string
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {

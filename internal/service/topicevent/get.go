@@ -3,6 +3,7 @@ package topicevent
 import (
 	"context"
 
+	"github.com/google/uuid"
 	conn "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -11,7 +12,7 @@ import (
 
 func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsResponse, error) {
 	logger.Info("Getting topic events")
-	topicEvents, err := conn.Queries.GetAllTopicEvents(ctx, ctx.Value(middleware.UserID).(int32))
+	topicEvents, err := conn.Queries.GetAllTopicEvents(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get topic events", err)
 		return dto.GetTopicEventsResponse{}, err
@@ -22,7 +23,7 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 		// TODO: Also check the dates
 		if t.Name != "" && t.Name == r.Topic {
 			resp.Topics[i] = t.Name
-			resp.Dates[i] = v.Date.Time
+			resp.Dates[i] = v.Date
 			resp.TimesTracked[i] = int(v.TimeTrackedSeconds)
 		}
 	}

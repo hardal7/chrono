@@ -1,8 +1,8 @@
 CREATE TABLE topics (
-    id SERIAL PRIMARY KEY,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
     time_tracked_seconds INT NOT NULL,
-    created_by_userid INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_by_userid uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

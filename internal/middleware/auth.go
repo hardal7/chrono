@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -23,6 +24,7 @@ func Authenticate(next http.Handler) http.Handler {
 			http.Error(w, "No token provided", http.StatusUnauthorized)
 			return
 		} else if err != nil {
+			logger.Debug(err.Error())
 			http.Error(w, "Failed to retrieve token", http.StatusInternalServerError)
 			return
 		} else {
@@ -38,10 +40,15 @@ func Authenticate(next http.Handler) http.Handler {
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); !ok {
-				http.Error(w, "Failed to parse token", http.StatusInternalServerError)
+				http.Error(w, "Token is invalid", http.StatusInternalServerError)
 				return
 			} else {
-				userID := int32(claims["sub"].(float64))
+				userID, err := uuid.Parse(claims["sub"].(string))
+				if err != nil {
+					logger.Debug(err.Error())
+					http.Error(w, "Failed to parse token", http.StatusInternalServerError)
+					return
+				}
 				logger.Info("Authenticated user")
 				ctx := context.WithValue(r.Context(), UserID, userID)
 				next.ServeHTTP(w, r.WithContext(ctx))
