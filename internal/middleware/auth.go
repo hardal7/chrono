@@ -41,7 +41,7 @@ func Authenticate(next http.Handler) http.Handler {
 				http.Error(w, "Failed to parse token", http.StatusInternalServerError)
 				return
 			} else {
-				userID := int(claims["sub"].(float64))
+				userID := int32(claims["sub"].(float64))
 				logger.Info("Authenticated user")
 				ctx := context.WithValue(r.Context(), UserID, userID)
 				next.ServeHTTP(w, r.WithContext(ctx))

@@ -15,14 +15,20 @@ func TestMain(m *testing.M) {
 	api.InitValidator()
 	m.Run()
 }
-func TestRegister(t *testing.T) {
-	registerTest.Run(t)
+func TestRegisterUser(t *testing.T) {
+	registerUserTest.Run(t)
 }
-func TestLogin(t *testing.T) {
-	loginTest.Run(t)
+func TestLoginUser(t *testing.T) {
+	loginUserTest.Run(t)
+}
+func TestEditUserAccount(t *testing.T) {
+	editUserAccountTest.Run(t)
+}
+func TestGetUserAccount(t *testing.T) {
+	getUserAccountTest.Run(t)
 }
 
-var registerTest = test.Test{
+var registerUserTest = test.Test{
 	Method:   http.MethodPost,
 	Endpoint: "/register",
 	Handler:  api.RegisterUserHandler,
@@ -34,7 +40,7 @@ var registerTest = test.Test{
 				Username: "john2doe",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusCreated,
+			ExpectedResponse: test.Response{Status: http.StatusCreated},
 		},
 		{
 			Name: "duplicate user",
@@ -43,7 +49,7 @@ var registerTest = test.Test{
 				Username: "johndoe",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusConflict,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing email",
@@ -51,7 +57,7 @@ var registerTest = test.Test{
 				Username: "johndoe",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing username",
@@ -59,7 +65,7 @@ var registerTest = test.Test{
 				Email:    "john@mail.com",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing password",
@@ -67,12 +73,12 @@ var registerTest = test.Test{
 				Email:    "john@mail.com",
 				Username: "johndoe",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
-			Name:           "empty body",
-			Body:           dto.RegisterUserRequest{},
-			ExpectedStatus: http.StatusBadRequest,
+			Name:             "empty body",
+			Body:             dto.RegisterUserRequest{},
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "sql injection attempt",
@@ -81,7 +87,7 @@ var registerTest = test.Test{
 				Username: "'; DROP TABLE users;--",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "extremely long input",
@@ -90,17 +96,17 @@ var registerTest = test.Test{
 				Username: strings.Repeat("u", 5000),
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
-			Name:           "malformed json",
-			RawBody:        `{"email":"john@mail.com","username":`,
-			ExpectedStatus: http.StatusBadRequest,
+			Name:             "malformed json",
+			RawBody:          `{"email":"john@mail.com","username":`,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 	},
 }
 
-var loginTest = test.Test{
+var loginUserTest = test.Test{
 	Method:   http.MethodPost,
 	Endpoint: "/login",
 	Handler:  api.LoginUserHandler,
@@ -111,7 +117,7 @@ var loginTest = test.Test{
 				Username: "johndoe",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusOK,
+			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "successful login with email",
@@ -119,7 +125,7 @@ var loginTest = test.Test{
 				Email:    "john@mail.com",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusOK,
+			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "incorrect password",
@@ -127,7 +133,7 @@ var loginTest = test.Test{
 				Username: "johndoe",
 				Password: "wrongpassword",
 			},
-			ExpectedStatus: http.StatusUnauthorized,
+			ExpectedResponse: test.Response{Status: http.StatusUnauthorized},
 		},
 		{
 			Name: "user not found by username",
@@ -135,7 +141,7 @@ var loginTest = test.Test{
 				Username: "unknownuser",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusNotFound,
+			ExpectedResponse: test.Response{Status: http.StatusNotFound},
 		},
 		{
 			Name: "user not found by email",
@@ -143,14 +149,14 @@ var loginTest = test.Test{
 				Email:    "unknown@mail.com",
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusNotFound,
+			ExpectedResponse: test.Response{Status: http.StatusNotFound},
 		},
 		{
 			Name: "missing username and email",
 			Body: dto.LoginUserRequest{
 				Password: "strongpassword",
 			},
-			ExpectedStatus: http.StatusNotFound,
+			ExpectedResponse: test.Response{Status: http.StatusNotFound},
 		},
 		{
 			Name: "empty password",
@@ -158,7 +164,127 @@ var loginTest = test.Test{
 				Username: "johndoe",
 				Password: "",
 			},
-			ExpectedStatus: http.StatusBadRequest,
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
+		},
+	},
+}
+
+var editUserAccountTest = test.Test{
+	Method:   http.MethodPost,
+	Endpoint: "/account",
+	Handler:  api.EditUserAccountHandler,
+	Cases: []test.Case{
+		{
+			Name: "successful username change",
+			Body: dto.EditUserAccountRequest{
+				NewUsername: "johnNewdoe",
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful password change",
+			Body: dto.EditUserAccountRequest{
+				NewPassword: "newPassword123",
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful username and password change",
+			Body: dto.EditUserAccountRequest{
+				NewUsername: "johnNewdoe",
+				NewPassword: "newPassword123",
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful account deletion",
+			Body: dto.EditUserAccountRequest{
+				DeleteAccount: true,
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful username change and account deletion",
+			Body: dto.EditUserAccountRequest{
+				NewUsername:   "johnNewdoe",
+				DeleteAccount: true,
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful password change and account deletion",
+			Body: dto.EditUserAccountRequest{
+				NewPassword:   "newPassword123",
+				DeleteAccount: true,
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "successful username password change and account deletion",
+			Body: dto.EditUserAccountRequest{
+				NewUsername:   "johnNewdoe",
+				NewPassword:   "newPassword123",
+				DeleteAccount: true,
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+			},
+		},
+		{
+			Name: "empty request",
+			Body: dto.EditUserAccountRequest{},
+			ExpectedResponse: test.Response{
+				Status: http.StatusBadRequest,
+			},
+		},
+		{
+			Name: "empty username",
+			Body: dto.EditUserAccountRequest{
+				NewUsername: "",
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusBadRequest,
+			},
+		},
+		{
+			Name: "empty password",
+			Body: dto.EditUserAccountRequest{
+				NewPassword: "",
+			},
+			ExpectedResponse: test.Response{
+				Status: http.StatusBadRequest,
+			},
+		},
+	},
+}
+
+var getUserAccountTest = test.Test{
+	Method:   http.MethodGet,
+	Endpoint: "/account",
+	Handler:  api.EditUserAccountHandler,
+	Cases: []test.Case{
+		{
+			Name: "successful account details retrieval",
+			ExpectedResponse: test.Response{
+				Status: http.StatusOK,
+				Body: dto.GetUserAccountResponse{
+					Username: "johndoe",
+					Email:    "john@mail.com",
+					// CreatedAt: ,
+				},
+			},
 		},
 	},
 }

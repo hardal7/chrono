@@ -2,12 +2,14 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -28,7 +30,11 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	}
 	if r.NewUsername != "" {
 		u.Username = r.NewUsername
-		logger.Info("Changing username", "newUsername", r.NewUsername)
+		logger.Info("Changing username", "username", u.Username, "newUsername", r.NewUsername)
+		_, err := conn.Queries.GetUserByUsername(ctx, r.NewUsername)
+		if err != pgx.ErrNoRows {
+			return errors.New("account with username exists")
+		}
 	}
 	if r.NewPassword != "" {
 		logger.Info("Changing account password")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/lmittmann/tint"
@@ -23,7 +24,8 @@ func Init() {
 				}
 				return a
 			},
-			TimeFormat: "12:00:00",
+			// TODO: Show seconds as well
+			TimeFormat: time.Kitchen,
 		}),
 	))
 	slog.SetDefault(logger)
