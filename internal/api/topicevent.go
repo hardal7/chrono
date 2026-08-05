@@ -1,13 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/topicevent"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func TopicEventRoute(r chi.Router) {
@@ -18,19 +16,8 @@ func TopicEventRoute(r chi.Router) {
 
 func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.TrackTopicEventRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = topicevent.Track(r.Context(), req)
+	processRequest(w, r, req)
+	err := topicevent.Track(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to track topic event", http.StatusBadRequest)
 		return
@@ -40,29 +27,13 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
+	processRequest(w, r, req)
 	resp, err := topicevent.Get(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get topic events", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	processResponse(w, resp)
 }
 
 func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,10 +42,5 @@ func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get topic events today", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	processResponse(w, resp)
 }

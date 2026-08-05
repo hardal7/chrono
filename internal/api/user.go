@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -20,20 +19,8 @@ func UserRoute(r chi.Router) {
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	err = user.Register(r.Context(), req)
+	processRequest(w, r, req)
+	err := user.Register(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to register user", http.StatusBadRequest)
 		return
@@ -43,18 +30,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
+	processRequest(w, r, req)
 	cookie, err := user.Login(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to login user", http.StatusBadRequest)
@@ -71,56 +47,24 @@ func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get account details", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	processResponse(w, resp)
 }
 
 func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopUsersRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
+	processRequest(w, r, req)
 	resp, err := user.GetTopUsers(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get top users", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	processResponse(w, resp)
 }
 
 func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditUserAccountRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	err = user.EditAccount(r.Context(), req)
+	processRequest(w, r, req)
+	err := user.EditAccount(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to edit user account", http.StatusBadRequest)
 		return
