@@ -20,13 +20,13 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	} else {
 		resp := dto.GetTopUsersResponse{}
 		for i, v := range users {
-			resp.Users[i] = dto.TopUser{
+			resp.Users = append(resp.Users, dto.TopUser{
 				Rank:      i + 1,
 				Username:  v.Username,
 				TotalTime: int(v.TimeTrackedSeconds),
 				// TODO
 				// TodayTime: int(v.TodayTrackedSeconds),
-			}
+			})
 		}
 		return resp, nil
 	}
