@@ -25,10 +25,11 @@ type GetTopUsersRequest struct {
 	Limit  int `json:"limit"`
 }
 type TopUser struct {
-	Rank      int    `json:"rank"`
-	Username  string `json:"username"`
-	TotalTime int    `json:"total_time"`
-	TodayTime int    `json:"today_time"`
+	Rank       int    `json:"rank"`
+	Username   string `json:"username"`
+	TotalTime  int    `json:"total_time"`
+	TodayTime  int    `json:"today_time"`
+	AvatarPath string `json:"avatar_path"`
 }
 type GetTopUsersResponse struct {
 	Users []TopUser `json:"users"`

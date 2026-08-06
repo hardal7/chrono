@@ -28,6 +28,7 @@ func TestGetUserAccount(t *testing.T) {
 	getUserAccountTest.Run(t)
 }
 
+// TODO: Use the middlewares
 var registerUserTest = test.Test{
 	Method:   http.MethodPost,
 	Endpoint: "/register",

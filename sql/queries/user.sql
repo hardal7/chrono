@@ -26,3 +26,9 @@ LIMIT $2;
 UPDATE users
 SET time_tracked_seconds = time_tracked_seconds + $2
 WHERE id = $1;
+-- name: GetAvatarFromUserID :one
+SELECT * FROM avatars
+WHERE user_id = $1;
+-- name: CreateAvatar :exec
+INSERT INTO avatars (user_id)
+VALUES ($1);

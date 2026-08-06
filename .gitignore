@@ -4,4 +4,4 @@
 .gitlab-ci-local
 bin
 certs
-uploads
+avatars

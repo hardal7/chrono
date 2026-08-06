@@ -11,6 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+const createAvatar = `-- name: CreateAvatar :exec
+INSERT INTO avatars (user_id)
+VALUES ($1)
+`
+
+func (q *Queries) CreateAvatar(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, createAvatar, userID)
+	return err
+}
+
 const createUser = `-- name: CreateUser :exec
 INSERT INTO users(email, username, password, time_tracked_seconds)
 VALUES($1, $2, $3, $4)
@@ -41,6 +51,18 @@ WHERE id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
+}
+
+const getAvatarFromUserID = `-- name: GetAvatarFromUserID :one
+SELECT id, user_id FROM avatars
+WHERE user_id = $1
+`
+
+func (q *Queries) GetAvatarFromUserID(ctx context.Context, userID uuid.UUID) (Avatar, error) {
+	row := q.db.QueryRow(ctx, getAvatarFromUserID, userID)
+	var i Avatar
+	err := row.Scan(&i.ID, &i.UserID)
+	return i, err
 }
 
 const getTopUsers = `-- name: GetTopUsers :many

@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
@@ -13,13 +14,14 @@ import (
 func UserRoute(r chi.Router) {
 	r.Post("/account", EditUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
+	r.Get("/avatar/{id}", GetUserAvatar)
 	r.Get("/account", GetUserAccountHandler)
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	err := user.Register(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to register user", http.StatusBadRequest)
@@ -30,7 +32,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	cookie, err := user.Login(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to login user", http.StatusBadRequest)
@@ -52,7 +54,7 @@ func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopUsersRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	resp, err := user.GetTopUsers(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get top users", http.StatusBadRequest)
@@ -63,7 +65,7 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditUserAccountRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	err := user.EditAccount(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to edit user account", http.StatusBadRequest)
@@ -78,4 +80,12 @@ func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to upload user avatar", http.StatusBadRequest)
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func GetUserAvatar(w http.ResponseWriter, r *http.Request) {
+	avatarID := chi.URLParam(r, "id")
+	path := filepath.Join("./"+user.AvatarDirectory, avatarID)
+	http.ServeFile(w, r, path)
+	w.WriteHeader(http.StatusOK)
 }

@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -33,7 +35,17 @@ func LogRequest(next http.Handler) http.Handler {
 		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
-		logger.Trace(string(body))
+
+		contentType := r.Header.Get("Content-Type")
+		if strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/plain") {
+			logger.Trace(string(body))
+		} else {
+			logger.Trace(fmt.Sprintf(
+				"Request body omitted (Content-Type: %s, %d bytes)",
+				contentType,
+				len(body),
+			))
+		}
 	})
 }
 

@@ -16,7 +16,7 @@ func TopicEventRoute(r chi.Router) {
 
 func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.TrackTopicEventRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	err := topicevent.Track(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to track topic event", http.StatusBadRequest)
@@ -27,7 +27,7 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	resp, err := topicevent.Get(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get topic events", http.StatusBadRequest)

@@ -11,6 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Avatar struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
 type Session struct {
 	ID             uuid.UUID
 	Name           string

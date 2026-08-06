@@ -18,7 +18,7 @@ func TopicRoute(r chi.Router) {
 
 func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateTopicRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	err := topic.Create(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to create topic", http.StatusBadRequest)
@@ -29,7 +29,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditTopicRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	err := topic.Edit(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to edit topic", http.StatusBadRequest)
@@ -40,7 +40,7 @@ func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicRequest
-	processRequest(w, r, req)
+	processRequest(w, r, &req)
 	resp, err := topic.Get(r.Context(), req)
 	if err != nil {
 		logger.Error(err.Error())

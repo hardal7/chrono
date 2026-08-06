@@ -22,6 +22,7 @@ func processRequest(w http.ResponseWriter, r *http.Request, req any) {
 		return
 	}
 }
+
 func processResponse(w http.ResponseWriter, resp any) {
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(resp)
