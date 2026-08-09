@@ -12,18 +12,17 @@ import (
 )
 
 const createTopic = `-- name: CreateTopic :exec
-INSERT INTO topics(name, time_tracked_seconds, created_by_userid)
-VALUES($1, $2, $3)
+INSERT INTO topics(name, created_by_userid)
+VALUES($1, $2)
 `
 
 type CreateTopicParams struct {
-	Name               string
-	TimeTrackedSeconds int32
-	CreatedByUserid    uuid.UUID
+	Name            string
+	CreatedByUserid uuid.UUID
 }
 
 func (q *Queries) CreateTopic(ctx context.Context, arg CreateTopicParams) error {
-	_, err := q.db.Exec(ctx, createTopic, arg.Name, arg.TimeTrackedSeconds, arg.CreatedByUserid)
+	_, err := q.db.Exec(ctx, createTopic, arg.Name, arg.CreatedByUserid)
 	return err
 }
 

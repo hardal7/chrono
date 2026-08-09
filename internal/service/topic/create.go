@@ -28,9 +28,8 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 	}
 
 	err = conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
-		Name:               r.Name,
-		TimeTrackedSeconds: 0,
-		CreatedByUserid:    ctx.Value(middleware.UserID).(uuid.UUID),
+		Name:            r.Name,
+		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		logger.Error("Failed to create topic", err)

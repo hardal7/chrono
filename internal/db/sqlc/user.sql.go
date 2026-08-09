@@ -22,24 +22,18 @@ func (q *Queries) CreateAvatar(ctx context.Context, userID uuid.UUID) error {
 }
 
 const createUser = `-- name: CreateUser :exec
-INSERT INTO users(email, username, password, time_tracked_seconds)
-VALUES($1, $2, $3, $4)
+INSERT INTO users(email, username, password)
+VALUES($1, $2, $3)
 `
 
 type CreateUserParams struct {
-	Email              string
-	Username           string
-	Password           string
-	TimeTrackedSeconds int32
+	Email    string
+	Username string
+	Password string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.Exec(ctx, createUser,
-		arg.Email,
-		arg.Username,
-		arg.Password,
-		arg.TimeTrackedSeconds,
-	)
+	_, err := q.db.Exec(ctx, createUser, arg.Email, arg.Username, arg.Password)
 	return err
 }
 
@@ -66,19 +60,19 @@ func (q *Queries) GetAvatarFromUserID(ctx context.Context, userID uuid.UUID) (Av
 }
 
 const getTopUsers = `-- name: GetTopUsers :many
-SELECT id, email, username, password, time_tracked_seconds, created_at, updated_at FROM users
-WHERE time_tracked_seconds < $1 
-ORDER BY time_tracked_seconds DESC
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
+WHERE total_time_tracked_seconds < $1 
+ORDER BY total_time_tracked_seconds DESC
 LIMIT $2
 `
 
 type GetTopUsersParams struct {
-	TimeTrackedSeconds int32
-	Limit              int32
+	TotalTimeTrackedSeconds int32
+	Limit                   int32
 }
 
 func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getTopUsers, arg.TimeTrackedSeconds, arg.Limit)
+	rows, err := q.db.Query(ctx, getTopUsers, arg.TotalTimeTrackedSeconds, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +85,8 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 			&i.Email,
 			&i.Username,
 			&i.Password,
-			&i.TimeTrackedSeconds,
+			&i.TotalTimeTrackedSeconds,
+			&i.TodayTimeTrackedSeconds,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -106,7 +101,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, username, password, time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
 WHERE email = $1
 `
 
@@ -118,7 +113,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Email,
 		&i.Username,
 		&i.Password,
-		&i.TimeTrackedSeconds,
+		&i.TotalTimeTrackedSeconds,
+		&i.TodayTimeTrackedSeconds,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -126,7 +122,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, password, time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
 WHERE id = $1
 `
 
@@ -138,7 +134,8 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Email,
 		&i.Username,
 		&i.Password,
-		&i.TimeTrackedSeconds,
+		&i.TotalTimeTrackedSeconds,
+		&i.TodayTimeTrackedSeconds,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -146,7 +143,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, username, password, time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
 WHERE username = $1
 `
 
@@ -158,26 +155,37 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Email,
 		&i.Username,
 		&i.Password,
-		&i.TimeTrackedSeconds,
+		&i.TotalTimeTrackedSeconds,
+		&i.TodayTimeTrackedSeconds,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const resetTimeTrackedToday = `-- name: ResetTimeTrackedToday :exec
+UPDATE users
+SET today_time_tracked_seconds = 0
+`
+
+func (q *Queries) ResetTimeTrackedToday(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, resetTimeTrackedToday)
+	return err
+}
+
 const trackUserTime = `-- name: TrackUserTime :exec
 UPDATE users
-SET time_tracked_seconds = time_tracked_seconds + $2
+SET total_time_tracked_seconds = total_time_tracked_seconds + $2
 WHERE id = $1
 `
 
 type TrackUserTimeParams struct {
-	ID                 uuid.UUID
-	TimeTrackedSeconds int32
+	ID                      uuid.UUID
+	TotalTimeTrackedSeconds int32
 }
 
 func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) error {
-	_, err := q.db.Exec(ctx, trackUserTime, arg.ID, arg.TimeTrackedSeconds)
+	_, err := q.db.Exec(ctx, trackUserTime, arg.ID, arg.TotalTimeTrackedSeconds)
 	return err
 }
 

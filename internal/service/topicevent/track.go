@@ -31,8 +31,8 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		return err
 	}
 	err = conn.Queries.TrackUserTime(ctx, db.TrackUserTimeParams{
-		ID:                 t.ID,
-		TimeTrackedSeconds: int32(r.TimeSeconds),
+		ID:                      t.ID,
+		TotalTimeTrackedSeconds: int32(r.TimeSeconds),
 	})
 	if err != nil {
 		logger.Error("Failed to track user time", err)

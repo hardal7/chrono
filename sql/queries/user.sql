@@ -1,6 +1,6 @@
 -- name: CreateUser :exec
-INSERT INTO users(email, username, password, time_tracked_seconds)
-VALUES($1, $2, $3, $4);
+INSERT INTO users(email, username, password)
+VALUES($1, $2, $3);
 -- name: UpdateUser :exec
 UPDATE users
 SET email = $2, username = $3, password = $4, updated_at = now()
@@ -19,13 +19,19 @@ SELECT * FROM users
 WHERE id = $1;
 -- name: GetTopUsers :many
 SELECT * FROM users
-WHERE time_tracked_seconds < $1 
-ORDER BY time_tracked_seconds DESC
+WHERE total_time_tracked_seconds < $1 
+ORDER BY total_time_tracked_seconds DESC
 LIMIT $2;
 -- name: TrackUserTime :exec
 UPDATE users
-SET time_tracked_seconds = time_tracked_seconds + $2
+SET total_time_tracked_seconds = total_time_tracked_seconds + $2
 WHERE id = $1;
+UPDATE users
+SET today_time_tracked_seconds = today_time_tracked_seconds + $2
+WHERE id = $1;
+-- name: ResetTimeTrackedToday :exec
+UPDATE users
+SET today_time_tracked_seconds = 0;
 -- name: GetAvatarFromUserID :one
 SELECT * FROM avatars
 WHERE user_id = $1;

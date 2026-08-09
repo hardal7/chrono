@@ -52,11 +52,12 @@ type TopicEvent struct {
 }
 
 type User struct {
-	ID                 uuid.UUID
-	Email              string
-	Username           string
-	Password           string
-	TimeTrackedSeconds int32
-	CreatedAt          pgtype.Timestamptz
-	UpdatedAt          pgtype.Timestamptz
+	ID                      uuid.UUID
+	Email                   string
+	Username                string
+	Password                string
+	TotalTimeTrackedSeconds int32
+	TodayTimeTrackedSeconds int32
+	CreatedAt               pgtype.Timestamptz
+	UpdatedAt               pgtype.Timestamptz
 }

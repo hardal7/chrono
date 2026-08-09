@@ -1,6 +1,6 @@
 -- name: CreateTopic :exec
-INSERT INTO topics(name, time_tracked_seconds, created_by_userid)
-VALUES($1, $2, $3);
+INSERT INTO topics(name, created_by_userid)
+VALUES($1, $2);
 -- name: UpdateTopic :exec
 UPDATE topics
 SET name = $2, time_tracked_seconds = $3, updated_at = now()

@@ -13,8 +13,8 @@ import (
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
 	users, err := conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
-		TimeTrackedSeconds: int32(r.Cursor),
-		Limit:              int32(r.Limit),
+		TotalTimeTrackedSeconds: int32(r.Cursor),
+		Limit:                   int32(r.Limit),
 	})
 	if err != nil {
 		logger.Error("Failed to get users", err)
@@ -30,7 +30,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			resp.Users = append(resp.Users, dto.TopUser{
 				Rank:      i + 1,
 				Username:  v.Username,
-				TotalTime: int(v.TimeTrackedSeconds),
+				TotalTime: int(v.TotalTimeTrackedSeconds),
 				// TODO
 				// TodayTime: int(v.TodayTrackedSeconds),
 				AvatarPath: "/user/avatar/" + avatar.ID.String(),

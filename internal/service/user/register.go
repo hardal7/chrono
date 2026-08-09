@@ -35,10 +35,9 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		}
 	}
 	err = conn.Queries.CreateUser(ctx, db.CreateUserParams{
-		Username:           r.Username,
-		Email:              r.Email,
-		Password:           string(passwordHash),
-		TimeTrackedSeconds: 0,
+		Username: r.Username,
+		Email:    r.Email,
+		Password: string(passwordHash),
 	})
 	if err != nil {
 		logger.Error("Failed to create user", err)
