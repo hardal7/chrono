@@ -44,7 +44,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": u.ID,
+		"sub": u.ID.String(),
 		"exp": time.Now().Add(time.Hour * 24 * time.Duration(jwtExpirationDays)).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))

@@ -1,7 +1,6 @@
 package dto
 
 type CreateTopicRequest struct {
-	ID   int    `db:"id"`
 	Name string `json:"name"`
 }
 

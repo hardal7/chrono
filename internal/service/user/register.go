@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const bcryptCost int = 10
+const bcryptCost int = 12
 
 func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 	logger.Info("Registering user", "username", r.Username)

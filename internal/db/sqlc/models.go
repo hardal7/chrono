@@ -16,6 +16,13 @@ type Avatar struct {
 	UserID uuid.UUID
 }
 
+type Friend struct {
+	ID          uuid.UUID
+	OwnerID     uuid.UUID
+	RecipientID uuid.UUID
+	IsAccepted  bool
+}
+
 type Session struct {
 	ID             uuid.UUID
 	Name           string

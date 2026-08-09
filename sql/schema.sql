@@ -13,6 +13,13 @@ CREATE TABLE avatars (
     user_id uuid NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE friends (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    owner_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    is_accepted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE sessions (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
