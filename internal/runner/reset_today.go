@@ -8,6 +8,7 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
+// TODO: Set streaks for topics here
 func ResetToday(ctx context.Context) {
 	logger.Info("Started runner", "name", "reset_today")
 	for {

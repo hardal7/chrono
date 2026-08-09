@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hardal7/chrono/internal/api"
 	"github.com/hardal7/chrono/internal/dto"
@@ -28,7 +29,6 @@ func TestGetUserAccount(t *testing.T) {
 	getUserAccountTest.Run(t)
 }
 
-// TODO: Use the middlewares
 var registerUserTest = test.Test{
 	Method:   http.MethodPost,
 	Endpoint: "/register",
@@ -172,7 +172,7 @@ var loginUserTest = test.Test{
 
 var editUserAccountTest = test.Test{
 	Method:   http.MethodPost,
-	Endpoint: "/account",
+	Endpoint: "/user/account",
 	Handler:  api.EditUserAccountHandler,
 	Cases: []test.Case{
 		{
@@ -187,7 +187,7 @@ var editUserAccountTest = test.Test{
 		{
 			Name: "successful password change",
 			Body: dto.EditUserAccountRequest{
-				NewPassword: "newPassword123",
+				NewPassword: "newPassword",
 			},
 			ExpectedResponse: test.Response{
 				Status: http.StatusOK,
@@ -196,8 +196,8 @@ var editUserAccountTest = test.Test{
 		{
 			Name: "successful username and password change",
 			Body: dto.EditUserAccountRequest{
-				NewUsername: "johnNewdoe",
-				NewPassword: "newPassword123",
+				NewUsername: "johnNewdoe2",
+				NewPassword: "newPassword2",
 			},
 			ExpectedResponse: test.Response{
 				Status: http.StatusOK,
@@ -215,7 +215,7 @@ var editUserAccountTest = test.Test{
 		{
 			Name: "successful username change and account deletion",
 			Body: dto.EditUserAccountRequest{
-				NewUsername:   "johnNewdoe",
+				NewUsername:   "johnNewdoe3",
 				DeleteAccount: true,
 			},
 			ExpectedResponse: test.Response{
@@ -225,7 +225,7 @@ var editUserAccountTest = test.Test{
 		{
 			Name: "successful password change and account deletion",
 			Body: dto.EditUserAccountRequest{
-				NewPassword:   "newPassword123",
+				NewPassword:   "newPassword",
 				DeleteAccount: true,
 			},
 			ExpectedResponse: test.Response{
@@ -235,8 +235,8 @@ var editUserAccountTest = test.Test{
 		{
 			Name: "successful username password change and account deletion",
 			Body: dto.EditUserAccountRequest{
-				NewUsername:   "johnNewdoe",
-				NewPassword:   "newPassword123",
+				NewUsername:   "johnNewdoe4",
+				NewPassword:   "newPassword",
 				DeleteAccount: true,
 			},
 			ExpectedResponse: test.Response{
@@ -273,7 +273,7 @@ var editUserAccountTest = test.Test{
 
 var getUserAccountTest = test.Test{
 	Method:   http.MethodGet,
-	Endpoint: "/account",
+	Endpoint: "/user/account",
 	Handler:  api.EditUserAccountHandler,
 	Cases: []test.Case{
 		{
@@ -281,9 +281,9 @@ var getUserAccountTest = test.Test{
 			ExpectedResponse: test.Response{
 				Status: http.StatusOK,
 				Body: dto.GetUserAccountResponse{
-					Username: "johndoe",
-					Email:    "john@mail.com",
-					// CreatedAt: ,
+					Username:  "johndoe",
+					Email:     "john@mail.com",
+					CreatedAt: time.Now(),
 				},
 			},
 		},

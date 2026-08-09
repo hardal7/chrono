@@ -20,8 +20,7 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 	resp := dto.GetTopicEventsResponse{}
 	for i, v := range topicEvents {
 		t, _ := conn.Queries.GetTopicByID(ctx, v.TopicID)
-		// TODO: Also check the dates
-		if t.Name != "" && t.Name == r.Topic {
+		if (r.Topic == "" || r.Topic == t.Name) && (v.Date.Before(r.FromDate) && v.Date.After(r.ToDate)) {
 			resp.Topics[i] = t.Name
 			resp.Dates[i] = v.Date
 			resp.TimesTracked[i] = int(v.TimeTrackedSeconds)

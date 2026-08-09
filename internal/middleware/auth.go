@@ -23,6 +23,7 @@ func Authenticate(next http.Handler) http.Handler {
 
 		auth := r.Header.Get(AuthHeader)
 		if auth == "" {
+			logger.Error("No token provided")
 			http.Error(w, "No token provided", http.StatusUnauthorized)
 			return
 		} else {
@@ -31,21 +32,25 @@ func Authenticate(next http.Handler) http.Handler {
 				return []byte(config.App.JWT_SECRET), nil
 			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 			if err == jwt.ErrTokenExpired {
+				logger.Error("Token is expired")
 				http.Error(w, "Token is expired", http.StatusUnauthorized)
 				return
 			} else if err != nil {
 				logger.Debug(err.Error())
+				logger.Error("Token is invalid")
 				http.Error(w, "Token is invalid", http.StatusUnauthorized)
 				return
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); !ok {
+				logger.Error("Token is invalid")
 				http.Error(w, "Token is invalid", http.StatusInternalServerError)
 				return
 			} else {
 				userID, err := uuid.Parse(claims["sub"].(string))
 				if err != nil {
 					logger.Debug(err.Error())
+					logger.Error("Failed to parse token")
 					http.Error(w, "Failed to parse token", http.StatusInternalServerError)
 					return
 				}

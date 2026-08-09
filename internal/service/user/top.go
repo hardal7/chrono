@@ -28,11 +28,10 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 				avatar = db.Avatar{}
 			}
 			resp.Users = append(resp.Users, dto.TopUser{
-				Rank:      i + 1,
-				Username:  v.Username,
-				TotalTime: int(v.TotalTimeTrackedSeconds),
-				// TODO
-				// TodayTime: int(v.TodayTrackedSeconds),
+				Rank:       i + 1,
+				Username:   v.Username,
+				TotalTime:  int(v.TotalTimeTrackedSeconds),
+				TodayTime:  int(v.TodayTimeTrackedSeconds),
 				AvatarPath: "/user/avatar/" + avatar.ID.String(),
 			})
 		}
