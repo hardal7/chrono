@@ -31,7 +31,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		return err
 	}
 	err = conn.Queries.TrackUserTime(ctx, db.TrackUserTimeParams{
-		ID:                      t.ID,
+		ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
 		TotalTimeTrackedSeconds: int32(r.TimeSeconds),
 	})
 	if err != nil {

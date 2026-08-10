@@ -14,7 +14,6 @@ import (
 func UserRoute(r chi.Router) {
 	r.Post("/account", EditUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
-	r.Get("/avatar/{id}", GetUserAvatar)
 	r.Get("/account", GetUserAccountHandler)
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
 }
@@ -83,7 +82,7 @@ func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetUserAvatar(w http.ResponseWriter, r *http.Request) {
+func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	avatarID := chi.URLParam(r, "id")
 	path := filepath.Join("./"+user.AvatarDirectory, avatarID)
 	http.ServeFile(w, r, path)

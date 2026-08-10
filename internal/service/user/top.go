@@ -23,16 +23,18 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		resp := dto.GetTopUsersResponse{}
 		for i, v := range users {
 			avatar, err := conn.Queries.GetAvatarFromUserID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+			avatarPath := avatar.ID.String()
 			if err != nil {
 				logger.Warn("Failed to get avatar of user", "userRank", i+1)
-				avatar = db.Avatar{}
+				avatarPath = "empty"
 			}
+			logger.Warn("user", v.Username, "time", v.TotalTimeTrackedSeconds)
 			resp.Users = append(resp.Users, dto.TopUser{
 				Rank:       i + 1,
 				Username:   v.Username,
 				TotalTime:  int(v.TotalTimeTrackedSeconds),
 				TodayTime:  int(v.TodayTimeTrackedSeconds),
-				AvatarPath: "/user/avatar/" + avatar.ID.String(),
+				AvatarPath: "/avatar/" + avatarPath,
 			})
 		}
 		return resp, nil

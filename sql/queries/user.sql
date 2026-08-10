@@ -24,10 +24,9 @@ ORDER BY total_time_tracked_seconds DESC
 LIMIT $2;
 -- name: TrackUserTime :exec
 UPDATE users
-SET total_time_tracked_seconds = total_time_tracked_seconds + $2
-WHERE id = $1;
-UPDATE users
-SET today_time_tracked_seconds = today_time_tracked_seconds + $2
+SET
+  total_time_tracked_seconds = total_time_tracked_seconds + $2,
+  today_time_tracked_seconds = today_time_tracked_seconds + $2
 WHERE id = $1;
 -- name: ResetTimeTrackedToday :exec
 UPDATE users

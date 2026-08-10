@@ -25,6 +25,7 @@ func Serve() {
 		r.Post("/register", RegisterUserHandler)
 		r.Post("/login", LoginUserHandler)
 		r.Get("/health", PingHandler)
+		r.Get("/avatar/{id}", GetUserAvatarHandler)
 	})
 
 	// Authenticated routes
