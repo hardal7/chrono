@@ -16,7 +16,7 @@ func init() {
 }
 
 func main() {
-	go runner.ResetToday(context.Background())
+	go runner.NewDay(context.Background())
 	conn.CreateConnection()
 	api.Serve()
 }

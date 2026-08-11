@@ -24,5 +24,6 @@ func GetToday(ctx context.Context) (dto.GetTopicEventsTodayResponse, error) {
 	resp := dto.GetTopicEventsTodayResponse{
 		TotalTime: totalTime,
 	}
+	logger.Info("Got total time tracked today")
 	return resp, nil
 }

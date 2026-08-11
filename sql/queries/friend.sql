@@ -11,6 +11,15 @@ WHERE owner_id = $1 AND recipient_id = $2;
 -- name: GetFriendRequests :many
 SELECT * FROM friends
 WHERE recipient_id = $1;
--- name: GetOwnedFriendRequests :many
+-- name: GetSentriendRequests :many
 SELECT * FROM friends
 WHERE owner_id = $1;
+-- name: GetTopFriends :many
+SELECT users.* FROM friends
+JOIN users ON users.id = friends.recipient_id
+WHERE 
+    friends.is_accepted = TRUE
+    AND users.id = $1
+    AND users.total_time_tracked_seconds < $2
+ORDER BY users.total_time_tracked_seconds DESC
+LIMIT $3;

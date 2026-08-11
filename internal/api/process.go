@@ -1,8 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -25,9 +27,21 @@ func processRequest(w http.ResponseWriter, r *http.Request, req any) {
 
 func processResponse(w http.ResponseWriter, resp any) {
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(resp)
+
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(resp)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	logger.Trace(strings.TrimSpace(buf.String()))
+
+	_, err = w.Write(buf.Bytes())
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 }

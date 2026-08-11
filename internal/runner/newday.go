@@ -9,8 +9,8 @@ import (
 )
 
 // TODO: Set streaks for topics here
-func ResetToday(ctx context.Context) {
-	logger.Info("Started runner", "name", "reset_today")
+func NewDay(ctx context.Context) {
+	logger.Info("Started runner", "name", "new_day")
 	for {
 		now := time.Now()
 		nextDay := now.AddDate(0, 0, 1)

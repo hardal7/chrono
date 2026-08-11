@@ -87,13 +87,13 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 	return items, nil
 }
 
-const getOwnedFriendRequests = `-- name: GetOwnedFriendRequests :many
+const getSentriendRequests = `-- name: GetSentriendRequests :many
 SELECT id, owner_id, recipient_id, is_accepted FROM friends
 WHERE owner_id = $1
 `
 
-func (q *Queries) GetOwnedFriendRequests(ctx context.Context, ownerID uuid.UUID) ([]Friend, error) {
-	rows, err := q.db.Query(ctx, getOwnedFriendRequests, ownerID)
+func (q *Queries) GetSentriendRequests(ctx context.Context, ownerID uuid.UUID) ([]Friend, error) {
+	rows, err := q.db.Query(ctx, getSentriendRequests, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +106,52 @@ func (q *Queries) GetOwnedFriendRequests(ctx context.Context, ownerID uuid.UUID)
 			&i.OwnerID,
 			&i.RecipientID,
 			&i.IsAccepted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTopFriends = `-- name: GetTopFriends :many
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.created_at, users.updated_at FROM friends
+JOIN users ON users.id = friends.recipient_id
+WHERE 
+    friends.is_accepted = TRUE
+    AND users.id = $1
+    AND users.total_time_tracked_seconds < $2
+ORDER BY users.total_time_tracked_seconds DESC
+LIMIT $3
+`
+
+type GetTopFriendsParams struct {
+	ID                      uuid.UUID
+	TotalTimeTrackedSeconds int32
+	Limit                   int32
+}
+
+func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, getTopFriends, arg.ID, arg.TotalTimeTrackedSeconds, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Username,
+			&i.Password,
+			&i.TotalTimeTrackedSeconds,
+			&i.TodayTimeTrackedSeconds,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

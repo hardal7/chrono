@@ -2,7 +2,7 @@ APP_NAME=chrono
 BUILD_DIR=bin
 DOCKER=docker compose
 
-.PHONY: build run clean migrate
+.PHONY: build run lint test clean sqlc
 
 build:
 	mkdir -p $(BUILD_DIR)
@@ -19,6 +19,9 @@ test:
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+sqlc:
+	rm -rf internal/db/sqlc && sqlc generate
 
 dev-down:
 	$(DOCKER) --env-file .env -f deployments/compose-dev.yml down
