@@ -22,17 +22,17 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		return err
 	}
 	err = conn.Queries.TrackTopicTime(ctx, db.TrackTopicTimeParams{
-		ID:                 t.ID,
-		CreatedByUserid:    ctx.Value(middleware.UserID).(uuid.UUID),
-		TimeTrackedSeconds: int32(r.TimeSeconds),
+		ID:              t.ID,
+		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
+		TimeTracked:     int32(r.TimeSeconds),
 	})
 	if err != nil {
 		logger.Error("Failed to track topic time", err)
 		return err
 	}
 	err = conn.Queries.TrackUserTime(ctx, db.TrackUserTimeParams{
-		ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
-		TotalTimeTrackedSeconds: int32(r.TimeSeconds),
+		ID:          ctx.Value(middleware.UserID).(uuid.UUID),
+		TimeTracked: int32(r.TimeSeconds),
 	})
 	if err != nil {
 		logger.Error("Failed to track user time", err)

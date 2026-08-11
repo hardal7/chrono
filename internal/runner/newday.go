@@ -8,28 +8,59 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-// TODO: Set streaks for topics here
+func nextDate(days int) time.Time {
+	now := time.Now()
+	nextDay := now.AddDate(0, 0, days)
+	return time.Date(
+		nextDay.Year(),
+		nextDay.Month(),
+		nextDay.Day(),
+		0, 0, 0, 0,
+		time.UTC,
+	)
+}
+
 func NewDay(ctx context.Context) {
 	logger.Info("Started runner", "name", "new_day")
 	for {
-		now := time.Now()
-		nextDay := now.AddDate(0, 0, 1)
-		tomorrow := time.Date(
-			nextDay.Year(),
-			nextDay.Month(),
-			nextDay.Day(),
-			0, 0, 0, 0,
-			time.UTC,
-		)
-
-		timer := time.NewTimer(time.Until(tomorrow))
+		timer := time.NewTimer(time.Until(nextDate(1)))
 		<-timer.C
-		err := conn.Queries.ResetTimeTrackedToday(ctx)
-		if err != nil {
-			logger.Debug(err.Error())
-			logger.Error("Failed to reset time tracked for today", "date", time.Now().String())
+		updateStreaks(ctx)
+		resetTodayTimes(ctx)
+	}
+}
+
+func resetTodayTimes(ctx context.Context) {
+	logger.Info("Reseting times tracked today")
+	err := conn.Queries.ResetTopicTimeTrackedToday(ctx)
+	if err != nil {
+		logger.Debug(err.Error())
+		logger.Error("Failed to reset time tracked for today", "date", time.Now().String())
+		return
+	}
+	err = conn.Queries.ResetUserTimeTrackedToday(ctx)
+	if err != nil {
+		logger.Debug(err.Error())
+		logger.Error("Failed to reset time tracked for today", "date", time.Now().String())
+		return
+	}
+	logger.Info("Reset times tracked today")
+}
+
+func updateStreaks(ctx context.Context) {
+	logger.Info("Updating streaks")
+	topics, err := conn.Queries.GetAllTopics(ctx)
+	if err != nil {
+		logger.Debug(err.Error())
+		logger.Error("Failed to get topics")
+		return
+	}
+	for _, v := range topics {
+		if v.TodayTimeTrackedSeconds != 0 {
+			conn.Queries.IncreaseStreak(ctx, v.ID)
 		} else {
-			logger.Info("Reset times tracked today")
+			conn.Queries.LoseStreak(ctx, v.ID)
 		}
 	}
+	logger.Info("Updated streaks", "topics", len(topics))
 }

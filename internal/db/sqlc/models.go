@@ -35,12 +35,14 @@ type Session struct {
 }
 
 type Topic struct {
-	ID                 uuid.UUID
-	Name               string
-	TimeTrackedSeconds int32
-	CreatedByUserid    uuid.UUID
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
+	ID                      uuid.UUID
+	Name                    string
+	Streak                  int32
+	TodayTimeTrackedSeconds int32
+	TotalTimeTrackedSeconds int32
+	CreatedByUserid         uuid.UUID
+	CreatedAt               time.Time
+	UpdatedAt               time.Time
 }
 
 type TopicEvent struct {

@@ -36,8 +36,41 @@ func (q *Queries) DeleteTopic(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAllTopics = `-- name: GetAllTopics :many
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
+`
+
+func (q *Queries) GetAllTopics(ctx context.Context) ([]Topic, error) {
+	rows, err := q.db.Query(ctx, getAllTopics)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Topic{}
+	for rows.Next() {
+		var i Topic
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Streak,
+			&i.TodayTimeTrackedSeconds,
+			&i.TotalTimeTrackedSeconds,
+			&i.CreatedByUserid,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTopicByID = `-- name: GetTopicByID :one
-SELECT id, name, time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
 WHERE id = $1
 `
 
@@ -47,7 +80,9 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.TimeTrackedSeconds,
+		&i.Streak,
+		&i.TodayTimeTrackedSeconds,
+		&i.TotalTimeTrackedSeconds,
 		&i.CreatedByUserid,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -56,7 +91,7 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 }
 
 const getTopicOfUserByName = `-- name: GetTopicOfUserByName :one
-SELECT id, name, time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
 WHERE name = $1 AND created_by_userid = $2
 `
 
@@ -71,7 +106,9 @@ func (q *Queries) GetTopicOfUserByName(ctx context.Context, arg GetTopicOfUserBy
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.TimeTrackedSeconds,
+		&i.Streak,
+		&i.TodayTimeTrackedSeconds,
+		&i.TotalTimeTrackedSeconds,
 		&i.CreatedByUserid,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -79,36 +116,70 @@ func (q *Queries) GetTopicOfUserByName(ctx context.Context, arg GetTopicOfUserBy
 	return i, err
 }
 
+const increaseStreak = `-- name: IncreaseStreak :exec
+UPDATE topics
+SET streak = streak + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncreaseStreak(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, increaseStreak, id)
+	return err
+}
+
+const loseStreak = `-- name: LoseStreak :exec
+UPDATE topics
+SET streak = 0
+WHERE id = $1
+`
+
+func (q *Queries) LoseStreak(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, loseStreak, id)
+	return err
+}
+
+const resetTopicTimeTrackedToday = `-- name: ResetTopicTimeTrackedToday :exec
+UPDATE topics
+SET today_time_tracked_seconds = 0
+`
+
+func (q *Queries) ResetTopicTimeTrackedToday(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, resetTopicTimeTrackedToday)
+	return err
+}
+
 const trackTopicTime = `-- name: TrackTopicTime :exec
 UPDATE topics
-SET time_tracked_seconds = time_tracked_seconds + $3
+SET 
+    total_time_tracked_seconds = total_time_tracked_seconds + $3,
+    today_time_tracked_seconds = today_time_tracked_seconds + $3
 WHERE id = $1 AND created_by_userid = $2
 `
 
 type TrackTopicTimeParams struct {
-	ID                 uuid.UUID
-	CreatedByUserid    uuid.UUID
-	TimeTrackedSeconds int32
+	ID              uuid.UUID
+	CreatedByUserid uuid.UUID
+	TimeTracked     int32
 }
 
 func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) error {
-	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.CreatedByUserid, arg.TimeTrackedSeconds)
+	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.CreatedByUserid, arg.TimeTracked)
 	return err
 }
 
 const updateTopic = `-- name: UpdateTopic :exec
 UPDATE topics
-SET name = $2, time_tracked_seconds = $3, updated_at = now()
+SET name = $2, total_time_tracked_seconds = $3, updated_at = now()
 WHERE id = $1
 `
 
 type UpdateTopicParams struct {
-	ID                 uuid.UUID
-	Name               string
-	TimeTrackedSeconds int32
+	ID                      uuid.UUID
+	Name                    string
+	TotalTimeTrackedSeconds int32
 }
 
 func (q *Queries) UpdateTopic(ctx context.Context, arg UpdateTopicParams) error {
-	_, err := q.db.Exec(ctx, updateTopic, arg.ID, arg.Name, arg.TimeTrackedSeconds)
+	_, err := q.db.Exec(ctx, updateTopic, arg.ID, arg.Name, arg.TotalTimeTrackedSeconds)
 	return err
 }

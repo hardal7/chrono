@@ -163,13 +163,13 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
-const resetTimeTrackedToday = `-- name: ResetTimeTrackedToday :exec
+const resetUserTimeTrackedToday = `-- name: ResetUserTimeTrackedToday :exec
 UPDATE users
 SET today_time_tracked_seconds = 0
 `
 
-func (q *Queries) ResetTimeTrackedToday(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, resetTimeTrackedToday)
+func (q *Queries) ResetUserTimeTrackedToday(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, resetUserTimeTrackedToday)
 	return err
 }
 
@@ -182,12 +182,12 @@ WHERE id = $1
 `
 
 type TrackUserTimeParams struct {
-	ID                      uuid.UUID
-	TotalTimeTrackedSeconds int32
+	ID          uuid.UUID
+	TimeTracked int32
 }
 
 func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) error {
-	_, err := q.db.Exec(ctx, trackUserTime, arg.ID, arg.TotalTimeTrackedSeconds)
+	_, err := q.db.Exec(ctx, trackUserTime, arg.ID, arg.TimeTracked)
 	return err
 }
 

@@ -36,9 +36,9 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 	}
 	t.Name = r.NewName
 	err = conn.Queries.UpdateTopic(ctx, db.UpdateTopicParams{
-		ID:                 t.ID,
-		Name:               t.Name,
-		TimeTrackedSeconds: t.TimeTrackedSeconds,
+		ID:                      t.ID,
+		Name:                    t.Name,
+		TotalTimeTrackedSeconds: t.TotalTimeTrackedSeconds,
 	})
 	if err != nil {
 		logger.Error("Failed to update topic", err)

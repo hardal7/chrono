@@ -25,10 +25,10 @@ LIMIT $2;
 -- name: TrackUserTime :exec
 UPDATE users
 SET
-    total_time_tracked_seconds = total_time_tracked_seconds + $2,
-    today_time_tracked_seconds = today_time_tracked_seconds + $2
+    total_time_tracked_seconds = total_time_tracked_seconds + sqlc.arg(time_tracked),
+    today_time_tracked_seconds = today_time_tracked_seconds + sqlc.arg(time_tracked)
 WHERE id = $1;
--- name: ResetTimeTrackedToday :exec
+-- name: ResetUserTimeTrackedToday :exec
 UPDATE users
 SET today_time_tracked_seconds = 0;
 -- name: GetAvatarFromUserID :one
