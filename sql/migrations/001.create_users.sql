@@ -8,8 +8,3 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-
-CREATE TABLE avatars (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id uuid NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE
-);

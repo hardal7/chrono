@@ -15,7 +15,7 @@ const firstTopic string = "General"
 func InitFirst(ctx context.Context) error {
 	err := conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
 		Name:            firstTopic,
-		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
+		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		logger.Warn("Failed to initialize first topic")

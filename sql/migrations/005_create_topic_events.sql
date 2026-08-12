@@ -3,5 +3,5 @@ CREATE TABLE topic_events (
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     topic_id uuid NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
     time_tracked_seconds INT NOT NULL DEFAULT 0,
-    date TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

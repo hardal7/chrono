@@ -14,7 +14,7 @@ import (
 func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 	t, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{
 		Name:            r.Name,
-		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
+		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		return err

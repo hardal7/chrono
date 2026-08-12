@@ -12,17 +12,17 @@ import (
 )
 
 const createTopic = `-- name: CreateTopic :exec
-INSERT INTO topics(name, created_by_userid)
+INSERT INTO topics(name, created_by_user_id)
 VALUES($1, $2)
 `
 
 type CreateTopicParams struct {
 	Name            string
-	CreatedByUserid uuid.UUID
+	CreatedByUserID uuid.UUID
 }
 
 func (q *Queries) CreateTopic(ctx context.Context, arg CreateTopicParams) error {
-	_, err := q.db.Exec(ctx, createTopic, arg.Name, arg.CreatedByUserid)
+	_, err := q.db.Exec(ctx, createTopic, arg.Name, arg.CreatedByUserID)
 	return err
 }
 
@@ -37,7 +37,7 @@ func (q *Queries) DeleteTopic(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllTopics = `-- name: GetAllTopics :many
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_user_id, created_at, updated_at FROM topics
 `
 
 func (q *Queries) GetAllTopics(ctx context.Context) ([]Topic, error) {
@@ -55,7 +55,7 @@ func (q *Queries) GetAllTopics(ctx context.Context) ([]Topic, error) {
 			&i.Streak,
 			&i.TodayTimeTrackedSeconds,
 			&i.TotalTimeTrackedSeconds,
-			&i.CreatedByUserid,
+			&i.CreatedByUserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -70,7 +70,7 @@ func (q *Queries) GetAllTopics(ctx context.Context) ([]Topic, error) {
 }
 
 const getTopicByID = `-- name: GetTopicByID :one
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_user_id, created_at, updated_at FROM topics
 WHERE id = $1
 `
 
@@ -83,7 +83,7 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 		&i.Streak,
 		&i.TodayTimeTrackedSeconds,
 		&i.TotalTimeTrackedSeconds,
-		&i.CreatedByUserid,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -91,17 +91,17 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 }
 
 const getTopicOfUserByName = `-- name: GetTopicOfUserByName :one
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_userid, created_at, updated_at FROM topics
-WHERE name = $1 AND created_by_userid = $2
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, created_by_user_id, created_at, updated_at FROM topics
+WHERE name = $1 AND created_by_user_id = $2
 `
 
 type GetTopicOfUserByNameParams struct {
 	Name            string
-	CreatedByUserid uuid.UUID
+	CreatedByUserID uuid.UUID
 }
 
 func (q *Queries) GetTopicOfUserByName(ctx context.Context, arg GetTopicOfUserByNameParams) (Topic, error) {
-	row := q.db.QueryRow(ctx, getTopicOfUserByName, arg.Name, arg.CreatedByUserid)
+	row := q.db.QueryRow(ctx, getTopicOfUserByName, arg.Name, arg.CreatedByUserID)
 	var i Topic
 	err := row.Scan(
 		&i.ID,
@@ -109,7 +109,7 @@ func (q *Queries) GetTopicOfUserByName(ctx context.Context, arg GetTopicOfUserBy
 		&i.Streak,
 		&i.TodayTimeTrackedSeconds,
 		&i.TotalTimeTrackedSeconds,
-		&i.CreatedByUserid,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -153,17 +153,17 @@ UPDATE topics
 SET 
     total_time_tracked_seconds = total_time_tracked_seconds + $3,
     today_time_tracked_seconds = today_time_tracked_seconds + $3
-WHERE id = $1 AND created_by_userid = $2
+WHERE id = $1 AND created_by_user_id = $2
 `
 
 type TrackTopicTimeParams struct {
 	ID              uuid.UUID
-	CreatedByUserid uuid.UUID
+	CreatedByUserID uuid.UUID
 	TimeTracked     int32
 }
 
 func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) error {
-	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.CreatedByUserid, arg.TimeTracked)
+	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.CreatedByUserID, arg.TimeTracked)
 	return err
 }
 

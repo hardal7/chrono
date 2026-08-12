@@ -11,27 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Avatar struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
-}
-
 type Friend struct {
 	ID          uuid.UUID
-	OwnerID     uuid.UUID
+	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 	IsAccepted  bool
 }
 
 type Session struct {
-	ID             uuid.UUID
-	Name           string
-	Password       pgtype.Text
-	OwnerID        uuid.UUID
-	ParticipantIds []uuid.UUID
-	Expiry         time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID              uuid.UUID
+	Name            string
+	MaxParticipants pgtype.Int4
+	Password        pgtype.Text
+	ExpiresAt       pgtype.Timestamptz
+	Topic           pgtype.Text
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+type SessionParticipant struct {
+	ID                      uuid.UUID
+	IsOwner                 bool
+	UserID                  uuid.UUID
+	SessionID               uuid.UUID
+	LastSeenAt              time.Time
+	TotalTimeTrackedSeconds int32
+	TodayTimeTrackedSeconds int32
 }
 
 type Topic struct {
@@ -40,7 +45,7 @@ type Topic struct {
 	Streak                  int32
 	TodayTimeTrackedSeconds int32
 	TotalTimeTrackedSeconds int32
-	CreatedByUserid         uuid.UUID
+	CreatedByUserID         uuid.UUID
 	CreatedAt               time.Time
 	UpdatedAt               time.Time
 }
@@ -50,7 +55,7 @@ type TopicEvent struct {
 	UserID             uuid.UUID
 	TopicID            uuid.UUID
 	TimeTrackedSeconds int32
-	Date               time.Time
+	CreatedAt          time.Time
 }
 
 type User struct {

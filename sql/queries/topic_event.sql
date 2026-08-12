@@ -1,9 +1,9 @@
 -- name: CreateTopicEvent :exec
-INSERT INTO topic_events(user_id, topic_id, time_tracked_seconds, date)
+INSERT INTO topic_events(user_id, topic_id, time_tracked_seconds, created_at)
 VALUES($1, $2, $3, $4);
--- name: UpdateTopicEvent :exec
+-- name: Upcreated_atTopicEvent :exec
 UPDATE topic_events
-SET time_tracked_seconds = $2, date = $3
+SET time_tracked_seconds = $2, created_at = $3
 WHERE id = $1;
 -- name: DeleteTopicEvent :exec
 DELETE FROM topic_events
@@ -13,4 +13,4 @@ SELECT * FROM topic_events
 WHERE user_id = $1;
 -- name: GetTopicEventsToday :many
 SELECT * FROM topic_events
-WHERE user_id = $1 AND DATE(date) = CURRENT_DATE;
+WHERE user_id = $1 AND created_at(date) = CURRENT_DATE;

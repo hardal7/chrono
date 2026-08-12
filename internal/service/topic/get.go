@@ -15,7 +15,7 @@ func Get(ctx context.Context, r dto.GetTopicRequest) (dto.GetTopicResponse, erro
 	logger.Info("Getting topic", "name", r.Name)
 	t, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{
 		Name:            r.Name,
-		CreatedByUserid: ctx.Value(middleware.UserID).(uuid.UUID),
+		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		logger.Error("Failed to get topic by username", err)

@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -38,18 +37,8 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 		return err
 	}
 
-	userID := ctx.Value(middleware.UserID).(uuid.UUID)
-	err = conn.Queries.CreateAvatar(ctx, userID)
-	if err != nil {
-		logger.Error("Failed to query database", err)
-		return err
-	}
-	avatar, err := conn.Queries.GetAvatarFromUserID(ctx, userID)
-	if err != nil {
-		logger.Error("Failed to query database", err)
-		return err
-	}
-	err = createFile(fileBytes, avatar.ID.String())
+	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
+	err = createFile(fileBytes, userID)
 	if err != nil {
 		logger.Error("Failed to create file", err)
 		return err

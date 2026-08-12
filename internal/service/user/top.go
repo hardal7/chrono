@@ -33,8 +33,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 
 	resp := dto.GetTopUsersResponse{}
 	for i, v := range users {
-		avatar, err := conn.Queries.GetAvatarFromUserID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
-		avatarPath := avatar.ID.String()
+		avatarPath := ctx.Value(middleware.UserID).(uuid.UUID).String()
 		if err != nil {
 			logger.Warn("Failed to get avatar of user", "userRank", i+1)
 			avatarPath = "empty"

@@ -14,51 +14,51 @@ import (
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
 SET is_accepted = true
-WHERE owner_id = $1 AND recipient_id = $2
+WHERE sender_id = $1 AND recipient_id = $2
 `
 
 type AcceptFriendRequestParams struct {
-	OwnerID     uuid.UUID
+	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 }
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.OwnerID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.SenderID, arg.RecipientID)
 	return err
 }
 
 const createFriend = `-- name: CreateFriend :exec
-INSERT INTO friends(owner_id, recipient_id)
+INSERT INTO friends(sender_id, recipient_id)
 VALUES($1, $2)
 `
 
 type CreateFriendParams struct {
-	OwnerID     uuid.UUID
+	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 }
 
 func (q *Queries) CreateFriend(ctx context.Context, arg CreateFriendParams) error {
-	_, err := q.db.Exec(ctx, createFriend, arg.OwnerID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, createFriend, arg.SenderID, arg.RecipientID)
 	return err
 }
 
 const deleteFriend = `-- name: DeleteFriend :exec
 DELETE FROM friends
-WHERE owner_id = $1 AND recipient_id = $2
+WHERE sender_id = $1 AND recipient_id = $2
 `
 
 type DeleteFriendParams struct {
-	OwnerID     uuid.UUID
+	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 }
 
 func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) error {
-	_, err := q.db.Exec(ctx, deleteFriend, arg.OwnerID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, deleteFriend, arg.SenderID, arg.RecipientID)
 	return err
 }
 
 const getFriendRequests = `-- name: GetFriendRequests :many
-SELECT id, owner_id, recipient_id, is_accepted FROM friends
+SELECT id, sender_id, recipient_id, is_accepted FROM friends
 WHERE recipient_id = $1
 `
 
@@ -73,7 +73,7 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 		var i Friend
 		if err := rows.Scan(
 			&i.ID,
-			&i.OwnerID,
+			&i.SenderID,
 			&i.RecipientID,
 			&i.IsAccepted,
 		); err != nil {
@@ -88,12 +88,12 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 }
 
 const getSentriendRequests = `-- name: GetSentriendRequests :many
-SELECT id, owner_id, recipient_id, is_accepted FROM friends
-WHERE owner_id = $1
+SELECT id, sender_id, recipient_id, is_accepted FROM friends
+WHERE sender_id = $1
 `
 
-func (q *Queries) GetSentriendRequests(ctx context.Context, ownerID uuid.UUID) ([]Friend, error) {
-	rows, err := q.db.Query(ctx, getSentriendRequests, ownerID)
+func (q *Queries) GetSentriendRequests(ctx context.Context, senderID uuid.UUID) ([]Friend, error) {
+	rows, err := q.db.Query(ctx, getSentriendRequests, senderID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (q *Queries) GetSentriendRequests(ctx context.Context, ownerID uuid.UUID) (
 		var i Friend
 		if err := rows.Scan(
 			&i.ID,
-			&i.OwnerID,
+			&i.SenderID,
 			&i.RecipientID,
 			&i.IsAccepted,
 		); err != nil {

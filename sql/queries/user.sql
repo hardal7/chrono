@@ -31,9 +31,3 @@ WHERE id = $1;
 -- name: ResetUserTimeTrackedToday :exec
 UPDATE users
 SET today_time_tracked_seconds = 0;
--- name: GetAvatarFromUserID :one
-SELECT * FROM avatars
-WHERE user_id = $1;
--- name: CreateAvatar :exec
-INSERT INTO avatars (user_id)
-VALUES ($1);

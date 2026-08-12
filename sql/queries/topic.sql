@@ -1,5 +1,5 @@
 -- name: CreateTopic :exec
-INSERT INTO topics(name, created_by_userid)
+INSERT INTO topics(name, created_by_user_id)
 VALUES($1, $2);
 -- name: UpdateTopic :exec
 UPDATE topics
@@ -15,13 +15,13 @@ WHERE id = $1;
 SELECT * FROM topics;
 -- name: GetTopicOfUserByName :one
 SELECT * FROM topics
-WHERE name = $1 AND created_by_userid = $2;
+WHERE name = $1 AND created_by_user_id = $2;
 -- name: TrackTopicTime :exec
 UPDATE topics
 SET 
     total_time_tracked_seconds = total_time_tracked_seconds + sqlc.arg(time_tracked),
     today_time_tracked_seconds = today_time_tracked_seconds + sqlc.arg(time_tracked)
-WHERE id = $1 AND created_by_userid = $2;
+WHERE id = $1 AND created_by_user_id = $2;
 -- name: ResetTopicTimeTrackedToday :exec
 UPDATE topics
 SET today_time_tracked_seconds = 0;
