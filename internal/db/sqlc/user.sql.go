@@ -171,23 +171,17 @@ func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) er
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET email = $2, username = $3, password = $4, updated_at = now()
+SET username = $2, password = $3, updated_at = now()
 WHERE id = $1
 `
 
 type UpdateUserParams struct {
 	ID       uuid.UUID
-	Email    string
 	Username string
 	Password string
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.Exec(ctx, updateUser,
-		arg.ID,
-		arg.Email,
-		arg.Username,
-		arg.Password,
-	)
+	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Username, arg.Password)
 	return err
 }

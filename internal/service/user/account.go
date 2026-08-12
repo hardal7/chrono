@@ -31,15 +31,17 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		logger.Info("Deleted account", "username", u.Username)
 		return nil
 	}
+
 	if r.NewUsername != "" {
-		u.Username = r.NewUsername
 		logger.Info("Changing username", "username", u.Username, "newUsername", r.NewUsername)
 		_, err := conn.Queries.GetUserByUsername(ctx, r.NewUsername)
 		if err != pgx.ErrNoRows {
 			logger.Error("Account with username exists")
 			return errors.New("account with username exists")
 		}
+		u.Username = r.NewUsername
 	}
+
 	if r.NewPassword != "" {
 		logger.Info("Changing account password")
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
@@ -49,10 +51,10 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		}
 		u.Password = string(passwordHash)
 	}
+
 	err = conn.Queries.UpdateUser(ctx, db.UpdateUserParams{
 		ID:       u.ID,
 		Username: u.Username,
-		Email:    u.Email,
 		Password: u.Password,
 	})
 	if err != nil {

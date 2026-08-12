@@ -1,9 +1,9 @@
 -- name: CreateTopic :exec
-INSERT INTO topics(name, created_by_user_id)
+INSERT INTO topics(name, owner_id)
 VALUES($1, $2);
 -- name: UpdateTopic :exec
 UPDATE topics
-SET name = $2, total_time_tracked_seconds = $3, updated_at = now()
+SET name = $2, updated_at = now()
 WHERE id = $1;
 -- name: DeleteTopic :exec
 DELETE FROM topics
@@ -11,17 +11,17 @@ WHERE id = $1;
 -- name: GetTopicByID :one
 SELECT * FROM topics
 WHERE id = $1;
--- name: GetAllTopics :many
+-- name: GetTopicsAll :many
 SELECT * FROM topics;
--- name: GetTopicOfUserByName :one
+-- name: GetTopicByOwnerAndName :one
 SELECT * FROM topics
-WHERE name = $1 AND created_by_user_id = $2;
+WHERE name = $1 AND owner_id = $2;
 -- name: TrackTopicTime :exec
 UPDATE topics
 SET 
     total_time_tracked_seconds = total_time_tracked_seconds + sqlc.arg(time_tracked),
     today_time_tracked_seconds = today_time_tracked_seconds + sqlc.arg(time_tracked)
-WHERE id = $1 AND created_by_user_id = $2;
+WHERE id = $1 AND owner_id = $2;
 -- name: ResetTopicTimeTrackedToday :exec
 UPDATE topics
 SET today_time_tracked_seconds = 0;

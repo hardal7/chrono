@@ -12,7 +12,7 @@ import (
 
 func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsResponse, error) {
 	logger.Info("Getting topic events")
-	topicEvents, err := conn.Queries.GetAllTopicEvents(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	topicEvents, err := conn.Queries.GetTopicEventsAll(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get topic events", err)
 		return dto.GetTopicEventsResponse{}, err

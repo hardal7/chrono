@@ -11,7 +11,7 @@ WHERE sender_id = $1 AND recipient_id = $2;
 -- name: GetFriendRequests :many
 SELECT * FROM friends
 WHERE recipient_id = $1;
--- name: GetSentriendRequests :many
+-- name: GetSentFriendRequests :many
 SELECT * FROM friends
 WHERE sender_id = $1;
 -- name: GetTopFriends :many

@@ -87,13 +87,13 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 	return items, nil
 }
 
-const getSentriendRequests = `-- name: GetSentriendRequests :many
+const getSentFriendRequests = `-- name: GetSentFriendRequests :many
 SELECT id, sender_id, recipient_id, is_accepted FROM friends
 WHERE sender_id = $1
 `
 
-func (q *Queries) GetSentriendRequests(ctx context.Context, senderID uuid.UUID) ([]Friend, error) {
-	rows, err := q.db.Query(ctx, getSentriendRequests, senderID)
+func (q *Queries) GetSentFriendRequests(ctx context.Context, senderID uuid.UUID) ([]Friend, error) {
+	rows, err := q.db.Query(ctx, getSentFriendRequests, senderID)
 	if err != nil {
 		return nil, err
 	}

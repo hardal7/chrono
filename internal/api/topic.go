@@ -43,7 +43,7 @@ func GetTopicHandler(w http.ResponseWriter, r *http.Request) {
 	processRequest(w, r, &req)
 	resp, err := topic.Get(r.Context(), req)
 	if err != nil {
-		logger.Error(err.Error())
+		http.Error(w, "Failed to get topics", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

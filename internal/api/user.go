@@ -8,7 +8,6 @@ import (
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/service/user"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func UserRoute(r chi.Router) {
@@ -44,7 +43,6 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := user.GetAccount(r.Context())
 	if err != nil {
-		logger.Error(err.Error())
 		http.Error(w, "Failed to get account details", http.StatusBadRequest)
 		return
 	}

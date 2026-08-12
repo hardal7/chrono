@@ -49,7 +49,7 @@ func resetTodayTimes(ctx context.Context) {
 
 func updateStreaks(ctx context.Context) {
 	logger.Info("Updating streaks")
-	topics, err := conn.Queries.GetAllTopics(ctx)
+	topics, err := conn.Queries.GetTopicsAll(ctx)
 	if err != nil {
 		logger.Debug(err.Error())
 		logger.Error("Failed to get topics")

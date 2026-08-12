@@ -3,7 +3,7 @@ INSERT INTO users(email, username, password)
 VALUES($1, $2, $3);
 -- name: UpdateUser :exec
 UPDATE users
-SET email = $2, username = $3, password = $4, updated_at = now()
+SET username = $2, password = $3, updated_at = now()
 WHERE id = $1;
 -- name: DeleteUser :exec
 DELETE FROM users

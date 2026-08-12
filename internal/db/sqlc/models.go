@@ -20,18 +20,19 @@ type Friend struct {
 
 type Session struct {
 	ID              uuid.UUID
+	OwnerID         uuid.UUID
 	Name            string
 	MaxParticipants pgtype.Int4
 	Password        pgtype.Text
 	ExpiresAt       pgtype.Timestamptz
 	Topic           pgtype.Text
+	IsActive        bool
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
 
 type SessionParticipant struct {
 	ID                      uuid.UUID
-	IsOwner                 bool
 	UserID                  uuid.UUID
 	SessionID               uuid.UUID
 	LastSeenAt              time.Time
@@ -45,7 +46,7 @@ type Topic struct {
 	Streak                  int32
 	TodayTimeTrackedSeconds int32
 	TotalTimeTrackedSeconds int32
-	CreatedByUserID         uuid.UUID
+	OwnerID                 uuid.UUID
 	CreatedAt               time.Time
 	UpdatedAt               time.Time
 }

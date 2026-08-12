@@ -44,13 +44,13 @@ func (q *Queries) DeleteTopicEvent(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getAllTopicEvents = `-- name: GetAllTopicEvents :many
+const getTopicEventsAll = `-- name: GetTopicEventsAll :many
 SELECT id, user_id, topic_id, time_tracked_seconds, created_at FROM topic_events
 WHERE user_id = $1
 `
 
-func (q *Queries) GetAllTopicEvents(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
-	rows, err := q.db.Query(ctx, getAllTopicEvents, userID)
+func (q *Queries) GetTopicEventsAll(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
+	rows, err := q.db.Query(ctx, getTopicEventsAll, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -106,19 +106,19 @@ func (q *Queries) GetTopicEventsToday(ctx context.Context, userID uuid.UUID) ([]
 	return items, nil
 }
 
-const upcreated_atTopicEvent = `-- name: Upcreated_atTopicEvent :exec
+const updateTopicEvent = `-- name: UpdateTopicEvent :exec
 UPDATE topic_events
 SET time_tracked_seconds = $2, created_at = $3
 WHERE id = $1
 `
 
-type Upcreated_atTopicEventParams struct {
+type UpdateTopicEventParams struct {
 	ID                 uuid.UUID
 	TimeTrackedSeconds int32
 	CreatedAt          time.Time
 }
 
-func (q *Queries) Upcreated_atTopicEvent(ctx context.Context, arg Upcreated_atTopicEventParams) error {
-	_, err := q.db.Exec(ctx, upcreated_atTopicEvent, arg.ID, arg.TimeTrackedSeconds, arg.CreatedAt)
+func (q *Queries) UpdateTopicEvent(ctx context.Context, arg UpdateTopicEventParams) error {
+	_, err := q.db.Exec(ctx, updateTopicEvent, arg.ID, arg.TimeTrackedSeconds, arg.CreatedAt)
 	return err
 }

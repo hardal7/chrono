@@ -13,18 +13,18 @@ import (
 
 func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	logger.Info("Tracking time", "topic", r.Topic)
-	t, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{
-		Name:            r.Topic,
-		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
+	t, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
+		Name:    r.Topic,
+		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		logger.Error("Failed to get topic by username", err)
 		return err
 	}
 	err = conn.Queries.TrackTopicTime(ctx, db.TrackTopicTimeParams{
-		ID:              t.ID,
-		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
-		TimeTracked:     int32(r.TimeSeconds),
+		ID:          t.ID,
+		OwnerID:     ctx.Value(middleware.UserID).(uuid.UUID),
+		TimeTracked: int32(r.TimeSeconds),
 	})
 	if err != nil {
 		logger.Error("Failed to track topic time", err)

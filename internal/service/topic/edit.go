@@ -12,9 +12,9 @@ import (
 )
 
 func Edit(ctx context.Context, r dto.EditTopicRequest) error {
-	t, err := conn.Queries.GetTopicOfUserByName(ctx, db.GetTopicOfUserByNameParams{
-		Name:            r.Name,
-		CreatedByUserID: ctx.Value(middleware.UserID).(uuid.UUID),
+	t, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
+		Name:    r.Name,
+		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
 		return err
@@ -34,11 +34,11 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 		logger.Info("Topic not changed")
 		return nil
 	}
+
 	t.Name = r.NewName
 	err = conn.Queries.UpdateTopic(ctx, db.UpdateTopicParams{
-		ID:                      t.ID,
-		Name:                    t.Name,
-		TotalTimeTrackedSeconds: t.TotalTimeTrackedSeconds,
+		ID:   t.ID,
+		Name: t.Name,
 	})
 	if err != nil {
 		logger.Error("Failed to update topic", err)
