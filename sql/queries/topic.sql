@@ -13,6 +13,9 @@ SELECT * FROM topics
 WHERE id = $1;
 -- name: GetTopicsAll :many
 SELECT * FROM topics;
+-- name: GetTopicByOwner :many
+SELECT * FROM topics
+WHERE owner_id = $1;
 -- name: GetTopicByOwnerAndName :one
 SELECT * FROM topics
 WHERE name = $1 AND owner_id = $2;

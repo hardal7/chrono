@@ -10,10 +10,18 @@ type EditTopicRequest struct {
 	Delete  bool   `json:"delete" validate:"omitempty"`
 }
 
-type GetTopicRequest struct {
+type GetTopicNamedRequest struct {
 	Name string `json:"name"`
 }
-type GetTopicResponse struct {
+type GetTopicNamedResponse struct {
 	TotalTime int `json:"total_time_tracked_seconds"`
 	Streak    int `json:"streak"`
+}
+
+type TopicSelection struct {
+	Name      string `json:"name"`
+	TotalTime int    `json:"total_time_tracked_seconds"`
+}
+type GetTopicsAllResponse struct {
+	Topics []TopicSelection `json:"topics"`
 }

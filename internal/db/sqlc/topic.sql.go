@@ -57,6 +57,40 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 	return i, err
 }
 
+const getTopicByOwner = `-- name: GetTopicByOwner :many
+SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
+WHERE owner_id = $1
+`
+
+func (q *Queries) GetTopicByOwner(ctx context.Context, ownerID uuid.UUID) ([]Topic, error) {
+	rows, err := q.db.Query(ctx, getTopicByOwner, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Topic{}
+	for rows.Next() {
+		var i Topic
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Streak,
+			&i.TodayTimeTrackedSeconds,
+			&i.TotalTimeTrackedSeconds,
+			&i.OwnerID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTopicByOwnerAndName = `-- name: GetTopicByOwnerAndName :one
 SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
 WHERE name = $1 AND owner_id = $2

@@ -11,7 +11,7 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func Get(ctx context.Context, r dto.GetTopicRequest) (dto.GetTopicResponse, error) {
+func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicNamedResponse, error) {
 	logger.Info("Getting topic", "name", r.Name)
 	t, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
 		Name:    r.Name,
@@ -19,9 +19,9 @@ func Get(ctx context.Context, r dto.GetTopicRequest) (dto.GetTopicResponse, erro
 	})
 	if err != nil {
 		logger.Error("Failed to get topic by username", err)
-		return dto.GetTopicResponse{}, err
+		return dto.GetTopicNamedResponse{}, err
 	}
-	resp := dto.GetTopicResponse{
+	resp := dto.GetTopicNamedResponse{
 		TotalTime: int(t.TotalTimeTrackedSeconds),
 		Streak:    int(t.Streak),
 	}
