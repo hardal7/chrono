@@ -23,6 +23,7 @@ func Get(ctx context.Context, r dto.GetTopicRequest) (dto.GetTopicResponse, erro
 	}
 	resp := dto.GetTopicResponse{
 		TotalTime: int(t.TotalTimeTrackedSeconds),
+		Streak:    int(t.Streak),
 	}
 	logger.Info("Got topic", "name", r.Name)
 	return resp, nil

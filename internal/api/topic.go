@@ -1,13 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/topic"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func TopicRoute(r chi.Router) {
@@ -46,10 +44,5 @@ func GetTopicHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get topics", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	processResponse(w, resp)
 }

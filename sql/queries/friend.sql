@@ -1,9 +1,11 @@
--- name: CreateFriend :exec
+-- name: CreateFriendRequest :exec
 INSERT INTO friends(sender_id, recipient_id)
 VALUES($1, $2);
 -- name: DeleteFriend :exec
 DELETE FROM friends
-WHERE sender_id = $1 AND recipient_id = $2;
+WHERE
+    sender_id = $1 AND recipient_id = $2
+    OR sender_id = $2 AND recipient_id = $1;
 -- name: AcceptFriendRequest :exec
 UPDATE friends
 SET is_accepted = true

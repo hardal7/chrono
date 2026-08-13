@@ -27,24 +27,26 @@ func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendReque
 	return err
 }
 
-const createFriend = `-- name: CreateFriend :exec
+const createFriendRequest = `-- name: CreateFriendRequest :exec
 INSERT INTO friends(sender_id, recipient_id)
 VALUES($1, $2)
 `
 
-type CreateFriendParams struct {
+type CreateFriendRequestParams struct {
 	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 }
 
-func (q *Queries) CreateFriend(ctx context.Context, arg CreateFriendParams) error {
-	_, err := q.db.Exec(ctx, createFriend, arg.SenderID, arg.RecipientID)
+func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendRequestParams) error {
+	_, err := q.db.Exec(ctx, createFriendRequest, arg.SenderID, arg.RecipientID)
 	return err
 }
 
 const deleteFriend = `-- name: DeleteFriend :exec
 DELETE FROM friends
-WHERE sender_id = $1 AND recipient_id = $2
+WHERE
+    sender_id = $1 AND recipient_id = $2
+    OR sender_id = $2 AND recipient_id = $1
 `
 
 type DeleteFriendParams struct {

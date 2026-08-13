@@ -77,7 +77,7 @@ func (q *Queries) GetTopicEventsAll(ctx context.Context, userID uuid.UUID) ([]To
 
 const getTopicEventsToday = `-- name: GetTopicEventsToday :many
 SELECT id, user_id, topic_id, time_tracked_seconds, created_at FROM topic_events
-WHERE user_id = $1 AND created_at(date) = CURRENT_DATE
+WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE
 `
 
 func (q *Queries) GetTopicEventsToday(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {

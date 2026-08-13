@@ -16,12 +16,12 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	var users []db.User
 	var err error
 	if r.FriendsOnly {
-		users, err = conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
+		users, err = conn.Queries.GetTopFriends(ctx, db.GetTopFriendsParams{
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 		})
 	} else {
-		users, err = conn.Queries.GetTopFriends(ctx, db.GetTopFriendsParams{
+		users, err = conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 		})

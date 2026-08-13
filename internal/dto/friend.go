@@ -8,6 +8,6 @@ type AcceptFriendRequestRequest struct {
 	Username string `json:"username"`
 }
 
-type DeleteFriendRequest struct {
+type RemoveFriendRequest struct {
 	Username string `json:"username"`
 }

@@ -15,4 +15,5 @@ type GetTopicRequest struct {
 }
 type GetTopicResponse struct {
 	TotalTime int `json:"total_time_tracked_seconds"`
+	Streak    int `json:"streak"`
 }

@@ -34,6 +34,8 @@ func Serve() {
 		r.Route("/user", UserRoute)
 		r.Route("/topic", TopicRoute)
 		r.Route("/topic-event", TopicEventRoute)
+		r.Route("/session", SessionRoute)
+		r.Route("/friend", FriendRoute)
 	})
 
 	go runServer("main", config.App.Port, mainRouter)
