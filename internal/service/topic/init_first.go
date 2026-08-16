@@ -8,12 +8,22 @@ import (
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 )
 
 const firstTopic string = "General"
 
 func InitFirst(ctx context.Context) error {
-	err := conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
+	_, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
+		Name:    firstTopic,
+		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
+	})
+	if err != pgx.ErrNoRows {
+		logger.Debug("First topic already initialized")
+		return err
+	}
+
+	err = conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
 		Name:    firstTopic,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})

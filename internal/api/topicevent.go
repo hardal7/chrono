@@ -37,7 +37,9 @@ func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
-	resp, err := topicevent.GetToday(r.Context())
+	var req dto.GetTopicEventsTodayRequest
+	processRequest(w, r, &req)
+	resp, err := topicevent.GetToday(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Failed to get topic events today", http.StatusBadRequest)
 		return

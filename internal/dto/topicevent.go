@@ -19,6 +19,14 @@ type GetTopicEventsResponse struct {
 	Dates        []time.Time `json:"dates"`
 }
 
+type GetTopicEventsTodayRequest struct {
+	Topics []string `json:"topics"`
+}
+type TopicEventsToday struct {
+	Name string `json:"name"`
+	Time int    `json:"time"`
+}
 type GetTopicEventsTodayResponse struct {
-	TotalTime int `json:"total_time"`
+	TotalTime int                `json:"total_time"`
+	Topics    []TopicEventsToday `json:"topics"`
 }

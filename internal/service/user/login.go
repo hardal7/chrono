@@ -62,7 +62,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	logger.Info("Logged user and sent token", "username", r.Username)
-	// Only Init topic if not init yet
+
 	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
 	topic.InitFirst(ctx)
 	return cookie, nil

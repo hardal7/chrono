@@ -11,6 +11,10 @@ WHERE id = $1;
 -- name: GetTopicEventsAll :many
 SELECT * FROM topic_events
 WHERE user_id = $1;
--- name: GetTopicEventsToday :many
+-- name: GetTopicEventsTodayAll :many
 SELECT * FROM topic_events
 WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE;
+-- name: GetTopicEventsTodayWithTopicName :many
+SELECT topic_events.* FROM topic_events
+JOIN topics ON topics.id = topic_events.topic_id
+WHERE user_id = $1 AND DATE(topic_events.created_at) = CURRENT_DATE AND topics.name = $2;

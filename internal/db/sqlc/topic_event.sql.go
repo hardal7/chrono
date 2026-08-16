@@ -75,13 +75,50 @@ func (q *Queries) GetTopicEventsAll(ctx context.Context, userID uuid.UUID) ([]To
 	return items, nil
 }
 
-const getTopicEventsToday = `-- name: GetTopicEventsToday :many
+const getTopicEventsTodayAll = `-- name: GetTopicEventsTodayAll :many
 SELECT id, user_id, topic_id, time_tracked_seconds, created_at FROM topic_events
 WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE
 `
 
-func (q *Queries) GetTopicEventsToday(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
-	rows, err := q.db.Query(ctx, getTopicEventsToday, userID)
+func (q *Queries) GetTopicEventsTodayAll(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
+	rows, err := q.db.Query(ctx, getTopicEventsTodayAll, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TopicEvent{}
+	for rows.Next() {
+		var i TopicEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TopicID,
+			&i.TimeTrackedSeconds,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTopicEventsTodayWithTopicName = `-- name: GetTopicEventsTodayWithTopicName :many
+SELECT topic_events.id, topic_events.user_id, topic_events.topic_id, topic_events.time_tracked_seconds, topic_events.created_at FROM topic_events
+JOIN topics ON topics.id = topic_events.topic_id
+WHERE user_id = $1 AND DATE(topic_events.created_at) = CURRENT_DATE AND topics.name = $2
+`
+
+type GetTopicEventsTodayWithTopicNameParams struct {
+	UserID uuid.UUID
+	Name   string
+}
+
+func (q *Queries) GetTopicEventsTodayWithTopicName(ctx context.Context, arg GetTopicEventsTodayWithTopicNameParams) ([]TopicEvent, error) {
+	rows, err := q.db.Query(ctx, getTopicEventsTodayWithTopicName, arg.UserID, arg.Name)
 	if err != nil {
 		return nil, err
 	}

@@ -12,14 +12,14 @@ import (
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
 	logger.Info("Getting all topics")
-	t, err := conn.Queries.GetTopicByOwner(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	t, err := conn.Queries.GetTopicsByOwner(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
 		logger.Error("Failed to get all topics", err)
 		return dto.GetTopicsAllResponse{}, err
 	}
 	var topics []dto.TopicSelection
-	for _, v := range t {
-		topics = append(topics, dto.TopicSelection{Name: v.Name, TotalTime: int(v.TotalTimeTrackedSeconds)})
+	for _, topic := range t {
+		topics = append(topics, dto.TopicSelection{Name: topic.Name, TotalTime: int(topic.TotalTimeTrackedSeconds)})
 	}
 	resp := dto.GetTopicsAllResponse{Topics: topics}
 	logger.Info("Got all topics", "name")

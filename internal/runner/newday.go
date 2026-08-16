@@ -55,11 +55,11 @@ func updateStreaks(ctx context.Context) {
 		logger.Error("Failed to get topics")
 		return
 	}
-	for _, v := range topics {
-		if v.TodayTimeTrackedSeconds != 0 {
-			conn.Queries.IncreaseStreak(ctx, v.ID)
+	for _, topic := range topics {
+		if topic.TodayTimeTrackedSeconds != 0 {
+			conn.Queries.IncreaseStreak(ctx, topic.ID)
 		} else {
-			conn.Queries.LoseStreak(ctx, v.ID)
+			conn.Queries.LoseStreak(ctx, topic.ID)
 		}
 	}
 	logger.Info("Updated streaks", "topics", len(topics))

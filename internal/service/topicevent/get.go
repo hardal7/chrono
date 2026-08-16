@@ -17,15 +17,17 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 		logger.Error("Failed to get topic events", err)
 		return dto.GetTopicEventsResponse{}, err
 	}
+
 	resp := dto.GetTopicEventsResponse{}
-	for i, v := range topicEvents {
-		t, _ := conn.Queries.GetTopicByID(ctx, v.TopicID)
-		if (r.Topic == "" || r.Topic == t.Name) && (v.CreatedAt.Before(r.FromDate) && v.CreatedAt.After(r.ToDate)) {
+	for i, event := range topicEvents {
+		t, _ := conn.Queries.GetTopicByID(ctx, event.TopicID)
+		if (r.Topic == "" || r.Topic == t.Name) && (event.CreatedAt.Before(r.FromDate) && event.CreatedAt.After(r.ToDate)) {
 			resp.Topics[i] = t.Name
-			resp.Dates[i] = v.CreatedAt
-			resp.TimesTracked[i] = int(v.TimeTrackedSeconds)
+			resp.Dates[i] = event.CreatedAt
+			resp.TimesTracked[i] = int(event.TimeTrackedSeconds)
 		}
 	}
+
 	logger.Info("Got topic events")
 	return resp, nil
 }

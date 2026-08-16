@@ -32,18 +32,14 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	}
 
 	resp := dto.GetTopUsersResponse{}
-	for i, v := range users {
+	for i, user := range users {
 		avatarPath := ctx.Value(middleware.UserID).(uuid.UUID).String()
-		if err != nil {
-			logger.Warn("Failed to get avatar of user", "userRank", i+1)
-			avatarPath = "empty"
-		}
-		logger.Warn("user", v.Username, "time", v.TotalTimeTrackedSeconds)
+		logger.Warn("user", user.Username, "time", user.TotalTimeTrackedSeconds)
 		resp.Users = append(resp.Users, dto.TopUser{
 			Rank:       i + 1,
-			Username:   v.Username,
-			TotalTime:  int(v.TotalTimeTrackedSeconds),
-			TodayTime:  int(v.TodayTimeTrackedSeconds),
+			Username:   user.Username,
+			TotalTime:  int(user.TotalTimeTrackedSeconds),
+			TodayTime:  int(user.TodayTimeTrackedSeconds),
 			AvatarPath: "/avatar/" + avatarPath,
 		})
 	}
