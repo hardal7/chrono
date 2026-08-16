@@ -11,10 +11,11 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-type Key string
-
 const AuthHeader string = "Authorization"
 const Bearer string = "Bearer "
+
+type Key string
+
 const UserID Key = "userID"
 
 func Authenticate(next http.Handler) http.Handler {
@@ -56,6 +57,7 @@ func Authenticate(next http.Handler) http.Handler {
 				}
 				logger.Info("Authenticated user")
 				ctx := context.WithValue(r.Context(), UserID, userID)
+
 				next.ServeHTTP(w, r.WithContext(ctx))
 			}
 		}

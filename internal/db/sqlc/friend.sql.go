@@ -120,7 +120,7 @@ func (q *Queries) GetSentFriendRequests(ctx context.Context, senderID uuid.UUID)
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.city, users.created_at, users.updated_at FROM friends
 JOIN users ON users.id = friends.recipient_id
 WHERE 
     friends.is_accepted = TRUE
@@ -152,6 +152,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
+			&i.City,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

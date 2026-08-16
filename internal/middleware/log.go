@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+const IP Key = "IP"
+
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -22,16 +25,18 @@ func LogRequest(next http.Handler) http.Handler {
 			return
 		}
 		r.Body = io.NopCloser(bytes.NewReader(body))
+
+		address := r.Header.Get("X-Forwarded-For")
+		ctx := context.WithValue(r.Context(), IP, address)
+
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}
-		next.ServeHTTP(ww, r)
+		next.ServeHTTP(ww, r.WithContext(ctx))
 
 		duration := time.Since(start)
 		method := r.Method
 		endpoint := r.URL.Path
-		address := r.Header.Get("X-Forwarded-For")
 		status := ww.status
-
 		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))

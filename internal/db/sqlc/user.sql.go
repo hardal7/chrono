@@ -9,21 +9,28 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :exec
-INSERT INTO users(email, username, password)
-VALUES($1, $2, $3)
+INSERT INTO users(email, username, password, city)
+VALUES($1, $2, $3, $4)
 `
 
 type CreateUserParams struct {
 	Email    string
 	Username string
 	Password string
+	City     pgtype.Text
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.Exec(ctx, createUser, arg.Email, arg.Username, arg.Password)
+	_, err := q.db.Exec(ctx, createUser,
+		arg.Email,
+		arg.Username,
+		arg.Password,
+		arg.City,
+	)
 	return err
 }
 
@@ -38,7 +45,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTopUsers = `-- name: GetTopUsers :many
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
 WHERE total_time_tracked_seconds < $1 
 ORDER BY total_time_tracked_seconds DESC
 LIMIT $2
@@ -65,6 +72,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
+			&i.City,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -79,7 +87,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
 WHERE email = $1
 `
 
@@ -93,6 +101,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
+		&i.City,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -100,7 +109,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
 WHERE id = $1
 `
 
@@ -114,6 +123,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
+		&i.City,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -121,7 +131,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
 WHERE username = $1
 `
 
@@ -135,6 +145,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
+		&i.City,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

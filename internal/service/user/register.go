@@ -7,8 +7,11 @@ import (
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/service/location"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,10 +37,16 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 			return err
 		}
 	}
+
+	city := location.IPToLocation(ctx.Value(middleware.IP).(string))
 	err = conn.Queries.CreateUser(ctx, db.CreateUserParams{
 		Username: r.Username,
 		Email:    r.Email,
 		Password: string(passwordHash),
+		City: pgtype.Text{
+			String: city,
+			Valid:  city != "",
+		},
 	})
 	if err != nil {
 		logger.Error("Failed to create user", err)

@@ -1,6 +1,6 @@
 -- name: CreateUser :exec
-INSERT INTO users(email, username, password)
-VALUES($1, $2, $3);
+INSERT INTO users(email, username, password, city)
+VALUES($1, $2, $3, $4);
 -- name: UpdateUser :exec
 UPDATE users
 SET username = $2, password = $3, updated_at = now()
