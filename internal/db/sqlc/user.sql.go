@@ -46,7 +46,9 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 
 const getTopUsers = `-- name: GetTopUsers :many
 SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
-WHERE total_time_tracked_seconds < $1 
+WHERE 
+    total_time_tracked_seconds < $1
+    AND username ILIKE $3 || '%'
 ORDER BY total_time_tracked_seconds DESC
 LIMIT $2
 `
@@ -54,10 +56,11 @@ LIMIT $2
 type GetTopUsersParams struct {
 	TotalTimeTrackedSeconds int32
 	Limit                   int32
+	MatchName               pgtype.Text
 }
 
 func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getTopUsers, arg.TotalTimeTrackedSeconds, arg.Limit)
+	rows, err := q.db.Query(ctx, getTopUsers, arg.TotalTimeTrackedSeconds, arg.Limit, arg.MatchName)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +95,7 @@ JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.city = target_user.city
     AND users.total_time_tracked_seconds < $2
+    AND username ILIKE $4 || '%'
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3
 `
@@ -100,10 +104,16 @@ type GetTopUsersLocalParams struct {
 	ID                      uuid.UUID
 	TotalTimeTrackedSeconds int32
 	Limit                   int32
+	MatchName               pgtype.Text
 }
 
 func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getTopUsersLocal, arg.ID, arg.TotalTimeTrackedSeconds, arg.Limit)
+	rows, err := q.db.Query(ctx, getTopUsersLocal,
+		arg.ID,
+		arg.TotalTimeTrackedSeconds,
+		arg.Limit,
+		arg.MatchName,
+	)
 	if err != nil {
 		return nil, err
 	}

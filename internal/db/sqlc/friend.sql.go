@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
@@ -134,6 +135,7 @@ WHERE
     users.id = $1
     AND friends.is_accepted = TRUE
     AND users.total_time_tracked_seconds < $2
+    AND username ILIKE $4 || '%'
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3
 `
@@ -142,10 +144,16 @@ type GetTopFriendsParams struct {
 	ID                      uuid.UUID
 	TotalTimeTrackedSeconds int32
 	Limit                   int32
+	MatchName               pgtype.Text
 }
 
 func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getTopFriends, arg.ID, arg.TotalTimeTrackedSeconds, arg.Limit)
+	rows, err := q.db.Query(ctx, getTopFriends,
+		arg.ID,
+		arg.TotalTimeTrackedSeconds,
+		arg.Limit,
+		arg.MatchName,
+	)
 	if err != nil {
 		return nil, err
 	}

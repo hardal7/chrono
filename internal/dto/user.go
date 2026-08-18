@@ -4,7 +4,7 @@ import "time"
 
 type RegisterUserRequest struct {
 	Email    string `json:"email" validate:"email"`
-	Username string `json:"username"`
+	Username string `json:"username" validate:"min=4"`
 	Password string `json:"password"`
 }
 
@@ -21,9 +21,10 @@ type EditUserAccountRequest struct {
 }
 
 type GetTopUsersRequest struct {
-	Cursor int    `json:"cursor"`
-	Limit  int    `json:"limit"`
-	Scope  string `json:"scope" validate:"omitempty,oneof=friends local global"`
+	Cursor    int    `json:"cursor"`
+	Limit     int    `json:"limit"`
+	Scope     string `json:"scope" validate:"omitempty,oneof=friends local global"`
+	MatchName string `json:"match_name"`
 }
 type TopUser struct {
 	Rank       int    `json:"rank"`

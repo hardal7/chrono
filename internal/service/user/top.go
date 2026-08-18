@@ -10,18 +10,22 @@ import (
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
 	logger.Info("Getting top users", "scope", r.Scope)
 	var users []db.User
 	var err error
+	matchName := pgtype.Text{String: r.MatchName, Valid: true}
+
 	switch r.Scope {
 	case "friends":
 		users, err = conn.Queries.GetTopFriends(ctx, db.GetTopFriendsParams{
 			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
+			MatchName:               matchName,
 		})
 		user, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 		if err != nil {
@@ -34,11 +38,13 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
+			MatchName:               matchName,
 		})
 	case "global":
 		users, err = conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
+			MatchName:               matchName,
 		})
 	default:
 		logger.Error("Invalid scope queried", "scope", r.Scope, err)
