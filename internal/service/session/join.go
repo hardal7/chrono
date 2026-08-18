@@ -27,7 +27,7 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		logger.Error("Wrong password for session", err)
 		return err
 	}
-	p, err := conn.Queries.GetSessionParticipantsBySessionID(ctx, s.ID)
+	p, err := conn.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
 		logger.Error("Failed to check if session is full", err)
 		return err

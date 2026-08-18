@@ -21,9 +21,9 @@ type EditUserAccountRequest struct {
 }
 
 type GetTopUsersRequest struct {
-	Cursor      int  `json:"cursor"`
-	Limit       int  `json:"limit"`
-	FriendsOnly bool `json:"friends_only" validate:"omitempty"`
+	Cursor int    `json:"cursor"`
+	Limit  int    `json:"limit"`
+	Scope  string `json:"scope" validate:"omitempty,oneof=friends local global"`
 }
 type TopUser struct {
 	Rank       int    `json:"rank"`

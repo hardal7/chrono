@@ -14,15 +14,9 @@ import (
 func Remove(ctx context.Context, r dto.RemoveFriendRequest) error {
 	logger.Info("Removing friend", "friend", r.Username)
 
-	u, err := conn.Queries.GetUserByUsername(ctx, r.Username)
-	if err != nil {
-		logger.Error("Failed to find friend", err)
-		return err
-	}
-
-	err = conn.Queries.DeleteFriend(ctx, db.DeleteFriendParams{
-		SenderID:    ctx.Value(middleware.UserID).(uuid.UUID),
-		RecipientID: u.ID,
+	err := conn.Queries.DeleteFriend(ctx, db.DeleteFriendParams{
+		SenderID: ctx.Value(middleware.UserID).(uuid.UUID),
+		Username: r.Username,
 	})
 	if err != nil {
 		logger.Error("Failed to remove friend", err)

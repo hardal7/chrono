@@ -106,13 +106,13 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 	return i, err
 }
 
-const getSessionParticipantsBySessionID = `-- name: GetSessionParticipantsBySessionID :many
+const getSessionParticipants = `-- name: GetSessionParticipants :many
 SELECT id, user_id, session_id, last_seen_at, total_time_tracked_seconds, today_time_tracked_seconds FROM session_participants
 WHERE session_id = $1
 `
 
-func (q *Queries) GetSessionParticipantsBySessionID(ctx context.Context, sessionID uuid.UUID) ([]SessionParticipant, error) {
-	rows, err := q.db.Query(ctx, getSessionParticipantsBySessionID, sessionID)
+func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUID) ([]SessionParticipant, error) {
+	rows, err := q.db.Query(ctx, getSessionParticipants, sessionID)
 	if err != nil {
 		return nil, err
 	}

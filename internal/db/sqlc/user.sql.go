@@ -86,6 +86,52 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 	return items, nil
 }
 
+const getTopUsersLocal = `-- name: GetTopUsersLocal :many
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.city, users.created_at, users.updated_at FROM users
+JOIN users AS target_user ON target_user.id = $1
+WHERE 
+    users.city = target_user.city
+    AND users.total_time_tracked_seconds < $2
+ORDER BY users.total_time_tracked_seconds DESC
+LIMIT $3
+`
+
+type GetTopUsersLocalParams struct {
+	ID                      uuid.UUID
+	TotalTimeTrackedSeconds int32
+	Limit                   int32
+}
+
+func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, getTopUsersLocal, arg.ID, arg.TotalTimeTrackedSeconds, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Username,
+			&i.Password,
+			&i.TotalTimeTrackedSeconds,
+			&i.TodayTimeTrackedSeconds,
+			&i.City,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, city, created_at, updated_at FROM users
 WHERE email = $1

@@ -14,15 +14,9 @@ import (
 func CreateRequest(ctx context.Context, r dto.CreateFriendRequestRequest) error {
 	logger.Info("Creating friend request", "recipient", r.Username)
 
-	u, err := conn.Queries.GetUserByUsername(ctx, r.Username)
-	if err != nil {
-		logger.Error("Failed to find user", err)
-		return err
-	}
-
-	err = conn.Queries.CreateFriendRequest(ctx, db.CreateFriendRequestParams{
-		SenderID:    ctx.Value(middleware.UserID).(uuid.UUID),
-		RecipientID: u.ID,
+	err := conn.Queries.CreateFriendRequest(ctx, db.CreateFriendRequestParams{
+		SenderID: ctx.Value(middleware.UserID).(uuid.UUID),
+		Username: r.Username,
 	})
 	if err != nil {
 		logger.Error("Failed to create friend request", err)

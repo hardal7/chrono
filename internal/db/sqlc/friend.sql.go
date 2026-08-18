@@ -14,48 +14,54 @@ import (
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
 SET is_accepted = true
-WHERE sender_id = $1 AND recipient_id = $2
+FROM users WHERE 
+    users.id = friends.sender_id
+    AND users.username = $1 AND recipient_id = $2
 `
 
 type AcceptFriendRequestParams struct {
-	SenderID    uuid.UUID
+	Username    string
 	RecipientID uuid.UUID
 }
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.SenderID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.Username, arg.RecipientID)
 	return err
 }
 
 const createFriendRequest = `-- name: CreateFriendRequest :exec
 INSERT INTO friends(sender_id, recipient_id)
-VALUES($1, $2)
+SELECT $1, id
+FROM users
+WHERE username = $2
 `
 
 type CreateFriendRequestParams struct {
-	SenderID    uuid.UUID
-	RecipientID uuid.UUID
+	SenderID uuid.UUID
+	Username string
 }
 
 func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, createFriendRequest, arg.SenderID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, createFriendRequest, arg.SenderID, arg.Username)
 	return err
 }
 
 const deleteFriend = `-- name: DeleteFriend :exec
 DELETE FROM friends
-WHERE
-    sender_id = $1 AND recipient_id = $2
-    OR sender_id = $2 AND recipient_id = $1
+USING users
+WHERE 
+    users.username = $2 AND
+    ((sender_id = $1 AND recipient_id = $2)
+    OR (sender_id = $2 AND recipient_id = $1))
 `
 
 type DeleteFriendParams struct {
-	SenderID    uuid.UUID
-	RecipientID uuid.UUID
+	SenderID uuid.UUID
+	Username string
 }
 
 func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) error {
-	_, err := q.db.Exec(ctx, deleteFriend, arg.SenderID, arg.RecipientID)
+	_, err := q.db.Exec(ctx, deleteFriend, arg.SenderID, arg.Username)
 	return err
 }
 
@@ -121,10 +127,12 @@ func (q *Queries) GetSentFriendRequests(ctx context.Context, senderID uuid.UUID)
 
 const getTopFriends = `-- name: GetTopFriends :many
 SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.city, users.created_at, users.updated_at FROM friends
-JOIN users ON users.id = friends.recipient_id
+JOIN users ON 
+    users.id = friends.recipient_id
+    OR users.id = friends.sender_id
 WHERE 
-    friends.is_accepted = TRUE
-    AND users.id = $1
+    users.id = $1
+    AND friends.is_accepted = TRUE
     AND users.total_time_tracked_seconds < $2
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3

@@ -14,15 +14,9 @@ import (
 func AcceptRequest(ctx context.Context, r dto.AcceptFriendRequestRequest) error {
 	logger.Info("Accepting friend request", "sender", r.Username)
 
-	u, err := conn.Queries.GetUserByUsername(ctx, r.Username)
-	if err != nil {
-		logger.Error("Failed to find user", err)
-		return err
-	}
-
-	err = conn.Queries.AcceptFriendRequest(ctx, db.AcceptFriendRequestParams{
+	err := conn.Queries.AcceptFriendRequest(ctx, db.AcceptFriendRequestParams{
 		RecipientID: ctx.Value(middleware.UserID).(uuid.UUID),
-		SenderID:    u.ID,
+		Username:    r.Username,
 	})
 	if err != nil {
 		logger.Error("Failed to accept friend request", err)

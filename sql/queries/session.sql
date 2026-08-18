@@ -18,6 +18,6 @@ WHERE name = $1 AND owner_id = $2;
 -- name: JoinSession :exec
 INSERT INTO session_participants(user_id, session_id, last_seen_at)
 VALUES($1, $2, $3);
--- name: GetSessionParticipantsBySessionID :many
+-- name: GetSessionParticipants :many
 SELECT * FROM session_participants
 WHERE session_id = $1;

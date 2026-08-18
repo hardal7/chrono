@@ -22,6 +22,14 @@ SELECT * FROM users
 WHERE total_time_tracked_seconds < $1 
 ORDER BY total_time_tracked_seconds DESC
 LIMIT $2;
+-- name: GetTopUsersLocal :many
+SELECT users.* FROM users
+JOIN users AS target_user ON target_user.id = $1
+WHERE 
+    users.city = target_user.city
+    AND users.total_time_tracked_seconds < $2
+ORDER BY users.total_time_tracked_seconds DESC
+LIMIT $3;
 -- name: TrackUserTime :exec
 UPDATE users
 SET
