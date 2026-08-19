@@ -21,11 +21,11 @@ const RequestID Key = "requestID"
 
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Authenticating user")
+		logger.Debug("Authenticating user")
 
 		auth := r.Header.Get(AuthHeader)
 		if auth == "" {
-			logger.Error("No token provided")
+			logger.Debug("No token provided")
 			http.Error(w, "No token provided", http.StatusUnauthorized)
 			return
 		}
@@ -36,35 +36,35 @@ func Authenticate(next http.Handler) http.Handler {
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err == jwt.ErrTokenExpired {
-			logger.Error("Token is expired", err)
+			logger.Debug("Token is expired", err)
 			http.Error(w, "Token is expired", http.StatusUnauthorized)
 			return
 		} else if err != nil {
-			logger.Error("Token has invalid JWT signature", err)
+			logger.Debug("Token has invalid JWT signature", err)
 			http.Error(w, "Token is invalid", http.StatusUnauthorized)
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			logger.Error("Token has invalid claims")
+			logger.Debug("Token has invalid claims")
 			http.Error(w, "Invalid Token", http.StatusUnauthorized)
 			return
 		}
 		sub, ok := claims["sub"].(string)
 		if !ok {
-			logger.Error("Token is missing fields")
+			logger.Debug("Token is missing fields")
 			http.Error(w, "Invalid Token", http.StatusUnauthorized)
 			return
 		}
 		userID, err := uuid.Parse(sub)
 		if err != nil {
-			logger.Error("Token does not contain a valid UUID")
+			logger.Debug("Token does not contain a valid UUID")
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		logger.Info("Authenticated user")
+		logger.Debug("Authenticated user")
 		ctx := context.WithValue(r.Context(), UserID, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

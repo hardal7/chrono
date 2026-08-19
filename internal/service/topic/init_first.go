@@ -30,6 +30,6 @@ func InitFirst(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	logger.Info("Initialized first topic")
+	logger.Debug("Initialized first topic")
 	return nil
 }

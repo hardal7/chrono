@@ -15,7 +15,7 @@ import (
 )
 
 func Create(ctx context.Context, r dto.CreateSessionRequest) error {
-	logger.Info("Creating session", "sessionName", r.Name)
+	logger.Debug("Creating session", "sessionName", r.Name)
 
 	_, err := conn.Queries.GetSessionByNameAndOwnerID(ctx, db.GetSessionByNameAndOwnerIDParams{
 		Name:    r.Name,
@@ -23,10 +23,10 @@ func Create(ctx context.Context, r dto.CreateSessionRequest) error {
 	})
 	if err != pgx.ErrNoRows {
 		if err == nil {
-			logger.Error("Session with name exists")
+			logger.Debug("Session with name exists")
 			return errors.New("session with name exists")
 		} else {
-			logger.Error("Failed to check if session is duplicate", err)
+			logger.Debug("Failed to check if session is duplicate", err)
 			return err
 		}
 	}
@@ -40,13 +40,13 @@ func Create(ctx context.Context, r dto.CreateSessionRequest) error {
 		Topic:           pgtype.Text{String: r.Topic, Valid: r.Topic != ""},
 	})
 	if err != nil {
-		logger.Error("Failed to create session", err)
+		logger.Debug("Failed to create session", err)
 		return err
 	}
-	logger.Info("Created session", "sessionName", r.Name)
+	logger.Debug("Created session", "sessionName", r.Name)
 
 	u, _ := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
-	logger.Info("Joining own session")
+	logger.Debug("Joining own session")
 	err = Join(ctx, dto.JoinSessionRequest{Name: r.Name, Password: r.Password, OwnerUsername: u.Username})
 	if err != nil {
 		logger.Warn("Failed to join own session")

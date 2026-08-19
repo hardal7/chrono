@@ -13,31 +13,31 @@ import (
 )
 
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
-	logger.Info("Joining session", "sessionName", r.Name)
+	logger.Debug("Joining session", "sessionName", r.Name)
 
 	s, err := conn.Queries.GetSessionByNameAndOwnerName(ctx, db.GetSessionByNameAndOwnerNameParams{
 		Name:     r.Name,
 		Username: r.OwnerUsername,
 	})
 	if err != nil {
-		logger.Error("Failed to find session", err)
+		logger.Debug("Failed to find session", err)
 		return err
 	}
 	if r.Password != s.Password.String {
-		logger.Error("Wrong password for session", err)
+		logger.Debug("Wrong password for session", err)
 		return err
 	}
 	p, err := conn.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
-		logger.Error("Failed to check if session is full", err)
+		logger.Debug("Failed to check if session is full", err)
 		return err
 	}
 	if int(s.MaxParticipants.Int32) == len(p) {
-		logger.Error("Session is full")
+		logger.Debug("Session is full")
 		return err
 	}
 	if !s.IsActive {
-		logger.Error("Session has expired")
+		logger.Debug("Session has expired")
 		return err
 	}
 
@@ -47,9 +47,9 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		LastSeenAt: time.Now(),
 	})
 	if err != nil {
-		logger.Error("Failed to join session", err)
+		logger.Debug("Failed to join session", err)
 		return err
 	}
-	logger.Info("Joined session", "sessionName", r.Name)
+	logger.Debug("Joined session", "sessionName", r.Name)
 	return nil
 }

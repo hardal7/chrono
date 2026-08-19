@@ -14,7 +14,7 @@ import (
 )
 
 func Create(ctx context.Context, r dto.CreateTopicRequest) error {
-	logger.Info("Creating topic", "topicName", r.Name)
+	logger.Debug("Creating topic", "topicName", r.Name)
 
 	_, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
@@ -22,10 +22,10 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 	})
 	if err != pgx.ErrNoRows {
 		if err == nil {
-			logger.Error("Topic with name exists")
+			logger.Debug("Topic with name exists")
 			return errors.New("topic with name exists")
 		} else {
-			logger.Error("Failed to check if topic is duplicate", err)
+			logger.Debug("Failed to check if topic is duplicate", err)
 			return err
 		}
 	}
@@ -35,9 +35,9 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
-		logger.Error("Failed to create topic", err)
+		logger.Debug("Failed to create topic", err)
 		return err
 	}
-	logger.Info("Created topic", "topicName", r.Name)
+	logger.Debug("Created topic", "topicName", r.Name)
 	return nil
 }

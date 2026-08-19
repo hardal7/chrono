@@ -20,30 +20,30 @@ const (
 )
 
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
-	logger.Info("Uploading avatar")
+	logger.Debug("Uploading avatar")
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
 	if err != nil {
-		logger.Error("Failed to read file", err)
+		logger.Debug("Failed to read file", err)
 		return err
 	}
 	if len(fileBytes) > maxBytes {
-		logger.Error("File size too large")
+		logger.Debug("File size too large")
 		return err
 	}
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
-		logger.Error("Invalid filetype")
+		logger.Debug("Invalid filetype")
 		return err
 	}
 
 	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
 	err = createFile(fileBytes, userID)
 	if err != nil {
-		logger.Error("Failed to create file", err)
+		logger.Debug("Failed to create file", err)
 		return err
 	}
-	logger.Info("Uploaded avatar")
+	logger.Debug("Uploaded avatar")
 	return nil
 }
 

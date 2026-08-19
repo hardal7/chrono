@@ -12,16 +12,16 @@ import (
 )
 
 func CreateRequest(ctx context.Context, r dto.CreateFriendRequestRequest) error {
-	logger.Info("Creating friend request", "recipient", r.Username)
+	logger.Debug("Creating friend request", "recipient", r.Username)
 
 	err := conn.Queries.CreateFriendRequest(ctx, db.CreateFriendRequestParams{
 		SenderID: ctx.Value(middleware.UserID).(uuid.UUID),
 		Username: r.Username,
 	})
 	if err != nil {
-		logger.Error("Failed to create friend request", err)
+		logger.Debug("Failed to create friend request", err)
 		return err
 	}
-	logger.Info("Created friend request", "recipient", r.Username)
+	logger.Debug("Created friend request", "recipient", r.Username)
 	return nil
 }

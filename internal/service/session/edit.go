@@ -21,15 +21,15 @@ func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 		return err
 	}
 
-	logger.Info("Editing session", "sessionName", s.Name)
+	logger.Debug("Editing session", "sessionName", s.Name)
 	if r.Delete {
-		logger.Info("Deleting session", "sessionName", s.Name)
+		logger.Debug("Deleting session", "sessionName", s.Name)
 		err := conn.Queries.DeleteSession(ctx, s.ID)
 		if err != nil {
-			logger.Error("Failed to delete session", err)
+			logger.Debug("Failed to delete session", err)
 			return err
 		}
-		logger.Info("Deleted session")
+		logger.Debug("Deleted session")
 		return nil
 	}
 
@@ -44,9 +44,9 @@ func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 		ExpiresAt:       pgtype.Timestamptz{Time: r.NewExpiresAt, Valid: !r.NewExpiresAt.IsZero()},
 	})
 	if err != nil {
-		logger.Error("Failed to update session", err)
+		logger.Debug("Failed to update session", err)
 		return err
 	}
-	logger.Info("Changed session details")
+	logger.Debug("Changed session details")
 	return nil
 }

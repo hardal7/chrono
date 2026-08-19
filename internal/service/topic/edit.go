@@ -19,19 +19,19 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 	if err != nil {
 		return err
 	}
-	logger.Info("Editing topic", "topicName", t.Name)
+	logger.Debug("Editing topic", "topicName", t.Name)
 	if r.Delete {
-		logger.Info("Deleting topic", "topicName", t.Name)
+		logger.Debug("Deleting topic", "topicName", t.Name)
 		err := conn.Queries.DeleteTopic(ctx, t.ID)
 		if err != nil {
-			logger.Error("Failed to delete topic", err)
+			logger.Debug("Failed to delete topic", err)
 			return err
 		}
-		logger.Info("Deleted topic")
+		logger.Debug("Deleted topic")
 		return nil
 	}
 	if r.NewName == "" {
-		logger.Info("Topic not changed")
+		logger.Debug("Topic not changed")
 		return nil
 	}
 
@@ -41,9 +41,9 @@ func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 		Name: t.Name,
 	})
 	if err != nil {
-		logger.Error("Failed to update topic", err)
+		logger.Debug("Failed to update topic", err)
 		return err
 	}
-	logger.Info("Changed topic name", "newName", r.NewName)
+	logger.Debug("Changed topic name", "newName", r.NewName)
 	return nil
 }

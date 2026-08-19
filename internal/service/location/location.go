@@ -8,11 +8,11 @@ import (
 )
 
 func IPToCountry(ip string) string {
-	logger.Info("Linking IP address to country")
+	logger.Debug("Linking IP address to country")
 
 	db, err := geoip2.Open("/srv/GeoLite2-City.mmdb")
 	if err != nil {
-		logger.Error("Failed to load geolocation database", err)
+		logger.Debug("Failed to load geolocation database", err)
 	}
 	defer func() {
 		err := db.Close()
@@ -23,18 +23,18 @@ func IPToCountry(ip string) string {
 
 	address, err := netip.ParseAddr(ip)
 	if err != nil {
-		logger.Error("Failed to parse IP address", err)
+		logger.Debug("Failed to parse IP address", err)
 	}
 	record, err := db.Country(address)
 	if err != nil {
-		logger.Error("Failed to find location of IP address", err)
+		logger.Debug("Failed to find location of IP address", err)
 	}
 	if !record.HasData() {
-		logger.Error("No data found for this IP")
+		logger.Debug("No data found for this IP")
 		return ""
 	}
 
 	country := record.Country.Names.English
-	logger.Info("Linked IP address to country", "country", country)
+	logger.Debug("Linked IP address to country", "country", country)
 	return country
 }

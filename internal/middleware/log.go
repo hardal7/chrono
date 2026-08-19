@@ -26,7 +26,7 @@ func LogRequest(next http.Handler) http.Handler {
 		}
 		r.Body = io.NopCloser(bytes.NewReader(body))
 
-		logger.Trace("Received REQUEST")
+		logger.Trace("Received Request")
 		contentType := r.Header.Get("Content-Type")
 		if strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/plain") {
 			logger.Trace(string(body))
@@ -49,7 +49,7 @@ func LogRequest(next http.Handler) http.Handler {
 		method := r.Method
 		endpoint := r.URL.Path
 		status := ww.status
-		logger.Debug(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
+		logger.Info(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
 	})

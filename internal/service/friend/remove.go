@@ -12,16 +12,16 @@ import (
 )
 
 func Remove(ctx context.Context, r dto.RemoveFriendRequest) error {
-	logger.Info("Removing friend", "friend", r.Username)
+	logger.Debug("Removing friend", "friend", r.Username)
 
 	err := conn.Queries.DeleteFriend(ctx, db.DeleteFriendParams{
 		SenderID: ctx.Value(middleware.UserID).(uuid.UUID),
 		Username: r.Username,
 	})
 	if err != nil {
-		logger.Error("Failed to remove friend", err)
+		logger.Debug("Failed to remove friend", err)
 		return err
 	}
-	logger.Info("Removed friend", "friend", r.Username)
+	logger.Debug("Removed friend", "friend", r.Username)
 	return nil
 }

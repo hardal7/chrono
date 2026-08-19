@@ -11,10 +11,10 @@ import (
 )
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
-	logger.Info("Getting all topics")
+	logger.Debug("Getting all topics")
 	t, err := conn.Queries.GetTopicsByOwner(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
-		logger.Error("Failed to get all topics", err)
+		logger.Debug("Failed to get all topics", err)
 		return dto.GetTopicsAllResponse{}, err
 	}
 	var topics []dto.TopicSelection
@@ -22,6 +22,6 @@ func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
 		topics = append(topics, dto.TopicSelection{Name: topic.Name, TotalTime: int(topic.TotalTimeTrackedSeconds)})
 	}
 	resp := dto.GetTopicsAllResponse{Topics: topics}
-	logger.Info("Got all topics", "name")
+	logger.Debug("Got all topics", "name")
 	return resp, nil
 }

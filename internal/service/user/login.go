@@ -20,7 +20,7 @@ import (
 const jwtExpirationDays int = 30
 
 func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
-	logger.Info("Logging user", "username", r.Username)
+	logger.Debug("Logging user", "username", r.Username)
 
 	var err error
 	var u db.User
@@ -30,16 +30,16 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		u, err = conn.Queries.GetUserByEmail(ctx, r.Email)
 	}
 	if err != nil {
-		logger.Error("Failed to get user", err)
+		logger.Debug("Failed to get user", err)
 		return http.Cookie{}, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		logger.Error("Wrong password", err)
+		logger.Debug("Wrong password", err)
 		return http.Cookie{}, err
 	} else if err != nil {
-		logger.Error("Failed to hash password", err)
+		logger.Debug("Failed to hash password", err)
 		return http.Cookie{}, err
 	}
 
@@ -49,7 +49,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	})
 	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
 	if err != nil {
-		logger.Error("Failed to sign token", err)
+		logger.Debug("Failed to sign token", err)
 		return http.Cookie{}, err
 	}
 
@@ -63,7 +63,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
-	logger.Info("Logged user and sent token", "username", r.Username)
+	logger.Debug("Logged user and sent token", "username", r.Username)
 
 	err = topic.InitFirst(ctx)
 	if err != nil {

@@ -12,16 +12,16 @@ import (
 )
 
 func AcceptRequest(ctx context.Context, r dto.AcceptFriendRequestRequest) error {
-	logger.Info("Accepting friend request", "sender", r.Username)
+	logger.Debug("Accepting friend request", "sender", r.Username)
 
 	err := conn.Queries.AcceptFriendRequest(ctx, db.AcceptFriendRequestParams{
 		RecipientID: ctx.Value(middleware.UserID).(uuid.UUID),
 		Username:    r.Username,
 	})
 	if err != nil {
-		logger.Error("Failed to accept friend request", err)
+		logger.Debug("Failed to accept friend request", err)
 		return err
 	}
-	logger.Info("Accepted friend request", "sender", r.Username)
+	logger.Debug("Accepted friend request", "sender", r.Username)
 	return nil
 }

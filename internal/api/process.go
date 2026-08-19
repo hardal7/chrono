@@ -36,7 +36,7 @@ func processResponse(w http.ResponseWriter, resp any) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	logger.Trace("Returning RESPONSE")
+	logger.Trace("Returning Response")
 	logger.Trace(strings.TrimSpace(buf.String()))
 
 	_, err = w.Write(buf.Bytes())

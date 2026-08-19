@@ -14,7 +14,7 @@ import (
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
-	logger.Info("Getting top users", "scope", r.Scope)
+	logger.Debug("Getting top users", "scope", r.Scope)
 	var users []db.User
 	var err error
 	matchName := pgtype.Text{String: r.MatchName, Valid: true}
@@ -29,7 +29,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		})
 		user, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 		if err != nil {
-			logger.Error("Failed to retrieve user", err)
+			logger.Debug("Failed to retrieve user", err)
 			return dto.GetTopUsersResponse{}, err
 		}
 		users = append(users, user)
@@ -47,11 +47,11 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			MatchName:               matchName,
 		})
 	default:
-		logger.Error("Invalid scope queried", "scope", r.Scope, err)
+		logger.Debug("Invalid scope queried", "scope", r.Scope, err)
 		return dto.GetTopUsersResponse{}, errors.New("invalid scope")
 	}
 	if err != nil {
-		logger.Error("Failed to get users", err)
+		logger.Debug("Failed to get users", err)
 		return dto.GetTopUsersResponse{}, err
 	}
 
@@ -65,6 +65,6 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			AvatarPath: "/avatar/" + user.ID.String(),
 		})
 	}
-	logger.Info("Got top users")
+	logger.Debug("Got top users")
 	return resp, nil
 }
