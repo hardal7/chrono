@@ -66,7 +66,7 @@ type User struct {
 	Password                string
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
-	City                    pgtype.Text
+	Country                 pgtype.Text
 	CreatedAt               pgtype.Timestamptz
 	UpdatedAt               pgtype.Timestamptz
 }

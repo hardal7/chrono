@@ -1,5 +1,5 @@
 -- name: CreateUser :exec
-INSERT INTO users(email, username, password, city)
+INSERT INTO users(email, username, password, country)
 VALUES($1, $2, $3, $4);
 -- name: UpdateUser :exec
 UPDATE users
@@ -28,7 +28,7 @@ LIMIT $2;
 SELECT users.* FROM users
 JOIN users AS target_user ON target_user.id = $1
 WHERE 
-    users.city = target_user.city
+    users.country = target_user.country
     AND users.total_time_tracked_seconds < $2
     AND username ILIKE sqlc.arg(match_name) || '%'
 ORDER BY users.total_time_tracked_seconds DESC

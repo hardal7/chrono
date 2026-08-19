@@ -57,13 +57,12 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 
 	resp := dto.GetTopUsersResponse{}
 	for i, user := range users {
-		avatarPath := ctx.Value(middleware.UserID).(uuid.UUID).String()
 		resp.Users = append(resp.Users, dto.TopUser{
 			Rank:       i + 1,
 			Username:   user.Username,
 			TotalTime:  int(user.TotalTimeTrackedSeconds),
 			TodayTime:  int(user.TodayTimeTrackedSeconds),
-			AvatarPath: "/avatar/" + avatarPath,
+			AvatarPath: "/avatar/" + user.ID.String(),
 		})
 	}
 	logger.Info("Got top users")

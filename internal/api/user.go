@@ -26,6 +26,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+
 }
 
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {

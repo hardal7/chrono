@@ -34,14 +34,12 @@ func resetTodayTimes(ctx context.Context) {
 	logger.Info("Reseting times tracked today")
 	err := conn.Queries.ResetTopicTimeTrackedToday(ctx)
 	if err != nil {
-		logger.Debug(err.Error())
-		logger.Error("Failed to reset time tracked for today", "date", time.Now().String())
+		logger.Error("Failed to reset time tracked for today", "date", time.Now().String(), "error", err)
 		return
 	}
 	err = conn.Queries.ResetUserTimeTrackedToday(ctx)
 	if err != nil {
-		logger.Debug(err.Error())
-		logger.Error("Failed to reset time tracked for today", "date", time.Now().String())
+		logger.Error("Failed to reset time tracked for today", "date", time.Now().String(), "error", err)
 		return
 	}
 	logger.Info("Reset times tracked today")
@@ -51,15 +49,18 @@ func updateStreaks(ctx context.Context) {
 	logger.Info("Updating streaks")
 	topics, err := conn.Queries.GetTopicsAll(ctx)
 	if err != nil {
-		logger.Debug(err.Error())
-		logger.Error("Failed to get topics")
+		logger.Error("Failed to get topics", err)
 		return
 	}
 	for _, topic := range topics {
 		if topic.TodayTimeTrackedSeconds != 0 {
-			conn.Queries.IncreaseStreak(ctx, topic.ID)
+			err = conn.Queries.IncreaseStreak(ctx, topic.ID)
 		} else {
-			conn.Queries.LoseStreak(ctx, topic.ID)
+			err = conn.Queries.LoseStreak(ctx, topic.ID)
+		}
+
+		if err != nil {
+			logger.Error("Failed to update streak", err)
 		}
 	}
 	logger.Info("Updated streaks", "topics", len(topics))

@@ -52,6 +52,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		logger.Error("Failed to sign token", err)
 		return http.Cookie{}, err
 	}
+
 	cookie := http.Cookie{
 		Name:     middleware.AuthHeader,
 		Value:    tokenString,
@@ -61,9 +62,13 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	}
+	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
 	logger.Info("Logged user and sent token", "username", r.Username)
 
-	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
-	topic.InitFirst(ctx)
+	err = topic.InitFirst(ctx)
+	if err != nil {
+		logger.Warn("Failed to initialize first topic")
+	}
+
 	return cookie, nil
 }

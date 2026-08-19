@@ -28,7 +28,6 @@ func InitFirst(ctx context.Context) error {
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
-		logger.Warn("Failed to initialize first topic")
 		return err
 	}
 	logger.Info("Initialized first topic")

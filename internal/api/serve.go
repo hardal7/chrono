@@ -46,7 +46,7 @@ func runServer(name, port string, router *chi.Mux) {
 	logger.Info("Started HTTP server", "type", name, "port", ":"+port)
 	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
-		logger.Fatal("Fatal error on server", err, "type", name)
+		logger.Fatal("Fatal error on server", "type", name, "error", err)
 	}
 }
 

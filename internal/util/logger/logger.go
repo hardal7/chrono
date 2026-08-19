@@ -50,7 +50,11 @@ func Trace(msg string, args ...any) {
 }
 
 func Debug(msg string, args ...any) {
-	slog.Debug(msg, args...)
+	if len(args) == 1 {
+		slog.Debug(msg, "error", args[0])
+	} else {
+		slog.Debug(msg, args...)
+	}
 }
 
 func Info(msg string, args ...any) {
@@ -62,11 +66,14 @@ func Warn(msg string, args ...any) {
 }
 
 func Error(msg string, args ...any) {
-	slog.Error(msg, args...)
+	if len(args) == 1 {
+		slog.Error(msg, "error", args[0])
+	} else {
+		slog.Error(msg, args...)
+	}
 }
 
-func Fatal(msg string, err error, args ...any) {
-	slog.Error(msg)
-	slog.Debug(err.Error())
+func Fatal(msg string, args ...any) {
+	Error(msg, args...)
 	os.Exit(1)
 }

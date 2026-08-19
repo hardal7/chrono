@@ -38,14 +38,14 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		}
 	}
 
-	city := location.IPToLocation(ctx.Value(middleware.IP).(string))
+	country := location.IPToCountry(ctx.Value(middleware.IP).(string))
 	err = conn.Queries.CreateUser(ctx, db.CreateUserParams{
 		Username: r.Username,
 		Email:    r.Email,
 		Password: string(passwordHash),
-		City: pgtype.Text{
-			String: city,
-			Valid:  city != "",
+		Country: pgtype.Text{
+			String: country,
+			Valid:  country != "",
 		},
 	})
 	if err != nil {
