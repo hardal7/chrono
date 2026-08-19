@@ -25,7 +25,7 @@ func Create(ctx context.Context, r dto.CreateTopicRequest) error {
 			logger.Debug("Topic with name exists")
 			return errors.New("topic with name exists")
 		} else {
-			logger.Debug("Failed to check if topic is duplicate", err)
+			logger.Warn("Failed to check if topic is duplicate", err)
 			return err
 		}
 	}

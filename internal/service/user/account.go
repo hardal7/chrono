@@ -46,7 +46,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		logger.Debug("Changing account password")
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
 		if err != nil {
-			logger.Debug("Failed to hash password", err)
+			logger.Warn("Failed to hash password", err)
 			return err
 		}
 		u.Password = string(passwordHash)

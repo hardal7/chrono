@@ -20,15 +20,8 @@ func Serve() {
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(middleware.LogRequest)
 
-	// Public routes
-	mainRouter.Group(func(r chi.Router) {
-		r.Post("/register", RegisterUserHandler)
-		r.Post("/login", LoginUserHandler)
-		r.Get("/health", PingHandler)
-		r.Get("/avatar/{id}", GetUserAvatarHandler)
-	})
+	mainRouter.Group(publicRoutes)
 
-	// Authenticated routes
 	mainRouter.Group(func(r chi.Router) {
 		r.Use(middleware.Authenticate)
 		r.Route("/user", UserRoute)

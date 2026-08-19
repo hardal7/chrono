@@ -9,7 +9,6 @@ import (
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/service/topic"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 
@@ -62,13 +61,6 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	}
-	ctx = context.WithValue(ctx, middleware.UserID, u.ID)
 	logger.Debug("Logged user and sent token", "username", r.Username)
-
-	err = topic.InitFirst(ctx)
-	if err != nil {
-		logger.Warn("Failed to initialize first topic")
-	}
-
 	return cookie, nil
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const AvatarEndpoint string = "/avatar"
+
 type Config struct {
 	Port        string
 	AdminPort   string

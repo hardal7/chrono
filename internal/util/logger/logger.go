@@ -62,7 +62,11 @@ func Info(msg string, args ...any) {
 }
 
 func Warn(msg string, args ...any) {
-	slog.Warn(msg, args...)
+	if len(args) == 1 {
+		slog.Warn(msg, "error", args[0])
+	} else {
+		slog.Warn(msg, args...)
+	}
 }
 
 func Error(msg string, args ...any) {

@@ -3,12 +3,14 @@ package user
 import (
 	"context"
 	"errors"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	conn "github.com/hardal7/chrono/internal/db"
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -62,7 +64,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			Username:   user.Username,
 			TotalTime:  int(user.TotalTimeTrackedSeconds),
 			TodayTime:  int(user.TodayTimeTrackedSeconds),
-			AvatarPath: "/avatar/" + user.ID.String(),
+			AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
 		})
 	}
 	logger.Debug("Got top users")

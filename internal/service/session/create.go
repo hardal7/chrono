@@ -26,7 +26,7 @@ func Create(ctx context.Context, r dto.CreateSessionRequest) error {
 			logger.Debug("Session with name exists")
 			return errors.New("session with name exists")
 		} else {
-			logger.Debug("Failed to check if session is duplicate", err)
+			logger.Warn("Failed to check if session is duplicate", err)
 			return err
 		}
 	}

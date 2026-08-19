@@ -27,7 +27,7 @@ func IPToCountry(ip string) string {
 	}
 	record, err := db.Country(address)
 	if err != nil {
-		logger.Debug("Failed to find location of IP address", err)
+		logger.Warn("Failed to find location of IP address", err)
 	}
 	if !record.HasData() {
 		logger.Debug("No data found for this IP")

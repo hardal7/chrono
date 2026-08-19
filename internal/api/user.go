@@ -85,5 +85,4 @@ func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	avatarID := chi.URLParam(r, "id")
 	path := filepath.Join("./"+user.AvatarDirectory, avatarID)
 	http.ServeFile(w, r, path)
-	w.WriteHeader(http.StatusOK)
 }
