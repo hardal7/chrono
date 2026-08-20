@@ -15,7 +15,7 @@ import (
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
 SET is_accepted = true
-FROM users WHERE 
+FROM users WHERE
     users.id = friends.sender_id
     AND users.username = $1 AND recipient_id = $2
 `
@@ -68,7 +68,7 @@ func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) erro
 
 const getFriendRequests = `-- name: GetFriendRequests :many
 SELECT id, sender_id, recipient_id, is_accepted FROM friends
-WHERE recipient_id = $1
+WHERE recipient_id = $1 AND is_accepted = FALSE
 `
 
 func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) ([]Friend, error) {
@@ -96,26 +96,30 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 	return items, nil
 }
 
-const getSentFriendRequests = `-- name: GetSentFriendRequests :many
-SELECT id, sender_id, recipient_id, is_accepted FROM friends
-WHERE sender_id = $1
+const getPossibleFriends = `-- name: GetPossibleFriends :many
+SELECT users.username, friends.is_accepted FROM friends
+JOIN users ON 
+    users.id = friends.recipient_id
+    OR users.id = friends.sender_id
+WHERE 
+    users.id = $1
 `
 
-func (q *Queries) GetSentFriendRequests(ctx context.Context, senderID uuid.UUID) ([]Friend, error) {
-	rows, err := q.db.Query(ctx, getSentFriendRequests, senderID)
+type GetPossibleFriendsRow struct {
+	Username   string
+	IsAccepted bool
+}
+
+func (q *Queries) GetPossibleFriends(ctx context.Context, id uuid.UUID) ([]GetPossibleFriendsRow, error) {
+	rows, err := q.db.Query(ctx, getPossibleFriends, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Friend{}
+	items := []GetPossibleFriendsRow{}
 	for rows.Next() {
-		var i Friend
-		if err := rows.Scan(
-			&i.ID,
-			&i.SenderID,
-			&i.RecipientID,
-			&i.IsAccepted,
-		); err != nil {
+		var i GetPossibleFriendsRow
+		if err := rows.Scan(&i.Username, &i.IsAccepted); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -127,7 +131,7 @@ func (q *Queries) GetSentFriendRequests(ctx context.Context, senderID uuid.UUID)
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.created_at, users.updated_at FROM friends
 JOIN users ON 
     users.id = friends.recipient_id
     OR users.id = friends.sender_id
@@ -169,6 +173,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
 			&i.Country,
+			&i.HideCountry,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

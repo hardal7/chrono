@@ -6,6 +6,7 @@ CREATE TABLE users (
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
     country VARCHAR(64),
+    hide_country BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );

@@ -19,8 +19,8 @@ const (
 	dirPerm  = 0755
 	filePerm = 0644 // Don't execute the file
 
-	AvatarDirectory        = "avatars"
-	defaultAvatarDirectory = "avatars/default"
+	AvatarDirectory        = "/srv/avatars"
+	defaultAvatarDirectory = "/srv/avatars/default"
 	defaultAvatarsNum      = 5
 )
 

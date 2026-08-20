@@ -42,3 +42,16 @@ type GetUserAccountResponse struct {
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type GetUserProfileRequest struct {
+	Username string `json:"username"`
+}
+type GetUserProfileResponse struct {
+	Username         string `json:"username"`
+	AvatarPath       string `json:"avatar_path"`
+	Country          string `json:"country"`
+	TotalTimeSeconds int    `json:"total_time_seconds"`
+	TodayTimeSeconds int    `json:"today_time_seconds"`
+	BestTopic        string `json:"best_topic"`
+	FriendStatus     string `json:"friend_status"`
+}

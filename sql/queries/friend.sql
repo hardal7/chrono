@@ -13,15 +13,12 @@ WHERE
 -- name: AcceptFriendRequest :exec
 UPDATE friends
 SET is_accepted = true
-FROM users WHERE 
+FROM users WHERE
     users.id = friends.sender_id
     AND users.username = $1 AND recipient_id = $2;
 -- name: GetFriendRequests :many
 SELECT * FROM friends
-WHERE recipient_id = $1;
--- name: GetSentFriendRequests :many
-SELECT * FROM friends
-WHERE sender_id = $1;
+WHERE recipient_id = $1 AND is_accepted = FALSE;
 -- name: GetTopFriends :many
 SELECT users.* FROM friends
 JOIN users ON 
@@ -34,3 +31,10 @@ WHERE
     AND username ILIKE sqlc.arg(match_name) || '%'
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3;
+-- name: GetPossibleFriends :many
+SELECT users.username, friends.is_accepted FROM friends
+JOIN users ON 
+    users.id = friends.recipient_id
+    OR users.id = friends.sender_id
+WHERE 
+    users.id = $1;

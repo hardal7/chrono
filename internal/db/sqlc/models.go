@@ -67,6 +67,7 @@ type User struct {
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
 	Country                 pgtype.Text
+	HideCountry             bool
 	CreatedAt               pgtype.Timestamptz
 	UpdatedAt               pgtype.Timestamptz
 }
