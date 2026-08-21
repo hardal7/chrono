@@ -1,6 +1,6 @@
 -- name: CreateSession :exec
-INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic, updated_at)
-VALUES($1, $2, $3, $4, $5, $6, now());
+INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic)
+VALUES($1, $2, $3, $4, $5, $6);
 -- name: UpdateSession :exec
 UPDATE sessions
 SET name = $2, max_participants = $3, password = $4, expires_at = $5, updated_at = now()

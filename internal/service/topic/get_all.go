@@ -22,6 +22,6 @@ func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
 		topics = append(topics, dto.TopicSelection{Name: topic.Name, TotalTime: int(topic.TotalTimeTrackedSeconds)})
 	}
 	resp := dto.GetTopicsAllResponse{Topics: topics}
-	logger.Debug("Got all topics", "name")
+	logger.Debug("Got all topics")
 	return resp, nil
 }

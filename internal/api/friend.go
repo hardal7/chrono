@@ -12,6 +12,7 @@ func FriendRoute(r chi.Router) {
 	r.Post("/create", CreateFriendRequestHandler)
 	r.Post("/accept", AcceptFriendRequestHandler)
 	r.Delete("/remove", RemoveFriendHandler)
+	r.Get("/all", GetAllFriendRequestsHandler)
 }
 
 func CreateFriendRequestHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,4 +46,13 @@ func RemoveFriendHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func GetAllFriendRequestsHandler(w http.ResponseWriter, r *http.Request) {
+	resp, err := friend.GetAll(r.Context())
+	if err != nil {
+		http.Error(w, "Failed to get all friend requests", http.StatusBadRequest)
+		return
+	}
+	processResponse(w, resp)
 }

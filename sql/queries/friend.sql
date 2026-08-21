@@ -12,7 +12,9 @@ WHERE
     OR (sender_id = $2 AND recipient_id = $1));
 -- name: AcceptFriendRequest :exec
 UPDATE friends
-SET is_accepted = true
+SET 
+    is_accepted = true,
+    updated_at = now()
 FROM users WHERE
     users.id = friends.sender_id
     AND users.username = $1 AND recipient_id = $2;

@@ -57,9 +57,15 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 
 func createFile(fileBytes []byte, filename string) error {
 	path := filepath.Join(AvatarDirectory, filename)
-	os.Remove(path)
-	err := os.WriteFile(path, fileBytes, filePerm)
+	err := os.Remove(path)
 	if err != nil {
+		logger.Debug("Failed to delete file", err)
+		return err
+	}
+
+	err = os.WriteFile(path, fileBytes, filePerm)
+	if err != nil {
+		logger.Debug("Failed to write file", err)
 		return err
 	}
 
@@ -83,6 +89,7 @@ func createSymlink(source, filename string) error {
 	path := filepath.Join(AvatarDirectory, filename)
 	err := os.Symlink(source, path)
 	if err != nil {
+		logger.Debug("Failed to create symlink", err)
 		return err
 	}
 	return nil

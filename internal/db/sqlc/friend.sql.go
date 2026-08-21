@@ -14,7 +14,9 @@ import (
 
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
-SET is_accepted = true
+SET 
+    is_accepted = true,
+    updated_at = now()
 FROM users WHERE
     users.id = friends.sender_id
     AND users.username = $1 AND recipient_id = $2
@@ -67,7 +69,7 @@ func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) erro
 }
 
 const getFriendRequests = `-- name: GetFriendRequests :many
-SELECT id, sender_id, recipient_id, is_accepted FROM friends
+SELECT id, sender_id, recipient_id, is_accepted, created_at, updated_at FROM friends
 WHERE recipient_id = $1 AND is_accepted = FALSE
 `
 
@@ -85,6 +87,8 @@ func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) 
 			&i.SenderID,
 			&i.RecipientID,
 			&i.IsAccepted,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

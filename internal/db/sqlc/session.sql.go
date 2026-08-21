@@ -14,8 +14,8 @@ import (
 )
 
 const createSession = `-- name: CreateSession :exec
-INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic, updated_at)
-VALUES($1, $2, $3, $4, $5, $6, now())
+INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic)
+VALUES($1, $2, $3, $4, $5, $6)
 `
 
 type CreateSessionParams struct {

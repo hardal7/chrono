@@ -16,6 +16,8 @@ type Friend struct {
 	SenderID    uuid.UUID
 	RecipientID uuid.UUID
 	IsAccepted  bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 }
 
 type Session struct {
