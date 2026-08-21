@@ -37,7 +37,8 @@ services:
     expose:
       - "${APP_PORT}"
     depends_on:
-      - migrate
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ../:/srv
     command: sh -c "make run -C /srv"

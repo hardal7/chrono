@@ -16,26 +16,28 @@ import (
 
 const (
 	maxBytes = 1024 * 1024 * 5 // 5 MB
-	dirPerm  = 0755
-	filePerm = 0644 // Don't execute the file
+	filePerm = 0644            // Don't execute the file
 
 	AvatarDirectory        = "/srv/avatars"
-	defaultAvatarDirectory = "/srv/avatars/default"
+	DefaultAvatarDirectory = "default"
 	defaultAvatarsNum      = 5
 )
 
+// TODO: Sanitize Image
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
-	logger.Debug("Uploading avatar")
+	logger.Debug("Uploading user avatar")
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
 	if err != nil {
 		logger.Debug("Failed to read file", err)
 		return err
 	}
+
 	if len(fileBytes) > maxBytes {
 		logger.Debug("File size too large")
 		return err
 	}
+
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
 		logger.Debug("Invalid filetype")
@@ -48,54 +50,40 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 		logger.Debug("Failed to create file", err)
 		return err
 	}
-	logger.Debug("Uploaded avatar")
+
+	logger.Debug("Uploaded user avatar")
 	return nil
 }
 
 func createFile(fileBytes []byte, filename string) error {
-	if _, err := os.Stat(AvatarDirectory); os.IsNotExist(err) {
-		err = os.Mkdir(AvatarDirectory, dirPerm)
-		if err != nil {
-			return err
-		}
-	}
-	err := os.WriteFile(filepath.Join(AvatarDirectory, filename), fileBytes, filePerm)
+	path := filepath.Join(AvatarDirectory, filename)
+	os.Remove(path)
+	err := os.WriteFile(path, fileBytes, filePerm)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func InitAvatar(ctx context.Context) error {
-	logger.Debug("Initializing avatar")
+	logger.Debug("Initializing user avatar")
+
 	randomAvatar := strconv.Itoa(rand.Intn(defaultAvatarsNum))
-	path := filepath.Join(defaultAvatarDirectory, randomAvatar)
-	src, err := os.Open(path)
-	if err != nil {
-		logger.Warn("Failed to load random avatar", "id", randomAvatar)
-		return err
-	}
-	defer func() {
-		err = src.Close()
-		if err != nil {
-			logger.Warn("Failed to close source file", err)
-		}
-	}()
-
+	avatarPath := filepath.Join(DefaultAvatarDirectory, randomAvatar)
 	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
-	dst, err := os.Create(filepath.Join(AvatarDirectory, userID))
+
+	err := createSymlink(avatarPath, userID)
+
+	logger.Debug("Initialized user avatar", "id", randomAvatar)
+	return err
+}
+
+func createSymlink(source, filename string) error {
+	path := filepath.Join(AvatarDirectory, filename)
+	err := os.Symlink(source, path)
 	if err != nil {
-		logger.Warn("Failed to create new file")
 		return err
 	}
-	defer func() {
-		err = dst.Close()
-		if err != nil {
-			logger.Warn("Failed to close destination file", err)
-		}
-	}()
-
-	_, err = io.Copy(dst, src)
-	logger.Debug("Initialized avatar", "id", randomAvatar)
-	return err
+	return nil
 }

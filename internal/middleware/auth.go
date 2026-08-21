@@ -64,7 +64,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		logger.Debug("Authenticated user")
+		logger.Debug("Authenticated user", "userID", userID.String())
 		ctx := context.WithValue(r.Context(), UserID, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
