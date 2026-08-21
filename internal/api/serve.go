@@ -20,16 +20,27 @@ func Serve() {
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(middleware.LogRequest)
 
-	mainRouter.Group(publicRoutes)
+	mainRouter.Route("/api", func(r chi.Router) {
+		r.Group(publicRoutes)
 
-	mainRouter.Group(func(r chi.Router) {
-		r.Use(middleware.Authenticate)
-		r.Route("/user", UserRoute)
-		r.Route("/topic", TopicRoute)
-		r.Route("/topic-event", TopicEventRoute)
-		r.Route("/session", SessionRoute)
-		r.Route("/friend", FriendRoute)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Authenticate)
+			r.Route("/user", UserRoute)
+			r.Route("/topic", TopicRoute)
+			r.Route("/topic-event", TopicEventRoute)
+			r.Route("/session", SessionRoute)
+			r.Route("/friend", FriendRoute)
+		})
 	})
+
+	mainRouter.Get("/privacy", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/privacy.html")
+	})
+	mainRouter.Get("/terms", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/terms.html")
+	})
+	siteServer := http.FileServer(http.Dir("./static"))
+	mainRouter.Handle("/*", siteServer)
 
 	go runServer("main", config.App.Port, mainRouter)
 	runServer("admin", config.App.AdminPort, adminRouter)

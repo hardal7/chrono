@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
@@ -14,31 +13,8 @@ func UserRoute(r chi.Router) {
 	r.Post("/account", EditUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
 	r.Get("/account", GetUserAccountHandler)
+	r.Get("/profile/{username}", GetUserProfileHandler)
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
-}
-
-func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
-	var req dto.RegisterUserRequest
-	processRequest(w, r, &req)
-	err := user.Register(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to register user", http.StatusBadRequest)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-
-}
-
-func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
-	var req dto.LoginUserRequest
-	processRequest(w, r, &req)
-	cookie, err := user.Login(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to login user", http.StatusBadRequest)
-		return
-	}
-	http.SetCookie(w, &cookie)
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +57,12 @@ func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
-	avatarID := chi.URLParam(r, "id")
-	path := filepath.Join("./"+user.AvatarDirectory, avatarID)
-	http.ServeFile(w, r, path)
+func GetUserProfileHandler(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	resp, err := user.GetProfile(r.Context(), username)
+	if err != nil {
+		http.Error(w, "Failed to get profile", http.StatusBadRequest)
+		return
+	}
+	processResponse(w, resp)
 }

@@ -43,9 +43,6 @@ type GetUserAccountResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type GetUserProfileRequest struct {
-	Username string `json:"username"`
-}
 type GetUserProfileResponse struct {
 	Username         string `json:"username"`
 	AvatarPath       string `json:"avatar_path"`

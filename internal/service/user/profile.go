@@ -13,9 +13,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func GetProfile(ctx context.Context, r dto.GetUserProfileRequest) (dto.GetUserProfileResponse, error) {
-	logger.Debug("Getting user profile", "username", r.Username)
-	user, err := conn.Queries.GetUserByUsername(ctx, r.Username)
+func GetProfile(ctx context.Context, username string) (dto.GetUserProfileResponse, error) {
+	logger.Debug("Getting user profile", "username", username)
+	user, err := conn.Queries.GetUserByUsername(ctx, username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			logger.Debug("User not found")
@@ -73,6 +73,6 @@ func GetProfile(ctx context.Context, r dto.GetUserProfileRequest) (dto.GetUserPr
 		FriendStatus:     friendStatus,
 	}
 
-	logger.Debug("Got user profile", "username", r.Username)
+	logger.Debug("Got user profile", "username", username)
 	return resp, nil
 }
