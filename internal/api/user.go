@@ -61,7 +61,7 @@ func GetUserProfileHandler(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 	resp, err := user.GetProfile(r.Context(), username)
 	if err != nil {
-		http.Error(w, "Failed to get profile", http.StatusBadRequest)
+		http.Error(w, "Failed to get user profile", http.StatusBadRequest)
 		return
 	}
 	processResponse(w, resp)

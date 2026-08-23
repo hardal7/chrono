@@ -21,3 +21,18 @@ VALUES($1, $2, $3);
 -- name: GetSessionParticipants :many
 SELECT * FROM session_participants
 WHERE session_id = $1;
+-- name: GetSessionsAllByFriends :many
+WITH friend_users AS (
+    SELECT
+        CASE
+            WHEN sender_id = $1 THEN recipient_id
+            ELSE sender_id
+        END
+    AS friend_id
+    FROM friends
+    WHERE
+        (sender_id = $1 OR recipient_id = $1)
+        AND is_accepted = TRUE
+)
+SELECT sessions.* FROM sessions
+JOIN friend_users ON sessions.owner_id = friend_users.friend_id;

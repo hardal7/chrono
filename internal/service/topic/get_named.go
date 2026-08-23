@@ -12,7 +12,7 @@ import (
 )
 
 func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicNamedResponse, error) {
-	logger.Debug("Getting topic", "name", r.Name)
+	logger.Debug("Getting topic", "topicName", r.Name)
 	t, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
 		Name:    r.Name,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
@@ -25,6 +25,6 @@ func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicName
 		TotalTime: int(t.TotalTimeTrackedSeconds),
 		Streak:    int(t.Streak),
 	}
-	logger.Debug("Got topic", "name", r.Name)
+	logger.Debug("Got topic", "topicName", r.Name)
 	return resp, nil
 }

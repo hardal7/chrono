@@ -138,6 +138,54 @@ func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUI
 	return items, nil
 }
 
+const getSessionsAllByFriends = `-- name: GetSessionsAllByFriends :many
+WITH friend_users AS (
+    SELECT
+        CASE
+            WHEN sender_id = $1 THEN recipient_id
+            ELSE sender_id
+        END
+    AS friend_id
+    FROM friends
+    WHERE
+        (sender_id = $1 OR recipient_id = $1)
+        AND is_accepted = TRUE
+)
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
+JOIN friend_users ON sessions.owner_id = friend_users.friend_id
+`
+
+func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUID) ([]Session, error) {
+	rows, err := q.db.Query(ctx, getSessionsAllByFriends, senderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Session{}
+	for rows.Next() {
+		var i Session
+		if err := rows.Scan(
+			&i.ID,
+			&i.OwnerID,
+			&i.Name,
+			&i.MaxParticipants,
+			&i.Password,
+			&i.ExpiresAt,
+			&i.Topic,
+			&i.IsActive,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const joinSession = `-- name: JoinSession :exec
 INSERT INTO session_participants(user_id, session_id, last_seen_at)
 VALUES($1, $2, $3)
