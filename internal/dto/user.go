@@ -4,7 +4,7 @@ import "time"
 
 type RegisterUserRequest struct {
 	Email    string `json:"email" validate:"email"`
-	Username string `json:"username" validate:"min=4"`
+	Username string `json:"username" validate:"min=4,max=32"`
 	Password string `json:"password"`
 }
 
@@ -15,7 +15,7 @@ type LoginUserRequest struct {
 }
 
 type EditUserAccountRequest struct {
-	NewUsername   string `json:"username" validate:"omitempty"`
+	NewUsername   string `json:"username" validate:"omitempty,max=32"`
 	NewPassword   string `json:"password" validate:"omitempty"`
 	DeleteAccount bool   `json:"delete" validate:"omitempty"`
 }

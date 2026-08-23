@@ -13,6 +13,7 @@ func IPToCountry(ip string) string {
 	db, err := geoip2.Open("/srv/GeoLite2-City.mmdb")
 	if err != nil {
 		logger.Debug("Failed to load geolocation database", err)
+		return ""
 	}
 	defer func() {
 		err := db.Close()
@@ -24,10 +25,12 @@ func IPToCountry(ip string) string {
 	address, err := netip.ParseAddr(ip)
 	if err != nil {
 		logger.Debug("Failed to parse IP address", err)
+		return ""
 	}
 	record, err := db.Country(address)
 	if err != nil {
 		logger.Warn("Failed to find location of IP address", err)
+		return ""
 	}
 	if !record.HasData() {
 		logger.Debug("No data found for this IP")

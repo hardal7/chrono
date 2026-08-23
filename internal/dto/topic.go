@@ -1,12 +1,12 @@
 package dto
 
 type CreateTopicRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" validate:"max=64"`
 }
 
 type EditTopicRequest struct {
 	Name    string `json:"name"`
-	NewName string `json:"new_name" validate:"omitempty"`
+	NewName string `json:"new_name" validate:"omitempty,max=64"`
 	Delete  bool   `json:"delete" validate:"omitempty"`
 }
 

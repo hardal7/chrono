@@ -29,6 +29,7 @@ func LogRequest(next http.Handler) http.Handler {
 		logger.Trace("Received Request")
 		contentType := r.Header.Get("Content-Type")
 		if strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/plain") {
+			// TODO: Do not print sensitive information
 			logger.Trace(string(body))
 		} else {
 			logger.Trace(fmt.Sprintf(

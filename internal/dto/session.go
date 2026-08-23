@@ -3,8 +3,8 @@ package dto
 import "time"
 
 type CreateSessionRequest struct {
-	Name            string    `json:"name"`
-	MaxParticipants int       `json:"max_participants" validate:"omitempty"`
+	Name            string    `json:"name" validate:"max=64"`
+	MaxParticipants int       `json:"max_participants" validate:"omitempty,max=1024"`
 	Password        string    `json:"password" validate:"omitempty"`
 	ExpiresAt       time.Time `json:"expires_at" validate:"omitempty"`
 	Topic           string    `json:"topic" validate:"omitempty"`
