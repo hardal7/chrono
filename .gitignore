@@ -4,5 +4,6 @@
 .gitlab-ci-local
 bin
 certs
-avatars
+avatars/*
+!avatars/default/
 *.mmdb

@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"io"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,7 +20,7 @@ const (
 
 	AvatarDirectory        = "/srv/avatars"
 	DefaultAvatarDirectory = "default"
-	defaultAvatarsNum      = 5
+	defaultAvatarsNum      = 15
 )
 
 // TODO: Sanitize Image
@@ -75,7 +75,7 @@ func createFile(fileBytes []byte, filename string) error {
 func InitAvatar(ctx context.Context) error {
 	logger.Debug("Initializing user avatar")
 
-	randomAvatar := strconv.Itoa(rand.Intn(defaultAvatarsNum))
+	randomAvatar := strconv.Itoa(rand.IntN(defaultAvatarsNum))
 	avatarPath := filepath.Join(DefaultAvatarDirectory, randomAvatar)
 	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
 

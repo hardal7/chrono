@@ -43,6 +43,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			MatchName:               matchName,
 		})
 	case "global":
+		// TODO: Cache this with redis (update on 1m?)
 		users, err = conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),

@@ -34,12 +34,10 @@ func Serve() {
 		})
 	})
 
-	mainRouter.Get("/privacy", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/privacy.html")
-	})
-	mainRouter.Get("/terms", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/terms.html")
-	})
+	mainRouter.Get("/privacy", serveHTML("privacy.html"))
+	mainRouter.Get("/terms", serveHTML("terms.html"))
+	mainRouter.Get("/report", serveHTML("report.html"))
+
 	siteServer := http.FileServer(http.Dir("./static"))
 	mainRouter.Handle("/*", siteServer)
 
@@ -59,4 +57,10 @@ var validate *validator.Validate
 
 func InitValidator() {
 	validate = validator.New(validator.WithRequiredStructEnabled())
+}
+
+func serveHTML(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/"+path)
+	}
 }
