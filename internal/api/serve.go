@@ -26,6 +26,7 @@ func Serve() {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Authenticate)
 			r.Route("/user", UserRoute)
+			r.Route("/location", LocationRoute)
 			r.Route("/topic", TopicRoute)
 			r.Route("/topic-event", TopicEventRoute)
 			r.Route("/session", SessionRoute)
