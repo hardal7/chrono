@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.31.1
 
-package db
+package query
 
 import (
 	"time"
@@ -70,6 +70,7 @@ type User struct {
 	TodayTimeTrackedSeconds int32
 	Country                 pgtype.Text
 	HideCountry             bool
+	HideUser                bool
 	CreatedAt               pgtype.Timestamptz
 	UpdatedAt               pgtype.Timestamptz
 }

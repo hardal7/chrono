@@ -19,6 +19,7 @@ func Paginate(next http.Handler) http.Handler {
 		logger.Debug("Paginating Request")
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			logger.Debug("Failed to read body", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
@@ -26,11 +27,13 @@ func Paginate(next http.Handler) http.Handler {
 
 		var req listRequest
 		if err := json.Unmarshal(body, &req); err != nil {
+			logger.Debug("Failed to unmarshal body", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
 		if req.Limit > 20 || req.Limit < 0 {
+			logger.Debug("Request is not within pagination limits", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}

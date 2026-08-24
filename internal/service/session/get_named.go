@@ -2,39 +2,37 @@ package session
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSessionNamedResponse, error) {
-	logger.Debug("Getting session", "sessionName", r.Name)
-	s, err := conn.Queries.GetSessionByNameAndOwnerName(ctx, db.GetSessionByNameAndOwnerNameParams{
+	resp := dto.GetSessionNamedResponse{}
+
+	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
 		Name:     r.Name,
 		Username: r.OwnerUsername,
 	})
 	if err != nil {
-		logger.Debug("Failed to get session by username", err)
-		return dto.GetSessionNamedResponse{}, err
+		return resp, fmt.Errorf("Failed to get session by username: %w: %w", db.ErrRunQuery, err)
 	}
 
-	p, err := conn.Queries.GetSessionParticipants(ctx, s.ID)
+	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
-		logger.Warn("Failed to get participants of the session", "sessionName", s.Name, "error", err)
-		return dto.GetSessionNamedResponse{}, err
+		return resp, fmt.Errorf("Failed to get participants of the session: %w: %w", db.ErrRunQuery, err)
 	}
+
 	participants := []dto.Participant{}
 	isParticipant := false
 	for _, participant := range p {
-		u, err := conn.Queries.GetUserByID(ctx, participant.ID)
+		u, err := db.Queries.GetUserByID(ctx, participant.ID)
 		if err != nil {
-			logger.Warn("Failed to get user participant", err)
-			return dto.GetSessionNamedResponse{}, err
+			return resp, fmt.Errorf("Failed to get user participant: %w: %w", db.ErrRunQuery, err)
 		}
 		if u.ID == ctx.Value(middleware.UserID).(uuid.UUID) {
 			isParticipant = true
@@ -50,11 +48,10 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	}
 
 	if !isParticipant {
-		logger.Debug("Cannot get details for unauthorized session")
-		return dto.GetSessionNamedResponse{}, errors.New("unauthorized session details requested")
+		return resp, fmt.Errorf("Unauthorized session details requested")
 	}
 
-	resp := dto.GetSessionNamedResponse{
+	resp = dto.GetSessionNamedResponse{
 		Name:                s.Name,
 		OwnerUsername:       r.OwnerUsername,
 		ExpiresAt:           s.ExpiresAt.Time,
@@ -62,6 +59,6 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 		TotalParticipants:   len(participants),
 		CurrentParticipants: participants,
 	}
-	logger.Debug("Got session", "sessionName", r.Name)
+
 	return resp, nil
 }

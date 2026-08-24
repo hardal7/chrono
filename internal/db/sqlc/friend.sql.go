@@ -3,7 +3,7 @@
 //   sqlc v1.31.1
 // source: friend.sql
 
-package db
+package query
 
 import (
 	"context"
@@ -135,7 +135,7 @@ func (q *Queries) GetPossibleFriends(ctx context.Context, id uuid.UUID) ([]GetPo
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.hide_user, users.created_at, users.updated_at FROM friends
 JOIN users ON 
     users.id = friends.recipient_id
     OR users.id = friends.sender_id
@@ -178,6 +178,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.TodayTimeTrackedSeconds,
 			&i.Country,
 			&i.HideCountry,
+			&i.HideUser,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

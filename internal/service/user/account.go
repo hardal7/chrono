@@ -2,76 +2,62 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
-	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
-	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	u, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
-		logger.Debug("Failed to get user", err)
-		return err
+		return fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Editing account details", "username", u.Username)
 	if r.DeleteAccount {
-		logger.Debug("Deleting account", "username", u.Username)
-		err := conn.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+		err := db.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 		if err != nil {
-			logger.Debug("Failed to delete user", err)
-			return err
+			return fmt.Errorf("Failed to delete user: %w: %w", db.ErrRunQuery, err)
 		}
-		logger.Debug("Deleted account", "username", u.Username)
 		return nil
 	}
 
 	if r.NewUsername != "" {
-		logger.Debug("Changing username", "username", u.Username, "newUsername", r.NewUsername)
-		_, err := conn.Queries.GetUserByUsername(ctx, r.NewUsername)
-		if err != pgx.ErrNoRows {
-			logger.Debug("Account with username exists")
-			return errors.New("account with username exists")
-		}
 		u.Username = r.NewUsername
 	}
 
 	if r.NewPassword != "" {
-		logger.Debug("Changing account password")
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
 		if err != nil {
-			logger.Warn("Failed to hash password", err)
-			return err
+			return fmt.Errorf("Failed to hash password: %w", err)
 		}
 		u.Password = string(passwordHash)
 	}
 
-	err = conn.Queries.UpdateUser(ctx, db.UpdateUserParams{
+	err = db.Queries.UpdateUser(ctx, query.UpdateUserParams{
 		ID:       u.ID,
 		Username: u.Username,
 		Password: u.Password,
 	})
 	if err != nil {
-		logger.Debug("Failed to update user", err)
-		return err
+		return fmt.Errorf("Failed to update user: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Edited account details")
+
 	return nil
 }
 
 func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
-	u, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	resp := dto.GetUserAccountResponse{}
+
+	u, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil {
-		logger.Debug("Failed to get user", err)
-		return dto.GetUserAccountResponse{}, err
+		return resp, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
-	resp := dto.GetUserAccountResponse{
+
+	resp = dto.GetUserAccountResponse{
 		Username:  u.Username,
 		Email:     u.Email,
 		CreatedAt: u.CreatedAt.Time,

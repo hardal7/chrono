@@ -3,7 +3,7 @@
 //   sqlc v1.31.1
 // source: user.sql
 
-package db
+package query
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTopUsers = `-- name: GetTopUsers :many
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM users
 WHERE 
     total_time_tracked_seconds < $1
     AND username ILIKE $3 || '%'
@@ -77,6 +77,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 			&i.TodayTimeTrackedSeconds,
 			&i.Country,
 			&i.HideCountry,
+			&i.HideUser,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -91,7 +92,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 }
 
 const getTopUsersLocal = `-- name: GetTopUsersLocal :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.created_at, users.updated_at FROM users
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.hide_user, users.created_at, users.updated_at FROM users
 JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.country = target_user.country
@@ -132,6 +133,7 @@ func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalPara
 			&i.TodayTimeTrackedSeconds,
 			&i.Country,
 			&i.HideCountry,
+			&i.HideUser,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -146,7 +148,7 @@ func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalPara
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM users
 WHERE email = $1
 `
 
@@ -162,6 +164,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.TodayTimeTrackedSeconds,
 		&i.Country,
 		&i.HideCountry,
+		&i.HideUser,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -169,7 +172,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM users
 WHERE id = $1
 `
 
@@ -185,6 +188,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.TodayTimeTrackedSeconds,
 		&i.Country,
 		&i.HideCountry,
+		&i.HideUser,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -192,7 +196,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, created_at, updated_at FROM users
+SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM users
 WHERE username = $1
 `
 
@@ -208,6 +212,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.TodayTimeTrackedSeconds,
 		&i.Country,
 		&i.HideCountry,
+		&i.HideUser,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

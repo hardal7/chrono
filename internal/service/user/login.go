@@ -2,15 +2,16 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
-	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -19,27 +20,26 @@ import (
 const jwtExpirationDays int = 30
 
 func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
-	logger.Debug("Logging user", "username", r.Username)
-
 	var err error
-	var u db.User
+	var u query.User
+	var cookie http.Cookie
+
 	if r.Username != "" {
-		u, err = conn.Queries.GetUserByUsername(ctx, r.Username)
+		u, err = db.Queries.GetUserByUsername(ctx, r.Username)
 	} else if r.Email != "" {
-		u, err = conn.Queries.GetUserByEmail(ctx, r.Email)
+		u, err = db.Queries.GetUserByEmail(ctx, r.Email)
 	}
-	if err != nil {
-		logger.Debug("Failed to get user", err)
-		return http.Cookie{}, err
+	if err == pgx.ErrNoRows {
+		return cookie, fmt.Errorf("User not found")
+	} else if err != nil {
+		return cookie, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		logger.Debug("Wrong password", err)
-		return http.Cookie{}, err
+		return cookie, fmt.Errorf("Wrong password: %w", err)
 	} else if err != nil {
-		logger.Debug("Failed to hash password", err)
-		return http.Cookie{}, err
+		return cookie, fmt.Errorf("Failed to hash password: %w", err)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -48,11 +48,10 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	})
 	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
 	if err != nil {
-		logger.Debug("Failed to sign token", err)
-		return http.Cookie{}, err
+		return cookie, fmt.Errorf("Failed to sign token: %w", err)
 	}
 
-	cookie := http.Cookie{
+	cookie = http.Cookie{
 		Name:     middleware.AuthHeader,
 		Value:    tokenString,
 		Path:     "/",
@@ -61,6 +60,5 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	}
-	logger.Debug("Logged user and sent token", "username", r.Username)
 	return cookie, nil
 }

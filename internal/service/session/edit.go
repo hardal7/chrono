@@ -2,41 +2,37 @@ package session
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Edit(ctx context.Context, r dto.EditSessionRequest) error {
-	s, err := conn.Queries.GetSessionByNameAndOwnerID(ctx, db.GetSessionByNameAndOwnerIDParams{
+	s, err := db.Queries.GetSessionByNameAndOwnerID(ctx, query.GetSessionByNameAndOwnerIDParams{
 		Name:    r.Name,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to get session: %w: %w", db.ErrRunQuery, err)
 	}
 
-	logger.Debug("Editing session", "sessionName", s.Name)
 	if r.Delete {
-		logger.Debug("Deleting session", "sessionName", s.Name)
-		err := conn.Queries.DeleteSession(ctx, s.ID)
+		err := db.Queries.DeleteSession(ctx, s.ID)
 		if err != nil {
-			logger.Debug("Failed to delete session", err)
-			return err
+			return fmt.Errorf("Failed to delete session: %w: %w", db.ErrRunQuery, err)
 		}
-		logger.Debug("Deleted session")
 		return nil
 	}
 
 	if r.NewName == "" {
 		s.Name = r.NewName
 	}
-	err = conn.Queries.UpdateSession(ctx, db.UpdateSessionParams{
+	err = db.Queries.UpdateSession(ctx, query.UpdateSessionParams{
 		ID:              s.ID,
 		Name:            s.Name,
 		MaxParticipants: pgtype.Int4{Int32: int32(r.NewMaxParticipants), Valid: r.NewMaxParticipants != 0},
@@ -44,9 +40,8 @@ func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 		ExpiresAt:       pgtype.Timestamptz{Time: r.NewExpiresAt, Valid: !r.NewExpiresAt.IsZero()},
 	})
 	if err != nil {
-		logger.Debug("Failed to update session", err)
-		return err
+		return fmt.Errorf("Failed to update session: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Changed session details")
+
 	return nil
 }

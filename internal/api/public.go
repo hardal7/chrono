@@ -20,26 +20,21 @@ func publicRoutes(r chi.Router) {
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserRequest
-	processRequest(w, r, &req)
-	err := user.Register(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to register user", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = user.Register(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusCreated)
-
 }
 
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
-	processRequest(w, r, &req)
-	cookie, err := user.Login(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to login user", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		cookie, err := user.Login(r.Context(), req)
+		http.SetCookie(w, &cookie)
+		processResponse(response{w, nil}, err)
 	}
-	http.SetCookie(w, &cookie)
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,6 +74,7 @@ func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
 	w.Header().Set("Content-Type", "image/jpeg")
 	http.ServeContent(w, r, fileInfo.Name(), fileInfo.ModTime(), file)
 }

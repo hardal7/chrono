@@ -10,39 +10,33 @@ import (
 
 func TopicEventRoute(r chi.Router) {
 	r.Post("/track", TrackTopicEventHandler)
-	r.Get("/get", GetTopicEventsHandler)
+	r.Get("/all", GetTopicEventsAllHandler)
 	r.Get("/today", GetTopicEventsTodayHandler)
 }
 
 func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.TrackTopicEventRequest
-	processRequest(w, r, &req)
-	err := topicevent.Track(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to track topic event", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = topicevent.Track(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusCreated)
 }
 
-func GetTopicEventsHandler(w http.ResponseWriter, r *http.Request) {
+func GetTopicEventsAllHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsRequest
-	processRequest(w, r, &req)
-	resp, err := topicevent.Get(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to get topic events", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		resp, err := topicevent.Get(r.Context(), req)
+		processResponse(response{w, resp}, err)
 	}
-	processResponse(w, resp)
 }
 
 func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicEventsTodayRequest
-	processRequest(w, r, &req)
-	resp, err := topicevent.GetToday(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to get topic events today", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		resp, err := topicevent.GetToday(r.Context(), req)
+		processResponse(response{w, resp}, err)
 	}
-	processResponse(w, resp)
 }

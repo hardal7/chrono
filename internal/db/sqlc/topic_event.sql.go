@@ -3,7 +3,7 @@
 //   sqlc v1.31.1
 // source: topic_event.sql
 
-package db
+package query
 
 import (
 	"context"

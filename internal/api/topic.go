@@ -17,42 +17,32 @@ func TopicRoute(r chi.Router) {
 
 func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateTopicRequest
-	processRequest(w, r, &req)
-	err := topic.Create(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to create topic", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = topic.Create(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusCreated)
 }
 
 func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditTopicRequest
-	processRequest(w, r, &req)
-	err := topic.Edit(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to edit topic", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = topic.Edit(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetAllTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := topic.GetAll(r.Context())
-	if err != nil {
-		http.Error(w, "Failed to get all topics", http.StatusBadRequest)
-		return
-	}
-	processResponse(w, resp)
+	processResponse(response{w, resp}, err)
 }
 
 func GetNamedTopicHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetTopicNamedRequest
-	processRequest(w, r, &req)
-	resp, err := topic.GetNamed(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to get named topic", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		resp, err := topic.GetNamed(r.Context(), req)
+		processResponse(response{w, resp}, err)
 	}
-	processResponse(w, resp)
 }

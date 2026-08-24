@@ -14,11 +14,9 @@ func LocationRoute(r chi.Router) {
 
 func EditLocationPrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.EditLocationPrivacyRequest
-	processRequest(w, r, &req)
-	err := location.EditLocationPrivacy(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to edit location privacy", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = location.EditLocationPrivacy(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusOK)
 }

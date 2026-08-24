@@ -10,12 +10,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-const IP Key = "IP"
+const (
+	IP        Key = "IP"
+	RequestID Key = "requestID"
+)
 
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +46,9 @@ func LogRequest(next http.Handler) http.Handler {
 		address := r.Header.Get("X-Forwarded-For")
 		ctx := context.WithValue(r.Context(), IP, address)
 
+		requestID := uuid.New().String()
+		ctx = context.WithValue(ctx, RequestID, requestID)
+
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}
 		next.ServeHTTP(ww, r.WithContext(ctx))
@@ -50,7 +57,7 @@ func LogRequest(next http.Handler) http.Handler {
 		method := r.Method
 		endpoint := r.URL.Path
 		status := ww.status
-		logger.Info(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String())
+		logger.Info(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String() + " " + requestID)
 		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
 		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
 	})

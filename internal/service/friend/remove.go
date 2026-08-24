@@ -2,26 +2,23 @@ package friend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func Remove(ctx context.Context, r dto.RemoveFriendRequest) error {
-	logger.Debug("Removing friend", "friend", r.Username)
-
-	err := conn.Queries.DeleteFriend(ctx, db.DeleteFriendParams{
+	err := db.Queries.DeleteFriend(ctx, query.DeleteFriendParams{
 		SenderID: ctx.Value(middleware.UserID).(uuid.UUID),
 		Username: r.Username,
 	})
 	if err != nil {
-		logger.Debug("Failed to remove friend", err)
-		return err
+		return fmt.Errorf("Failed to remove friend: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Removed friend", "friend", r.Username)
+
 	return nil
 }

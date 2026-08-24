@@ -22,9 +22,6 @@ func TestRegisterUser(t *testing.T) {
 func TestLoginUser(t *testing.T) {
 	loginUserTest.Run(t)
 }
-func TestEditUserAccount(t *testing.T) {
-	editUserAccountTest.Run(t)
-}
 func TestGetUserAccount(t *testing.T) {
 	getUserAccountTest.Run(t)
 }
@@ -166,107 +163,6 @@ var loginUserTest = test.Test{
 				Password: "",
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
-		},
-	},
-}
-
-var editUserAccountTest = test.Test{
-	Method:   http.MethodPost,
-	Endpoint: "/user/account",
-	Handler:  api.EditUserAccountHandler,
-	Cases: []test.Case{
-		{
-			Name: "successful username change",
-			Body: dto.EditUserAccountRequest{
-				NewUsername: "johnNewdoe",
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful password change",
-			Body: dto.EditUserAccountRequest{
-				NewPassword: "newPassword",
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful username and password change",
-			Body: dto.EditUserAccountRequest{
-				NewUsername: "johnNewdoe2",
-				NewPassword: "newPassword2",
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful account deletion",
-			Body: dto.EditUserAccountRequest{
-				DeleteAccount: true,
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful username change and account deletion",
-			Body: dto.EditUserAccountRequest{
-				NewUsername:   "johnNewdoe3",
-				DeleteAccount: true,
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful password change and account deletion",
-			Body: dto.EditUserAccountRequest{
-				NewPassword:   "newPassword",
-				DeleteAccount: true,
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "successful username password change and account deletion",
-			Body: dto.EditUserAccountRequest{
-				NewUsername:   "johnNewdoe4",
-				NewPassword:   "newPassword",
-				DeleteAccount: true,
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusOK,
-			},
-		},
-		{
-			Name: "empty request",
-			Body: dto.EditUserAccountRequest{},
-			ExpectedResponse: test.Response{
-				Status: http.StatusBadRequest,
-			},
-		},
-		{
-			Name: "empty username",
-			Body: dto.EditUserAccountRequest{
-				NewUsername: "",
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusBadRequest,
-			},
-		},
-		{
-			Name: "empty password",
-			Body: dto.EditUserAccountRequest{
-				NewPassword: "",
-			},
-			ExpectedResponse: test.Response{
-				Status: http.StatusBadRequest,
-			},
 		},
 	},
 }

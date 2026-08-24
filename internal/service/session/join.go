@@ -2,54 +2,55 @@ package session
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 )
 
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
-	logger.Debug("Joining session", "sessionName", r.Name)
-
-	s, err := conn.Queries.GetSessionByNameAndOwnerName(ctx, db.GetSessionByNameAndOwnerNameParams{
+	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
 		Name:     r.Name,
 		Username: r.OwnerUsername,
 	})
-	if err != nil {
-		logger.Debug("Failed to find session", err)
-		return err
-	}
-	if r.Password != s.Password.String {
-		logger.Debug("Wrong password for session", err)
-		return err
-	}
-	p, err := conn.Queries.GetSessionParticipants(ctx, s.ID)
-	if err != nil {
-		logger.Debug("Failed to check if session is full", err)
-		return err
-	}
-	if int(s.MaxParticipants.Int32) == len(p) {
-		logger.Debug("Session is full")
-		return err
-	}
-	if !s.IsActive {
-		logger.Debug("Session has expired")
-		return err
+	if err == pgx.ErrNoRows {
+		return fmt.Errorf("Session not found")
 	}
 
-	err = conn.Queries.JoinSession(ctx, db.JoinSessionParams{
+	if err != nil {
+		return fmt.Errorf("Failed to find session: %w: %w", err)
+	}
+
+	if r.Password != s.Password.String {
+		return fmt.Errorf("Wrong password for session")
+	}
+
+	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
+	if err != nil {
+		return fmt.Errorf("Failed to check if session is full: %w: %w", db.ErrRunQuery, err)
+	}
+
+	if int(s.MaxParticipants.Int32) == len(p) {
+		return fmt.Errorf("Session is full")
+	}
+
+	if !s.IsActive {
+		return fmt.Errorf("Session has expired")
+	}
+
+	err = db.Queries.JoinSession(ctx, query.JoinSessionParams{
 		UserID:     ctx.Value(middleware.UserID).(uuid.UUID),
 		SessionID:  s.ID,
 		LastSeenAt: time.Now(),
 	})
 	if err != nil {
-		logger.Debug("Failed to join session", err)
-		return err
+		return fmt.Errorf("Failed to join session: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Joined session", "sessionName", r.Name)
+
 	return nil
 }

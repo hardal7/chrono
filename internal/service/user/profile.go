@@ -2,34 +2,40 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
+	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
-	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 )
 
+const (
+	friendStatusNone     = "none"
+	friendStatusPending  = "pending"
+	friendStatusAccepted = "accepted"
+
+	privateCountry = "Private"
+)
+
 func GetProfile(ctx context.Context, username string) (dto.GetUserProfileResponse, error) {
-	logger.Debug("Getting user profile", "username", username)
-	user, err := conn.Queries.GetUserByUsername(ctx, username)
+	resp := dto.GetUserProfileResponse{}
+
+	user, err := db.Queries.GetUserByUsername(ctx, username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			logger.Debug("User not found")
-			return dto.GetUserProfileResponse{}, err
+			return resp, fmt.Errorf("User not found")
 		} else {
-			logger.Warn("Failed to check if user exists", err)
-			return dto.GetUserProfileResponse{}, err
+			return resp, fmt.Errorf("Failed to check if user exists: %w: %w", db.ErrRunQuery, err)
 		}
 	}
 
-	topics, err := conn.Queries.GetTopicsByOwner(ctx, user.ID)
+	topics, err := db.Queries.GetTopicsByOwner(ctx, user.ID)
 	if err != nil && err != pgx.ErrNoRows {
-		logger.Warn("Failed to get user topics", err)
-		return dto.GetUserProfileResponse{}, err
+		return resp, fmt.Errorf("Failed to get user topics: %w: %w", db.ErrRunQuery, err)
 	}
 	var bestTopic string
 	var mostTime int32
@@ -40,30 +46,29 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		}
 	}
 
-	possibleFriends, err := conn.Queries.GetPossibleFriends(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	possibleFriends, err := db.Queries.GetPossibleFriends(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 	if err != nil && err != pgx.ErrNoRows {
-		logger.Warn("Failed to get user friends", err)
-		return dto.GetUserProfileResponse{}, err
+		return resp, fmt.Errorf("Failed to get user friends: %w: %w", db.ErrRunQuery, err)
 	}
-	friendStatus := "none"
+	friendStatus := friendStatusNone
 	for _, friend := range possibleFriends {
 		if user.Username == friend.Username {
 			if friend.IsAccepted {
-				friendStatus = "accepted"
+				friendStatus = friendStatusAccepted
 			} else {
-				friendStatus = "pending"
+				friendStatus = friendStatusPending
 			}
 		}
 	}
 
 	var country string
 	if user.HideCountry {
-		country = "Private"
+		country = privateCountry
 	} else {
 		country = user.Country.String
 	}
 
-	resp := dto.GetUserProfileResponse{
+	resp = dto.GetUserProfileResponse{
 		Username:         user.Username,
 		AvatarPath:       filepath.Join(config.AvatarEndpoint, user.ID.String()),
 		TotalTimeSeconds: int(user.TotalTimeTrackedSeconds),
@@ -73,6 +78,5 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		FriendStatus:     friendStatus,
 	}
 
-	logger.Debug("Got user profile", "username", username)
 	return resp, nil
 }

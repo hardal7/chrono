@@ -2,15 +2,16 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/service/location"
 	"github.com/hardal7/chrono/internal/service/topic"
+	e "github.com/hardal7/chrono/internal/util/error"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -21,27 +22,21 @@ import (
 const bcryptCost int = 12
 
 func Register(ctx context.Context, r dto.RegisterUserRequest) error {
-	logger.Debug("Registering user", "username", r.Username)
-
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.Password), bcryptCost)
 	if err != nil {
-		logger.Warn("Failed to hash password", err)
-		return err
+		return fmt.Errorf("Failed to hash password: %w", err)
 	}
-	_, err = conn.Queries.GetUserByUsername(ctx, r.Username)
+	_, err = db.Queries.GetUserByUsername(ctx, r.Username)
 	if err != pgx.ErrNoRows {
 		if err == nil {
-			logger.Debug("User already exists")
-			// TODO: Custom error types
-			return errors.New("user already exists")
+			return fmt.Errorf("User already exists: %w", e.ErrAlreadyExists)
 		} else {
-			logger.Warn("Failed to check if user is duplicate", err)
-			return err
+			return fmt.Errorf("Failed to check if user is duplicate: %w: %w", db.ErrRunQuery, err)
 		}
 	}
 
 	country := location.IPToCountry(ctx.Value(middleware.IP).(string))
-	err = conn.Queries.CreateUser(ctx, db.CreateUserParams{
+	err = db.Queries.CreateUser(ctx, query.CreateUserParams{
 		Username: r.Username,
 		Email:    r.Email,
 		Password: string(passwordHash),
@@ -51,16 +46,15 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		},
 	})
 	if err != nil {
-		logger.Debug("Failed to create user", err)
-		return err
+		return fmt.Errorf("Failed to create user: %w", err)
 	}
-	logger.Debug("Registered user", "username", r.Username)
 
-	u, err := conn.Queries.GetUserByUsername(ctx, r.Username)
+	u, err := db.Queries.GetUserByUsername(ctx, r.Username)
 	if err != nil {
 		logger.Warn("Failed to get created user", "username", r.Username)
+	} else {
+		initAccount(ctx, u.ID)
 	}
-	initAccount(ctx, u.ID)
 	return nil
 }
 

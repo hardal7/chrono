@@ -2,21 +2,21 @@ package friend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
+	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func GetAll(ctx context.Context) (dto.GetFriendRequestsAllResponse, error) {
-	logger.Debug("Getting all friend requests")
+	resp := dto.GetFriendRequestsAllResponse{}
+
 	userID := ctx.Value(middleware.UserID).(uuid.UUID)
-	r, err := conn.Queries.GetFriendRequests(ctx, userID)
+	r, err := db.Queries.GetFriendRequests(ctx, userID)
 	if err != nil {
-		logger.Debug("Failed to get all friend requests", err)
-		return dto.GetFriendRequestsAllResponse{}, err
+		return resp, fmt.Errorf("Failed to get all friend requests: %w: %w", db.ErrRunQuery, err)
 	}
 
 	var requests []dto.FriendRequest
@@ -28,15 +28,13 @@ func GetAll(ctx context.Context) (dto.GetFriendRequestsAllResponse, error) {
 			friendID = request.RecipientID
 		}
 
-		friend, err := conn.Queries.GetUserByID(ctx, friendID)
+		friend, err := db.Queries.GetUserByID(ctx, friendID)
 		if err != nil {
-			logger.Warn("Failed to find friend", err)
-			return dto.GetFriendRequestsAllResponse{}, err
+			return resp, fmt.Errorf("Failed to find friend %q: %w: %w", friendID, db.ErrRunQuery, err)
 		}
 		requests = append(requests, dto.FriendRequest{FromUsername: friend.Username, Date: request.CreatedAt.Time})
 	}
+	resp = dto.GetFriendRequestsAllResponse{Requests: requests}
 
-	resp := dto.GetFriendRequestsAllResponse{Requests: requests}
-	logger.Debug("Got all friend requests")
 	return resp, nil
 }

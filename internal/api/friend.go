@@ -17,42 +17,32 @@ func FriendRoute(r chi.Router) {
 
 func CreateFriendRequestHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateFriendRequestRequest
-	processRequest(w, r, &req)
-	err := friend.CreateRequest(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to create friend request", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = friend.CreateRequest(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusCreated)
 }
 
 func AcceptFriendRequestHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.AcceptFriendRequestRequest
-	processRequest(w, r, &req)
-	err := friend.AcceptRequest(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to accept friend request", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = friend.AcceptRequest(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func RemoveFriendHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RemoveFriendRequest
-	processRequest(w, r, &req)
-	err := friend.Remove(r.Context(), req)
-	if err != nil {
-		http.Error(w, "Failed to remove friend", http.StatusBadRequest)
-		return
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = friend.Remove(r.Context(), req)
+		processResponse(response{w, nil}, err)
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetAllFriendRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := friend.GetAll(r.Context())
-	if err != nil {
-		http.Error(w, "Failed to get all friend requests", http.StatusBadRequest)
-		return
-	}
-	processResponse(w, resp)
+	processResponse(response{w, resp}, err)
 }

@@ -2,34 +2,33 @@ package topic
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 )
 
 const firstTopic string = "General"
 
 func InitFirst(ctx context.Context) error {
-	_, err := conn.Queries.GetTopicByOwnerAndName(ctx, db.GetTopicByOwnerAndNameParams{
+	_, err := db.Queries.GetTopicByOwnerAndName(ctx, query.GetTopicByOwnerAndNameParams{
 		Name:    firstTopic,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != pgx.ErrNoRows {
-		logger.Debug("First topic already initialized")
-		return err
+		return fmt.Errorf("First topic already initialized")
 	}
 
-	err = conn.Queries.CreateTopic(ctx, db.CreateTopicParams{
+	err = db.Queries.CreateTopic(ctx, query.CreateTopicParams{
 		Name:    firstTopic,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to create topic: %w: %w", db.ErrRunQuery, err)
 	}
-	logger.Debug("Initialized first topic")
+
 	return nil
 }

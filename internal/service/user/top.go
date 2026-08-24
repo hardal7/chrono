@@ -2,63 +2,67 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"path/filepath"
 
 	"github.com/google/uuid"
-	conn "github.com/hardal7/chrono/internal/db"
-	db "github.com/hardal7/chrono/internal/db/sqlc"
+	db "github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
-	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const (
+	scopeFriends = "friends"
+	scopeLocal   = "local"
+	scopeGlobal  = "global"
+)
+
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
-	logger.Debug("Getting top users", "scope", r.Scope)
-	var users []db.User
+	var users []query.User
 	var err error
+	resp := dto.GetTopUsersResponse{}
 	matchName := pgtype.Text{String: r.MatchName, Valid: true}
 
 	switch r.Scope {
-	case "friends":
-		users, err = conn.Queries.GetTopFriends(ctx, db.GetTopFriendsParams{
+	case scopeFriends:
+		users, err = db.Queries.GetTopFriends(ctx, query.GetTopFriendsParams{
 			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 			MatchName:               matchName,
 		})
-		user, err := conn.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+		user, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
 		if err != nil {
-			logger.Debug("Failed to retrieve user", err)
-			return dto.GetTopUsersResponse{}, err
+			return resp, fmt.Errorf("Failed to retrieve user: %w: %w", db.ErrRunQuery, err)
 		}
 		users = append(users, user)
-	case "local":
-		users, err = conn.Queries.GetTopUsersLocal(ctx, db.GetTopUsersLocalParams{
+
+	case scopeLocal:
+		users, err = db.Queries.GetTopUsersLocal(ctx, query.GetTopUsersLocalParams{
 			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 			MatchName:               matchName,
 		})
-	case "global":
+
+	case scopeGlobal:
 		// TODO: Cache this with redis (update on 1m?)
-		users, err = conn.Queries.GetTopUsers(ctx, db.GetTopUsersParams{
+		users, err = db.Queries.GetTopUsers(ctx, query.GetTopUsersParams{
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 			MatchName:               matchName,
 		})
+
 	default:
-		logger.Debug("Invalid scope queried", "scope", r.Scope, err)
-		return dto.GetTopUsersResponse{}, errors.New("invalid scope")
+		return resp, fmt.Errorf("Invalid scope queried")
 	}
 	if err != nil {
-		logger.Debug("Failed to get users", err)
-		return dto.GetTopUsersResponse{}, err
+		return resp, fmt.Errorf("Failed to get users: %w: %w", db.ErrRunQuery, err)
 	}
 
-	resp := dto.GetTopUsersResponse{}
 	for i, user := range users {
 		resp.Users = append(resp.Users, dto.TopUser{
 			Rank:       i + 1,
@@ -68,6 +72,6 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
 		})
 	}
-	logger.Debug("Got top users")
+
 	return resp, nil
 }
