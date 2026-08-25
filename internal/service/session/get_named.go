@@ -22,7 +22,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 		return resp, fmt.Errorf("Failed to get session by username: %w: %w", db.ErrRunQuery, err)
 	}
 
-	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
+	p, err := db.Queries.GetSessionParticipantsAsUsers(ctx, s.ID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get participants of the session: %w: %w", db.ErrRunQuery, err)
 	}
@@ -30,16 +30,12 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	participants := []dto.Participant{}
 	isParticipant := false
 	for _, participant := range p {
-		u, err := db.Queries.GetUserByID(ctx, participant.ID)
-		if err != nil {
-			return resp, fmt.Errorf("Failed to get user participant: %w: %w", db.ErrRunQuery, err)
-		}
-		if u.ID == ctx.Value(middleware.UserID).(uuid.UUID) {
+		if participant.ID == ctx.Value(middleware.UserID).(uuid.UUID) {
 			isParticipant = true
 		}
 
 		participants = append(participants, dto.Participant{
-			Name:             u.Username,
+			Name:             participant.Username,
 			AvatarPath:       participant.ID.String(),
 			SessionTime:      int(participant.TotalTimeTrackedSeconds),
 			SessionTimeToday: int(participant.TodayTimeTrackedSeconds),

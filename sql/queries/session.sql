@@ -18,8 +18,9 @@ WHERE name = $1 AND owner_id = $2;
 -- name: JoinSession :exec
 INSERT INTO session_participants(user_id, session_id, last_seen_at)
 VALUES($1, $2, $3);
--- name: GetSessionParticipants :many
+-- name: GetSessionParticipantsAsUsers :many
 SELECT * FROM session_participants
+JOIN users ON sessions_participants.user_id = users.id
 WHERE session_id = $1;
 -- name: GetSessionsAllByFriends :many
 WITH friend_users AS (
@@ -34,5 +35,9 @@ WITH friend_users AS (
         (sender_id = $1 OR recipient_id = $1)
         AND is_accepted = TRUE
 )
-SELECT sessions.* FROM sessions
-JOIN friend_users ON sessions.owner_id = friend_users.friend_id;
+SELECT 
+    sessions.*,
+    users.username AS owner_username
+FROM sessions
+JOIN friend_users ON sessions.owner_id = friend_users.friend_id
+JOIN users ON sessions.owner_id = users.id;

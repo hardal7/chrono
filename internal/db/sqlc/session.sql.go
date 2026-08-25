@@ -106,20 +106,41 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 	return i, err
 }
 
-const getSessionParticipants = `-- name: GetSessionParticipants :many
-SELECT id, user_id, session_id, last_seen_at, total_time_tracked_seconds, today_time_tracked_seconds FROM session_participants
+const getSessionParticipantsAsUsers = `-- name: GetSessionParticipantsAsUsers :many
+SELECT session_participants.id, user_id, session_id, last_seen_at, session_participants.total_time_tracked_seconds, session_participants.today_time_tracked_seconds, users.id, email, username, password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM session_participants
+JOIN users ON sessions_participants.user_id = users.id
 WHERE session_id = $1
 `
 
-func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUID) ([]SessionParticipant, error) {
-	rows, err := q.db.Query(ctx, getSessionParticipants, sessionID)
+type GetSessionParticipantsAsUsersRow struct {
+	ID                        uuid.UUID
+	UserID                    uuid.UUID
+	SessionID                 uuid.UUID
+	LastSeenAt                time.Time
+	TotalTimeTrackedSeconds   int32
+	TodayTimeTrackedSeconds   int32
+	ID_2                      uuid.UUID
+	Email                     string
+	Username                  string
+	Password                  string
+	TotalTimeTrackedSeconds_2 int32
+	TodayTimeTrackedSeconds_2 int32
+	Country                   pgtype.Text
+	HideCountry               bool
+	HideUser                  bool
+	CreatedAt                 pgtype.Timestamptz
+	UpdatedAt                 pgtype.Timestamptz
+}
+
+func (q *Queries) GetSessionParticipantsAsUsers(ctx context.Context, sessionID uuid.UUID) ([]GetSessionParticipantsAsUsersRow, error) {
+	rows, err := q.db.Query(ctx, getSessionParticipantsAsUsers, sessionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []SessionParticipant{}
+	items := []GetSessionParticipantsAsUsersRow{}
 	for rows.Next() {
-		var i SessionParticipant
+		var i GetSessionParticipantsAsUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -127,6 +148,17 @@ func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUI
 			&i.LastSeenAt,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
+			&i.ID_2,
+			&i.Email,
+			&i.Username,
+			&i.Password,
+			&i.TotalTimeTrackedSeconds_2,
+			&i.TodayTimeTrackedSeconds_2,
+			&i.Country,
+			&i.HideCountry,
+			&i.HideUser,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -151,19 +183,37 @@ WITH friend_users AS (
         (sender_id = $1 OR recipient_id = $1)
         AND is_accepted = TRUE
 )
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
+SELECT 
+    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.is_active, sessions.created_at, sessions.updated_at,
+    users.username AS owner_username
+FROM sessions
 JOIN friend_users ON sessions.owner_id = friend_users.friend_id
+JOIN users ON sessions.owner_id = users.id
 `
 
-func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUID) ([]Session, error) {
+type GetSessionsAllByFriendsRow struct {
+	ID              uuid.UUID
+	OwnerID         uuid.UUID
+	Name            string
+	MaxParticipants pgtype.Int4
+	Password        pgtype.Text
+	ExpiresAt       pgtype.Timestamptz
+	Topic           pgtype.Text
+	IsActive        bool
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	OwnerUsername   string
+}
+
+func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUID) ([]GetSessionsAllByFriendsRow, error) {
 	rows, err := q.db.Query(ctx, getSessionsAllByFriends, senderID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Session{}
+	items := []GetSessionsAllByFriendsRow{}
 	for rows.Next() {
-		var i Session
+		var i GetSessionsAllByFriendsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.OwnerID,
@@ -175,6 +225,7 @@ func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUI
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.OwnerUsername,
 		); err != nil {
 			return nil, err
 		}
