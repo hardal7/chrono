@@ -10,8 +10,10 @@ services:
       - /srv/db:/var/lib/postgresql/data:rw
       - ../configs/postgresql.conf:/etc/postgresql.conf
     command: "-c config_file=/etc/postgresql.conf"
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
     healthcheck:
-      test: "sh -c 'pg_isready -U $DB_USER'"
+      test: "pg_isready -U $DB_USER"
       interval: 1s
       retries: 5
 
@@ -30,6 +32,18 @@ services:
       - ../scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
 
+  redis:
+    image: redis:8.10-alpine
+    container_name: chrono-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    healthcheck:
+      test: "redis-cli --raw incr ping" 
+      interval: 1s
+      retries: 5
+
   api:
     build:
       context: ../
@@ -41,6 +55,8 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     volumes:
       - ../:/srv
     command: sh -c "make run -C /srv"

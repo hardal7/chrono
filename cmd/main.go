@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/hardal7/chrono/internal/api"
-	conn "github.com/hardal7/chrono/internal/db"
+	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/runner"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -16,7 +16,8 @@ func init() {
 }
 
 func main() {
+	db.CreateDBConnection()
+	db.CreateRedisConnection()
 	go runner.NewDay(context.Background())
-	conn.CreateConnection()
 	api.Serve()
 }

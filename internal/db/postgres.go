@@ -14,7 +14,7 @@ var (
 	Queries *db.Queries
 )
 
-func CreateConnection() {
+func CreateDBConnection() {
 	logger.Info("Connecting to database server", "host", config.App.DB_HOST)
 	var err error
 	DB, err = pgxpool.New(context.Background(), getConnectionString())
