@@ -10,6 +10,7 @@ var RDB *redis.Client
 
 func CreateRedisConnection() {
 	logger.Info("Connecting to redis server", "host", config.App.REDIS_HOST)
+
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.App.REDIS_HOST + ":" + config.App.REDIS_PORT,
 		Password: config.App.REDIS_PASSWORD,

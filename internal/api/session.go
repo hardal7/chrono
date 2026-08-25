@@ -21,7 +21,7 @@ func CreateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = session.Create(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -30,7 +30,7 @@ func EditSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = session.Edit(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -39,7 +39,7 @@ func JoinSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = session.Join(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -48,10 +48,10 @@ func GetNamedSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		resp, err := session.GetNamed(r.Context(), req)
-		processResponse(response{w, resp}, err)
+		processResponse(r.Context(), response{w, resp, err})
 	}
 }
 func GetAllSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := session.GetAll(r.Context())
-	processResponse(response{w, resp}, err)
+	processResponse(r.Context(), response{w, resp, err})
 }

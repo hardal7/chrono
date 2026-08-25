@@ -23,7 +23,7 @@ func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		resp, err := user.GetTopUsers(r.Context(), req)
-		processResponse(response{w, resp}, err)
+		processResponse(r.Context(), response{w, resp, err})
 	}
 }
 
@@ -32,27 +32,27 @@ func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = user.EditAccount(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
 func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := user.GetAccount(r.Context())
-	processResponse(response{w, resp}, err)
+	processResponse(r.Context(), response{w, resp, err})
 }
 
 func DeleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	err := user.DeleteAccount(r.Context())
-	processResponse(response{w, nil}, err)
+	processResponse(r.Context(), response{w, nil, err})
 }
 
 func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	err := user.UploadAvatar(r.Context(), r.Body)
-	processResponse(response{w, nil}, err)
+	processResponse(r.Context(), response{w, nil, err})
 }
 
 func GetUserProfileHandler(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 	resp, err := user.GetProfile(r.Context(), username)
-	processResponse(response{w, resp}, err)
+	processResponse(r.Context(), response{w, resp, err})
 }

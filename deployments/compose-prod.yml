@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - /srv/db:/var/lib/postgresql/data:rw
-      - ../configs/postgresql.conf:/etc/postgresql.conf
-    command: "-c config_file=/etc/postgresql.conf"
     ports:
       - "${DB_PORT}:${DB_PORT}"
     healthcheck:
@@ -86,13 +84,14 @@ services:
       - ../certs:/var/traefik.certs:rw
       - /var/run/docker.sock:/var/run/docker.sock
 
-  victoria:
+  # Store metrics
+  victoria-metrics:
     image: victoriametrics/victoria-metrics
-    container_name: victoria
+    container_name: victoria-metrics
     expose:
       - "8428"
     volumes:
-      - /srv/victoria:/storage
+      - /srv/victoria-metrics:/storage
     command:
       - -storageDataPath=/storage
       - -retentionPeriod=90d
@@ -102,11 +101,12 @@ services:
       interval: 1s
       retries: 5
 
+  # Collect metrics
   vmagent:
     image: victoriametrics/vmagent
     container_name: vmagent
     depends_on:
-      victoria:
+      victoria-metrics:
         condition: service_healthy
     environment:
       ADMIN_PORT: ${ADMIN_PORT}
@@ -117,14 +117,15 @@ services:
       - /srv/vmagent:/vmagentdata
     command:
       - -promscrape.config=/etc/vmagent/vmagent.yml
-      - -remoteWrite.url=http://victoria:8428/api/v1/write
+      - -remoteWrite.url=http://victoria-metrics:8428/api/v1/write
       - -loggerLevel=WARN
 
-  victorialogs:
+  # Store logs
+  victoria-logs:
     image: victoriametrics/victoria-logs
-    container_name: victorialogs
+    container_name: victoria-logs
     depends_on:
-      victoria:
+      victoria-metrics:
         condition: service_healthy
     volumes:
       - /srv/victoria-logs:/data
@@ -134,17 +135,19 @@ services:
       - -defaultMsgValue=empty
       - -loggerLevel=WARN
 
+  # Collect logs
   vector:
     image: timberio/vector:latest-alpine
     container_name: vector
     environment:
       VECTOR_LOG: warn
     depends_on:
-      - victorialogs
+      - victoria-logs
     volumes:
       - ../configs/vector.yml:/etc/vector/vector.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # Visualize logs & metrics
   grafana:
     image: grafana/grafana-oss
     container_name: grafana
@@ -160,3 +163,6 @@ services:
       - ../configs/grafana.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
     labels:
       - "traefik.enable=true"
+    depends_on:
+      victoria-metrics:
+        condition: service_healthy

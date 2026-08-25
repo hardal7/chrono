@@ -23,7 +23,7 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = user.Register(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -33,7 +33,7 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		cookie, err := user.Login(r.Context(), req)
 		http.SetCookie(w, &cookie)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 

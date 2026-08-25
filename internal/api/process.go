@@ -2,12 +2,14 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/hardal7/chrono/internal/db"
+	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
@@ -32,29 +34,30 @@ func processRequest(w http.ResponseWriter, r *http.Request, req any) error {
 type response struct {
 	w    http.ResponseWriter
 	body any
+	err  error
 }
 
-func processResponse(r response, err error) {
-	if errors.Is(err, db.ErrRunQuery) {
-		logger.Debug(err.Error())
+func processResponse(ctx context.Context, r response) {
+	if errors.Is(r.err, db.ErrRunQuery) {
+		logger.Debug(r.err.Error())
 		http.Error(r.w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	if errors.Is(err, db.ErrNotFound) {
-		logger.Debug(err.Error())
+	if errors.Is(r.err, db.ErrNotFound) {
+		logger.Debug(r.err.Error())
 		http.Error(r.w, "Not Found", http.StatusNotFound)
 		return
 	}
 
-	if errors.Is(err, apierror.ErrAlreadyExists) {
-		logger.Debug(err.Error())
+	if errors.Is(r.err, apierror.ErrAlreadyExists) {
+		logger.Debug(r.err.Error())
 		http.Error(r.w, "Already Exists", http.StatusConflict)
 		return
 	}
 
-	if err != nil {
-		logger.Debug(err.Error())
+	if r.err != nil {
+		logger.Debug(r.err.Error())
 		http.Error(r.w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -70,8 +73,9 @@ func processResponse(r response, err error) {
 			return
 		}
 
-		logger.Trace("Returning Response")
-		logger.Trace(strings.TrimSpace(buf.String()))
+		logger.Debug("Returning Response")
+		requestID := ctx.Value(middleware.RequestID).(string)
+		logger.Debug(strings.TrimSpace(buf.String()), "requestID", requestID)
 
 		_, err = r.w.Write(buf.Bytes())
 		if err != nil {

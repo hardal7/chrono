@@ -20,7 +20,7 @@ func CreateFriendRequestHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = friend.CreateRequest(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -29,7 +29,7 @@ func AcceptFriendRequestHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = friend.AcceptRequest(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -38,11 +38,11 @@ func RemoveFriendHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = friend.Remove(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
 func GetAllFriendRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := friend.GetAll(r.Context())
-	processResponse(response{w, resp}, err)
+	processResponse(r.Context(), response{w, resp, err})
 }

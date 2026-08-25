@@ -20,7 +20,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = topic.Create(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -29,13 +29,13 @@ func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = topic.Edit(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
 func GetAllTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := topic.GetAll(r.Context())
-	processResponse(response{w, resp}, err)
+	processResponse(r.Context(), response{w, resp, err})
 }
 
 func GetNamedTopicHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +43,6 @@ func GetNamedTopicHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		resp, err := topic.GetNamed(r.Context(), req)
-		processResponse(response{w, resp}, err)
+		processResponse(r.Context(), response{w, resp, err})
 	}
 }

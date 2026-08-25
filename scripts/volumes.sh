@@ -3,7 +3,7 @@ set -e
 
 echo "Creating volumes"
 
-sudo mkdir -p /srv/db /srv/grafana /srv/victoria /srv/victoria-logs /srv/vmagent
+sudo mkdir -p /srv/db /srv/grafana /srv/victoria-metrics /srv/victoria-logs /srv/vmagent
 
 sudo chown -R 999:999 /srv/db
 sudo chown -R 472:472 /srv/grafana

@@ -2,9 +2,9 @@ datasources:
   - name: VictoriaMetrics
     type: prometheus
     access: proxy
-    url: http://victoria:8428
+    url: http://victoria-metrics:8428
     isDefault: true
   - name: VictoriaLogs
     type: victoriametrics-logs-datasource
     access: proxy
-    url: http://victorialogs:9428
+    url: http://victoria-logs:9428

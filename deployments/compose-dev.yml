@@ -6,9 +6,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - ../configs/postgresql.conf:/etc/postgresql.conf
-    command: "-c config_file=/etc/postgresql.conf"
     ports:
       - "${DB_PORT}:${DB_PORT}"
     healthcheck:

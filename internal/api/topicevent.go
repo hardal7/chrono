@@ -19,7 +19,7 @@ func TrackTopicEventHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = topicevent.Track(r.Context(), req)
-		processResponse(response{w, nil}, err)
+		processResponse(r.Context(), response{w, nil, err})
 	}
 }
 
@@ -28,7 +28,7 @@ func GetTopicEventsAllHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		resp, err := topicevent.Get(r.Context(), req)
-		processResponse(response{w, resp}, err)
+		processResponse(r.Context(), response{w, resp, err})
 	}
 }
 
@@ -37,6 +37,6 @@ func GetTopicEventsTodayHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		resp, err := topicevent.GetToday(r.Context(), req)
-		processResponse(response{w, resp}, err)
+		processResponse(r.Context(), response{w, resp, err})
 	}
 }
