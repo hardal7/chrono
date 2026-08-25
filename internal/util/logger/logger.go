@@ -30,6 +30,7 @@ func Init() {
 }
 
 const LevelTrace = slog.Level(-8)
+const LevelFatal = slog.Level(12)
 
 func getLevel(level string) slog.Level {
 	switch level {
@@ -41,6 +42,8 @@ func getLevel(level string) slog.Level {
 		return slog.LevelInfo
 	case "WARN":
 		return slog.LevelWarn
+	case "FATAL":
+		return LevelFatal
 	}
 	return slog.LevelDebug
 }
@@ -50,11 +53,7 @@ func Trace(msg string, args ...any) {
 }
 
 func Debug(msg string, args ...any) {
-	if len(args) == 1 {
-		slog.Debug(msg, "error", args[0])
-	} else {
-		slog.Debug(msg, args...)
-	}
+	slog.Debug(msg, args...)
 }
 
 func Info(msg string, args ...any) {
@@ -62,22 +61,14 @@ func Info(msg string, args ...any) {
 }
 
 func Warn(msg string, args ...any) {
-	if len(args) == 1 {
-		slog.Warn(msg, "error", args[0])
-	} else {
-		slog.Warn(msg, args...)
-	}
+	slog.Warn(msg, args...)
 }
 
 func Error(msg string, args ...any) {
-	if len(args) == 1 {
-		slog.Error(msg, "error", args[0])
-	} else {
-		slog.Error(msg, args...)
-	}
+	slog.Error(msg, args...)
 }
 
 func Fatal(msg string, args ...any) {
-	Error(msg, args...)
+	slog.Log(context.Background(), LevelFatal, msg, args...)
 	os.Exit(1)
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -26,15 +27,14 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 
 	user, err := db.Queries.GetUserByUsername(ctx, username)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return resp, fmt.Errorf("User not found")
-		} else {
-			return resp, fmt.Errorf("Failed to check if user exists: %w: %w", db.ErrRunQuery, err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return resp, fmt.Errorf("User not found: %w", db.ErrNotFound)
 		}
+		return resp, fmt.Errorf("Failed to check if user exists: %w: %w", db.ErrRunQuery, err)
 	}
 
 	topics, err := db.Queries.GetTopicsByOwner(ctx, user.ID)
-	if err != nil && err != pgx.ErrNoRows {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return resp, fmt.Errorf("Failed to get user topics: %w: %w", db.ErrRunQuery, err)
 	}
 	var bestTopic string
@@ -47,7 +47,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 	}
 
 	possibleFriends, err := db.Queries.GetPossibleFriends(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
-	if err != nil && err != pgx.ErrNoRows {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return resp, fmt.Errorf("Failed to get user friends: %w: %w", db.ErrRunQuery, err)
 	}
 	friendStatus := friendStatusNone

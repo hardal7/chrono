@@ -20,13 +20,13 @@ func CreateConnection() {
 	DB, err = pgxpool.New(context.Background(), getConnectionString())
 	if err != nil {
 		DB.Close()
-		logger.Fatal("Failed to create connection pool", err)
+		logger.Fatal("Failed to create connection pool", "error", err)
 	}
 	logger.Info("Created connection pool")
 	logger.Info("Connecting to database server")
 	if err := DB.Ping(context.Background()); err != nil {
 		DB.Close()
-		logger.Fatal("Failed to connect to connection pool", err)
+		logger.Fatal("Failed to connect to connection pool", "error", err)
 	}
 	Queries = db.New(DB)
 	logger.Info("Connected to database server", "host", config.App.DB_HOST)

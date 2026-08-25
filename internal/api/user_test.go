@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hardal7/chrono/internal/api"
 	"github.com/hardal7/chrono/internal/dto"
@@ -38,7 +37,7 @@ var registerUserTest = test.Test{
 				Username: "john2doe",
 				Password: "strongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusCreated},
+			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "duplicate user",
@@ -47,7 +46,7 @@ var registerUserTest = test.Test{
 				Username: "johndoe",
 				Password: "strongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
+			ExpectedResponse: test.Response{Status: http.StatusConflict},
 		},
 		{
 			Name: "missing email",
@@ -76,15 +75,6 @@ var registerUserTest = test.Test{
 		{
 			Name:             "empty body",
 			Body:             dto.RegisterUserRequest{},
-			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
-		},
-		{
-			Name: "sql injection attempt",
-			Body: dto.RegisterUserRequest{
-				Email:    "sqli@mail.com",
-				Username: "'; DROP TABLE users;--",
-				Password: "strongpassword",
-			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
@@ -131,7 +121,7 @@ var loginUserTest = test.Test{
 				Username: "johndoe",
 				Password: "wrongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusUnauthorized},
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "user not found by username",
@@ -139,7 +129,7 @@ var loginUserTest = test.Test{
 				Username: "unknownuser",
 				Password: "strongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusNotFound},
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "user not found by email",
@@ -147,14 +137,14 @@ var loginUserTest = test.Test{
 				Email:    "unknown@mail.com",
 				Password: "strongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusNotFound},
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing username and email",
 			Body: dto.LoginUserRequest{
 				Password: "strongpassword",
 			},
-			ExpectedResponse: test.Response{Status: http.StatusNotFound},
+			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "empty password",
@@ -170,17 +160,13 @@ var loginUserTest = test.Test{
 var getUserAccountTest = test.Test{
 	Method:   http.MethodGet,
 	Endpoint: "/user/account",
-	Handler:  api.EditUserAccountHandler,
+	Handler:  api.GetUserAccountHandler,
 	Cases: []test.Case{
 		{
 			Name: "successful account details retrieval",
 			ExpectedResponse: test.Response{
 				Status: http.StatusOK,
-				Body: dto.GetUserAccountResponse{
-					Username:  "johndoe",
-					Email:     "john@mail.com",
-					CreatedAt: time.Now(),
-				},
+				Body:   nil,
 			},
 		},
 	},

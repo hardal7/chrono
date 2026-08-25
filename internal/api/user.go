@@ -12,14 +12,10 @@ import (
 func UserRoute(r chi.Router) {
 	r.Get("/account", GetUserAccountHandler)
 	r.Post("/account", EditUserAccountHandler)
+	r.Delete("/account", DeleteUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
 	r.Get("/profile/{username}", GetUserProfileHandler)
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
-}
-
-func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
-	resp, err := user.GetAccount(r.Context())
-	processResponse(response{w, resp}, err)
 }
 
 func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +34,16 @@ func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 		err = user.EditAccount(r.Context(), req)
 		processResponse(response{w, nil}, err)
 	}
+}
+
+func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
+	resp, err := user.GetAccount(r.Context())
+	processResponse(response{w, resp}, err)
+}
+
+func DeleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
+	err := user.DeleteAccount(r.Context())
+	processResponse(response{w, nil}, err)
 }
 
 func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {

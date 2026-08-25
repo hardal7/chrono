@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -11,7 +12,7 @@ import (
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/service/location"
 	"github.com/hardal7/chrono/internal/service/topic"
-	e "github.com/hardal7/chrono/internal/util/error"
+	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,12 +28,11 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		return fmt.Errorf("Failed to hash password: %w", err)
 	}
 	_, err = db.Queries.GetUserByUsername(ctx, r.Username)
-	if err != pgx.ErrNoRows {
+	if !errors.Is(err, pgx.ErrNoRows) {
 		if err == nil {
-			return fmt.Errorf("User already exists: %w", e.ErrAlreadyExists)
-		} else {
-			return fmt.Errorf("Failed to check if user is duplicate: %w: %w", db.ErrRunQuery, err)
+			return fmt.Errorf("User already exists: %w", apierror.ErrAlreadyExists)
 		}
+		return fmt.Errorf("Failed to check if user is duplicate: %w: %w", db.ErrRunQuery, err)
 	}
 
 	country := location.IPToCountry(ctx.Value(middleware.IP).(string))

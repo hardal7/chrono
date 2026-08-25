@@ -25,6 +25,7 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			logger.Debug("Failed to read body", "error", err)
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}

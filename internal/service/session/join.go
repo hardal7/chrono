@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,12 +19,12 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		Name:     r.Name,
 		Username: r.OwnerUsername,
 	})
-	if err == pgx.ErrNoRows {
-		return fmt.Errorf("Session not found")
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("Session not found: %w", db.ErrNotFound)
 	}
 
 	if err != nil {
-		return fmt.Errorf("Failed to find session: %w: %w", err)
+		return fmt.Errorf("Failed to find session: %w: %w", db.ErrRunQuery, err)
 	}
 
 	if r.Password != s.Password.String {

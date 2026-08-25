@@ -2,6 +2,7 @@ package topic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ func InitFirst(ctx context.Context) error {
 		Name:    firstTopic,
 		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
 	})
-	if err != pgx.ErrNoRows {
+	if !errors.Is(err, pgx.ErrNoRows) {
 		return fmt.Errorf("First topic already initialized")
 	}
 

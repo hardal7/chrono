@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/hardal7/chrono/internal/db"
-	e "github.com/hardal7/chrono/internal/util/error"
+	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -36,19 +36,25 @@ type response struct {
 
 func processResponse(r response, err error) {
 	if errors.Is(err, db.ErrRunQuery) {
-		logger.Error(err.Error())
+		logger.Debug(err.Error())
 		http.Error(r.w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	if errors.Is(err, e.ErrAlreadyExists) {
-		logger.Error(err.Error())
+	if errors.Is(err, db.ErrNotFound) {
+		logger.Debug(err.Error())
+		http.Error(r.w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	if errors.Is(err, apierror.ErrAlreadyExists) {
+		logger.Debug(err.Error())
 		http.Error(r.w, "Already Exists", http.StatusConflict)
 		return
 	}
 
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Debug(err.Error())
 		http.Error(r.w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -59,7 +65,7 @@ func processResponse(r response, err error) {
 		var buf bytes.Buffer
 		err := json.NewEncoder(&buf).Encode(r.body)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Debug(err.Error())
 			http.Error(r.w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -69,12 +75,11 @@ func processResponse(r response, err error) {
 
 		_, err = r.w.Write(buf.Bytes())
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Debug(err.Error())
 			http.Error(r.w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		r.w.WriteHeader(http.StatusOK)
 	}
-
 }

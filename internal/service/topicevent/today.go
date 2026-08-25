@@ -18,7 +18,7 @@ func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTop
 	if len(r.Topics) == 0 {
 		events, err := db.Queries.GetTopicEventsTodayAll(ctx, userID)
 		if err != nil {
-			return resp, fmt.Errorf("Failed to get topic events today: %w: %w", db.ErrRunQuery, err)
+			return resp, fmt.Errorf("Failed to get all topic events today: %w: %w", db.ErrRunQuery, err)
 		}
 
 		for _, event := range events {

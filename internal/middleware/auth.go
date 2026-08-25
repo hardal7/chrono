@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -36,12 +37,12 @@ func Authenticate(next http.Handler) http.Handler {
 			return []byte(config.App.JWT_SECRET), nil
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
-		if err == jwt.ErrTokenExpired {
-			logger.Debug("Token is expired", err)
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			logger.Debug("Token is expired", "error", err)
 			http.Error(w, "Token is expired", http.StatusUnauthorized)
 			return
 		} else if err != nil {
-			logger.Debug("Token has invalid JWT signature", err)
+			logger.Debug("Token has invalid JWT signature", "error", err)
 			http.Error(w, "Token is invalid", http.StatusUnauthorized)
 			return
 		}

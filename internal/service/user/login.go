@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -17,7 +18,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const jwtExpirationDays int = 30
+const (
+	day               = 3600 * 24
+	jwtExpirationDays = 30
+)
 
 func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	var err error
@@ -29,7 +33,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	} else if r.Email != "" {
 		u, err = db.Queries.GetUserByEmail(ctx, r.Email)
 	}
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return cookie, fmt.Errorf("User not found")
 	} else if err != nil {
 		return cookie, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
@@ -54,8 +58,8 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	cookie = http.Cookie{
 		Name:     middleware.AuthHeader,
 		Value:    tokenString,
-		Path:     "/",
-		MaxAge:   3600 * 24 * jwtExpirationDays,
+		Path:     "/api",
+		MaxAge:   jwtExpirationDays,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,

@@ -8,22 +8,23 @@ import (
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
-func nextDate(days int) time.Time {
+func nextMidnight() time.Time {
 	now := time.Now()
-	nextDay := now.AddDate(0, 0, days)
+	tomorrow := now.AddDate(0, 0, 1)
+
 	return time.Date(
-		nextDay.Year(),
-		nextDay.Month(),
-		nextDay.Day(),
+		tomorrow.Year(),
+		tomorrow.Month(),
+		tomorrow.Day(),
 		0, 0, 0, 0,
-		time.UTC,
+		now.Location(),
 	)
 }
 
 func NewDay(ctx context.Context) {
 	logger.Info("Started runner", "name", "new_day")
 	for {
-		timer := time.NewTimer(time.Until(nextDate(1)))
+		timer := time.NewTimer(time.Until(nextMidnight()))
 		<-timer.C
 		updateStreaks(ctx)
 		resetTodayTimes(ctx)
@@ -49,7 +50,7 @@ func updateStreaks(ctx context.Context) {
 	logger.Info("Updating streaks")
 	topics, err := conn.Queries.GetTopicsAll(ctx)
 	if err != nil {
-		logger.Error("Failed to get topics", err)
+		logger.Error("Failed to get topics", "error", err)
 		return
 	}
 	for _, topic := range topics {
@@ -60,7 +61,7 @@ func updateStreaks(ctx context.Context) {
 		}
 
 		if err != nil {
-			logger.Error("Failed to update streak", err)
+			logger.Error("Failed to update streak", "error", err)
 		}
 	}
 	logger.Info("Updated streaks", "topics", len(topics))

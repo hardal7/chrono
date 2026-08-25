@@ -17,13 +17,6 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	if err != nil {
 		return fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
-	if r.DeleteAccount {
-		err := db.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
-		if err != nil {
-			return fmt.Errorf("Failed to delete user: %w: %w", db.ErrRunQuery, err)
-		}
-		return nil
-	}
 
 	if r.NewUsername != "" {
 		u.Username = r.NewUsername
@@ -44,6 +37,15 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to update user: %w: %w", db.ErrRunQuery, err)
+	}
+
+	return nil
+}
+
+func DeleteAccount(ctx context.Context) error {
+	err := db.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	if err != nil {
+		return fmt.Errorf("Failed to delete user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil
