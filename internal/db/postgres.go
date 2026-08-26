@@ -24,7 +24,7 @@ func CreateDBConnection() {
 		logger.Fatal("Invalid database connection string", "error", err)
 	}
 
-	cfg.ConnConfig.Tracer = QueryTracer{}
+	cfg.ConnConfig.Tracer = queryTracer{}
 	DB, err = pgxpool.NewWithConfig(context.Background(), cfg)
 	if err != nil {
 		DB.Close()
@@ -50,13 +50,13 @@ func getConnectionString() string {
 		" sslmode=disable"
 }
 
-type QueryTracer struct{}
+type queryTracer struct{}
 
-func (t QueryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+func (t queryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
 	logger.Trace(data.SQL, "requestID", ctx.Value(middleware.RequestID).(string))
 	return ctx
 }
 
-func (t QueryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+func (t queryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
 	logger.Trace(data.CommandTag.String(), "error", data.Err, "requestID", ctx.Value(middleware.RequestID).(string))
 }
