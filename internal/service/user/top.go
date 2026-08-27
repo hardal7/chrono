@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -21,6 +20,7 @@ const (
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
+	userID := middleware.UserID(ctx)
 	var users []query.User
 	var err error
 	resp := dto.GetTopUsersResponse{}
@@ -29,12 +29,12 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	switch r.Scope {
 	case scopeFriends:
 		users, err = db.Queries.GetTopFriends(ctx, query.GetTopFriendsParams{
-			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
+			ID:                      userID,
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 			MatchName:               matchName,
 		})
-		user, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+		user, err := db.Queries.GetUserByID(ctx, userID)
 		if err != nil {
 			return resp, fmt.Errorf("Failed to retrieve user: %w: %w", db.ErrRunQuery, err)
 		}
@@ -42,7 +42,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 
 	case scopeLocal:
 		users, err = db.Queries.GetTopUsersLocal(ctx, query.GetTopUsersLocalParams{
-			ID:                      ctx.Value(middleware.UserID).(uuid.UUID),
+			ID:                      userID,
 			TotalTimeTrackedSeconds: int32(r.Cursor),
 			Limit:                   int32(r.Limit),
 			MatchName:               matchName,

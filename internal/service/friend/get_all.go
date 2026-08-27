@@ -11,9 +11,9 @@ import (
 )
 
 func GetAll(ctx context.Context) (dto.GetFriendRequestsAllResponse, error) {
+	userID := middleware.UserID(ctx)
 	resp := dto.GetFriendRequestsAllResponse{}
 
-	userID := ctx.Value(middleware.UserID).(uuid.UUID)
 	r, err := db.Queries.GetFriendRequests(ctx, userID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get all friend requests: %w: %w", db.ErrRunQuery, err)

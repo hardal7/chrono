@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/middleware"
 )
 
@@ -25,6 +24,8 @@ const (
 
 // TODO: Sanitize Image
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
+	userID := middleware.UserID(ctx)
+
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
 	if err != nil {
@@ -40,8 +41,7 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 		return fmt.Errorf("Invalid filetype")
 	}
 
-	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
-	err = createFile(fileBytes, userID)
+	err = createFile(fileBytes, userID.String())
 	if err != nil {
 		return fmt.Errorf("Failed to create file: %w", err)
 	}
@@ -65,11 +65,12 @@ func createFile(fileBytes []byte, filename string) error {
 }
 
 func InitAvatar(ctx context.Context) error {
+	userID := middleware.UserID(ctx)
+
 	randomAvatar := strconv.Itoa(rand.IntN(defaultAvatarsNum))
 	avatarPath := filepath.Join(DefaultAvatarDirectory, randomAvatar)
-	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()
 
-	err := createSymlink(avatarPath, userID)
+	err := createSymlink(avatarPath, userID.String())
 
 	return err
 }

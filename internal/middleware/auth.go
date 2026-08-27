@@ -18,7 +18,7 @@ const (
 	AuthHeader = "Authorization"
 	Bearer     = "Bearer "
 
-	UserID Key = "userID"
+	userID Key = "userID"
 )
 
 func Authenticate(next http.Handler) http.Handler {
@@ -59,16 +59,31 @@ func Authenticate(next http.Handler) http.Handler {
 			http.Error(w, "Invalid Token", http.StatusUnauthorized)
 			return
 		}
-		userID, err := uuid.Parse(sub)
+		id, err := uuid.Parse(sub)
 		if err != nil {
 			logger.Debug("Token does not contain a valid UUID")
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		logger.Debug("Authenticated user", "userID", userID.String())
-		ctx := context.WithValue(r.Context(), UserID, userID)
+		logger.Debug("Authenticated user", "userID", id.String())
+		ctx := context.WithValue(r.Context(), userID, id)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func UserID(ctx context.Context) uuid.UUID {
+	var id uuid.UUID
+
+	id, ok := ctx.Value(userID).(uuid.UUID)
+	if !ok {
+		logger.Warn("Failed to fetch userID")
+		return uuid.Nil
+	}
+	return id
+}
+
+func AsUserID(ctx context.Context, userID uuid.UUID) context.Context {
+	return context.WithValue(ctx, userID, userID)
 }

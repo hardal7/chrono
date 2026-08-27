@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -12,8 +11,10 @@ import (
 )
 
 func Delete(ctx context.Context, r dto.DeleteSessionRequest) error {
+	userID := middleware.UserID(ctx)
+
 	err := db.Queries.DeleteSession(ctx, query.DeleteSessionParams{
-		OwnerID: ctx.Value(middleware.UserID).(uuid.UUID),
+		OwnerID: userID,
 		Name:    r.Name,
 	})
 	if err != nil {

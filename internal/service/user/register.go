@@ -59,7 +59,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 }
 
 func initAccount(ctx context.Context, userID uuid.UUID) {
-	ctx = context.WithValue(ctx, middleware.UserID, userID)
+	ctx = middleware.AsUserID(ctx, userID)
 	err := topic.InitFirst(ctx)
 	if err != nil {
 		logger.Warn("Failed to initialize first topic")

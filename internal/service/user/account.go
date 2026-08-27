@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -13,7 +12,9 @@ import (
 )
 
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
-	u, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	userID := middleware.UserID(ctx)
+
+	u, err := db.Queries.GetUserByID(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
@@ -43,7 +44,9 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 }
 
 func DeleteAccount(ctx context.Context) error {
-	err := db.Queries.DeleteUser(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	userID := middleware.UserID(ctx)
+
+	err := db.Queries.DeleteUser(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("Failed to delete user: %w: %w", db.ErrRunQuery, err)
 	}
@@ -52,9 +55,10 @@ func DeleteAccount(ctx context.Context) error {
 }
 
 func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
+	userID := middleware.UserID(ctx)
 	resp := dto.GetUserAccountResponse{}
 
-	u, err := db.Queries.GetUserByID(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	u, err := db.Queries.GetUserByID(ctx, userID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}

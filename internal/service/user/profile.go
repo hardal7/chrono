@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -23,6 +22,7 @@ const (
 )
 
 func GetProfile(ctx context.Context, username string) (dto.GetUserProfileResponse, error) {
+	userID := middleware.UserID(ctx)
 	resp := dto.GetUserProfileResponse{}
 
 	user, err := db.Queries.GetUserByUsername(ctx, username)
@@ -46,7 +46,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		}
 	}
 
-	possibleFriends, err := db.Queries.GetPossibleFriends(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	possibleFriends, err := db.Queries.GetPossibleFriends(ctx, userID)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return resp, fmt.Errorf("Failed to get user friends: %w: %w", db.ErrRunQuery, err)
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -13,9 +12,10 @@ import (
 )
 
 func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
+	userID := middleware.UserID(ctx)
 	resp := dto.GetSessionsAllResponse{}
 
-	s, err := db.Queries.GetSessionsAllByFriends(ctx, ctx.Value(middleware.UserID).(uuid.UUID))
+	s, err := db.Queries.GetSessionsAllByFriends(ctx, userID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get all sessions of friends: %w: %w", db.ErrRunQuery, err)
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -13,6 +12,7 @@ import (
 )
 
 func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSessionNamedResponse, error) {
+	userID := middleware.UserID(ctx)
 	resp := dto.GetSessionNamedResponse{}
 
 	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
@@ -31,7 +31,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	participants := []dto.Participant{}
 	isParticipant := false
 	for _, participant := range p {
-		if participant.ID == ctx.Value(middleware.UserID).(uuid.UUID) {
+		if participant.ID == userID {
 			isParticipant = true
 		}
 

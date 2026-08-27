@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -12,8 +11,10 @@ import (
 )
 
 func AcceptRequest(ctx context.Context, r dto.AcceptFriendRequestRequest) error {
+	userID := middleware.UserID(ctx)
+
 	err := db.Queries.AcceptFriendRequest(ctx, query.AcceptFriendRequestParams{
-		RecipientID: ctx.Value(middleware.UserID).(uuid.UUID),
+		RecipientID: userID,
 		Username:    r.Username,
 	})
 	if err != nil {

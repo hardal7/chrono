@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -15,6 +14,8 @@ import (
 )
 
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
+	userID := middleware.UserID(ctx)
+
 	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
 		Name:     r.Name,
 		Username: r.OwnerUsername,
@@ -45,7 +46,7 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	}
 
 	err = db.Queries.JoinSession(ctx, query.JoinSessionParams{
-		UserID:     ctx.Value(middleware.UserID).(uuid.UUID),
+		UserID:     userID,
 		SessionID:  s.ID,
 		LastSeenAt: time.Now(),
 	})

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -12,7 +11,7 @@ import (
 )
 
 func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTopicEventsTodayResponse, error) {
-	userID := ctx.Value(middleware.UserID).(uuid.UUID)
+	userID := middleware.UserID(ctx)
 	resp := dto.GetTopicEventsTodayResponse{}
 
 	if len(r.Topics) == 0 {
