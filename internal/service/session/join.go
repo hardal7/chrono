@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
@@ -46,9 +45,8 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	}
 
 	err = db.Queries.JoinSession(ctx, query.JoinSessionParams{
-		UserID:     userID,
-		SessionID:  s.ID,
-		LastSeenAt: time.Now(),
+		UserID:    userID,
+		SessionID: s.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to join session: %w: %w", db.ErrRunQuery, err)

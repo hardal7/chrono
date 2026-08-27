@@ -137,7 +137,7 @@ func (q *Queries) GetPossibleFriends(ctx context.Context, id uuid.UUID) ([]GetPo
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.hide_user, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM friends
 JOIN users ON 
     users.id = friends.recipient_id
     OR users.id = friends.sender_id
@@ -146,6 +146,7 @@ WHERE
     AND friends.is_accepted = TRUE
     AND users.total_time_tracked_seconds < $2
     AND username ILIKE $4 || '%'
+    AND users.hide_user = FALSE
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3
 `
@@ -181,6 +182,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.Country,
 			&i.HideCountry,
 			&i.HideUser,
+			&i.LastSeenAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

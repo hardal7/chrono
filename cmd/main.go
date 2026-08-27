@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"os/signal"
+	"syscall"
 
 	"github.com/hardal7/chrono/internal/api"
 	"github.com/hardal7/chrono/internal/db"
@@ -16,8 +18,19 @@ func init() {
 }
 
 func main() {
-	db.CreateDBConnection()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	pool, err := db.CreateDBConnection()
+	if err != nil {
+		logger.Fatal(err.Error())
+		return
+	}
+	defer pool.Close()
+
 	db.CreateRedisConnection()
-	go runner.NewDay(context.Background())
-	api.Serve()
+
+	go runner.NewDay(ctx)
+	api.Serve(ctx)
+	<-ctx.Done()
 }

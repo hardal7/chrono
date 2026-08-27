@@ -47,7 +47,7 @@ func (test Test) Run(t *testing.T) {
 		}
 
 		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
-		ctx := context.WithValue(req.Context(), middleware.UserID, testUUID)
+		ctx := middleware.AsUserID(req.Context(), testUUID)
 		req.Header.Add("X-Forwarded-For", "1.1.1.1")
 		req = req.WithContext(ctx)
 

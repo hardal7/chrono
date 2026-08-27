@@ -17,8 +17,12 @@ func Init() {
 			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 				if a.Key == slog.LevelKey && len(groups) == 0 {
 					level, ok := a.Value.Any().(slog.Level)
-					if ok && level <= LevelTrace {
-						return tint.Attr(1, slog.String(a.Key, "TRC"))
+					if ok {
+						if level <= LevelTrace {
+							return tint.Attr(1, slog.String(a.Key, "TRC"))
+						} else if level >= LevelFatal {
+							return tint.Attr(2, slog.String(a.Key, "FTL"))
+						}
 					}
 				}
 				return a
@@ -70,5 +74,4 @@ func Error(msg string, args ...any) {
 
 func Fatal(msg string, args ...any) {
 	slog.Log(context.Background(), LevelFatal, msg, args...)
-	os.Exit(1)
 }

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,7 +13,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func Serve() {
+func Serve(ctx context.Context) {
 	InitValidator()
 
 	adminRouter := chi.NewRouter()
@@ -42,15 +44,32 @@ func Serve() {
 	siteServer := http.FileServer(http.Dir("./static"))
 	mainRouter.Handle("/*", siteServer)
 
-	go runServer("main", config.App.Port, mainRouter)
-	runServer("admin", config.App.AdminPort, adminRouter)
+	go runServer(ctx, "main", config.App.Port, mainRouter)
+	runServer(ctx, "admin", config.App.AdminPort, adminRouter)
 }
 
-func runServer(name, port string, router *chi.Mux) {
-	logger.Info("Started HTTP server", "type", name, "port", ":"+port)
-	err := http.ListenAndServe(":"+port, router)
-	if err != nil {
-		logger.Fatal("Fatal error on server", "type", name, "error", err)
+func runServer(ctx context.Context, name, port string, router *chi.Mux) {
+	server := &http.Server{
+		Addr:    ":" + port,
+		Handler: router,
+	}
+
+	go func() {
+		logger.Info("Started HTTP server", "type", name, "port", ":"+port)
+
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal("Fatal errror on HTTP server", "type", name, "error", err)
+		}
+	}()
+
+	<-ctx.Done()
+	logger.Info("Shutting down HTTP server", "type", name)
+	err := server.Shutdown(ctx)
+	if err == nil {
+		logger.Info("Shut down HTTP server", "type", name)
+	} else {
+		logger.Error("Failed to shut down HTTP server", "type", name, "error", err)
 	}
 }
 

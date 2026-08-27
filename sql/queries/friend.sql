@@ -35,6 +35,7 @@ WHERE
     AND friends.is_accepted = TRUE
     AND users.total_time_tracked_seconds < $2
     AND username ILIKE sqlc.arg(match_name) || '%'
+    AND users.hide_user = FALSE
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3;
 -- name: GetPossibleFriends :many

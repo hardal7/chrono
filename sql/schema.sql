@@ -8,6 +8,7 @@ CREATE TABLE users (
     country VARCHAR(64),
     hide_country BOOLEAN NOT NULL DEFAULT FALSE,
     hide_user BOOLEAN NOT NULL DEFAULT FALSE,
+    last_seen_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -43,7 +44,6 @@ CREATE TABLE session_participants (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     session_id uuid NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    last_seen_at TIMESTAMPTZ NOT NULL,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
 

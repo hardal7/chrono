@@ -18,7 +18,6 @@ CREATE TABLE session_participants (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     session_id uuid NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    last_seen_at TIMESTAMPTZ NOT NULL,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
 

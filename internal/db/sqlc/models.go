@@ -38,7 +38,6 @@ type SessionParticipant struct {
 	ID                      uuid.UUID
 	UserID                  uuid.UUID
 	SessionID               uuid.UUID
-	LastSeenAt              time.Time
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
 }
@@ -72,6 +71,7 @@ type User struct {
 	Country                 pgtype.Text
 	HideCountry             bool
 	HideUser                bool
+	LastSeenAt              time.Time
 	CreatedAt               pgtype.Timestamptz
 	UpdatedAt               pgtype.Timestamptz
 }

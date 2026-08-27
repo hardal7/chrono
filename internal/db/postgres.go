@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	db "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/middleware"
@@ -16,29 +17,30 @@ var (
 	Queries *db.Queries
 )
 
-func CreateDBConnection() {
+func CreateDBConnection() (*pgxpool.Pool, error) {
 	logger.Info("Connecting to database server", "host", config.App.DB_HOST)
 
 	cfg, err := pgxpool.ParseConfig(getConnectionString())
 	if err != nil {
-		logger.Fatal("Invalid database connection string", "error", err)
+		return nil, fmt.Errorf("Invalid database connection string: %w", err)
 	}
 
 	cfg.ConnConfig.Tracer = queryTracer{}
 	DB, err = pgxpool.NewWithConfig(context.Background(), cfg)
 	if err != nil {
 		DB.Close()
-		logger.Fatal("Failed to create connection pool", "error", err)
+		return nil, fmt.Errorf("Failed to create connection pool: %w", err)
 	}
 	logger.Info("Created connection pool")
 
 	if err := DB.Ping(context.Background()); err != nil {
 		DB.Close()
-		logger.Fatal("Failed to connect to connection pool", "error", err)
+		return nil, fmt.Errorf("Failed to connect to connection pool: %w", err)
 	}
 	Queries = db.New(DB)
 
 	logger.Info("Connected to database server", "host", config.App.DB_HOST)
+	return DB, nil
 }
 
 func getConnectionString() string {

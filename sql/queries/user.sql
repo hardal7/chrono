@@ -1,6 +1,6 @@
 -- name: CreateUser :exec
-INSERT INTO users(email, username, password, country)
-VALUES($1, $2, $3, $4);
+INSERT INTO users(email, username, password, country, last_seen_at)
+VALUES($1, $2, $3, $4, now());
 -- name: UpdateUser :exec
 UPDATE users
 SET username = COALESCE($2, username), password = $3, updated_at = now()
@@ -22,6 +22,7 @@ SELECT * FROM users
 WHERE 
     total_time_tracked_seconds < $1
     AND username ILIKE sqlc.arg(match_name) || '%'
+    AND users.hide_user = FALSE
 ORDER BY total_time_tracked_seconds DESC
 LIMIT $2;
 -- name: GetTopUsersLocal :many
@@ -32,6 +33,7 @@ WHERE
     AND users.total_time_tracked_seconds < $2
     AND username ILIKE sqlc.arg(match_name) || '%'
     AND users.hide_country = FALSE
+    AND users.hide_user = FALSE
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3;
 -- name: TrackUserTime :exec
