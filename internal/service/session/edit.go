@@ -14,20 +14,10 @@ import (
 func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 	userID := middleware.UserID(ctx)
 
-	s, err := db.Queries.GetSessionByNameAndOwnerID(ctx, query.GetSessionByNameAndOwnerIDParams{
-		Name:    r.Name,
-		OwnerID: userID,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to get session: %w: %w", db.ErrRunQuery, err)
-	}
-
-	if r.NewName == "" {
-		s.Name = r.NewName
-	}
-	err = db.Queries.UpdateSession(ctx, query.UpdateSessionParams{
-		ID:              s.ID,
-		Name:            s.Name,
+	err := db.Queries.UpdateSession(ctx, query.UpdateSessionParams{
+		OwnerID:         userID,
+		Name:            r.Name,
+		NewName:         r.NewName,
 		MaxParticipants: pgtype.Int4{Int32: int32(r.NewMaxParticipants), Valid: r.NewMaxParticipants != 0},
 		Password:        pgtype.Text{String: r.NewPassword, Valid: r.NewPassword != ""},
 		ExpiresAt:       pgtype.Timestamptz{Time: r.NewExpiresAt, Valid: !r.NewExpiresAt.IsZero()},

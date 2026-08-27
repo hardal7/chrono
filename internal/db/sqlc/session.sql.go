@@ -290,25 +290,27 @@ func (q *Queries) KickFromSession(ctx context.Context, arg KickFromSessionParams
 
 const updateSession = `-- name: UpdateSession :exec
 UPDATE sessions
-SET name = $2, max_participants = $3, password = $4, expires_at = $5, updated_at = now()
-WHERE id = $1
+SET name = COALESCE($6, name), max_participants = $3, password = $4, expires_at = $5, updated_at = now()
+WHERE owner_id = $1 AND name = $2
 `
 
 type UpdateSessionParams struct {
-	ID              uuid.UUID
+	OwnerID         uuid.UUID
 	Name            string
 	MaxParticipants pgtype.Int4
 	Password        pgtype.Text
 	ExpiresAt       pgtype.Timestamptz
+	NewName         string
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {
 	_, err := q.db.Exec(ctx, updateSession,
-		arg.ID,
+		arg.OwnerID,
 		arg.Name,
 		arg.MaxParticipants,
 		arg.Password,
 		arg.ExpiresAt,
+		arg.NewName,
 	)
 	return err
 }

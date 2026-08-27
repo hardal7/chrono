@@ -19,8 +19,12 @@ FROM users WHERE
     users.id = friends.sender_id
     AND users.username = $1 AND recipient_id = $2;
 -- name: GetFriendRequests :many
-SELECT * FROM friends
-WHERE recipient_id = $1 AND is_accepted = FALSE;
+SELECT friends.created_at, sender.username FROM friends
+JOIN users AS sender ON users.id = friends.sender_id
+JOIN users AS recipient ON users.id = friends.recipient_id
+WHERE 
+    recipient.id = $1
+    AND friends.is_accepted = FALSE;
 -- name: GetTopFriends :many
 SELECT users.* FROM friends
 JOIN users ON 

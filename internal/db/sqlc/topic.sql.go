@@ -208,16 +208,17 @@ func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) 
 
 const updateTopic = `-- name: UpdateTopic :exec
 UPDATE topics
-SET name = $2, updated_at = now()
-WHERE id = $1
+SET name = COALESCE($3), updated_at = now()
+WHERE owner_id = $1 AND name = $2
 `
 
 type UpdateTopicParams struct {
-	ID   uuid.UUID
-	Name string
+	OwnerID uuid.UUID
+	Name    string
+	NewName string
 }
 
 func (q *Queries) UpdateTopic(ctx context.Context, arg UpdateTopicParams) error {
-	_, err := q.db.Exec(ctx, updateTopic, arg.ID, arg.Name)
+	_, err := q.db.Exec(ctx, updateTopic, arg.OwnerID, arg.Name, arg.NewName)
 	return err
 }

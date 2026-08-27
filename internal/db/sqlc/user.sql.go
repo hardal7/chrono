@@ -249,7 +249,7 @@ func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) er
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET username = $2, password = $3, updated_at = now()
+SET username = COALESCE($2, username), password = $3, updated_at = now()
 WHERE id = $1
 `
 

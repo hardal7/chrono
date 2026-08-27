@@ -3,8 +3,8 @@ INSERT INTO topics(name, owner_id)
 VALUES($1, $2);
 -- name: UpdateTopic :exec
 UPDATE topics
-SET name = $2, updated_at = now()
-WHERE id = $1;
+SET name = COALESCE(sqlc.arg(new_name)), updated_at = now()
+WHERE owner_id = $1 AND name = $2;
 -- name: DeleteTopic :exec
 DELETE FROM topics
 WHERE owner_id = $1 AND name = $2;

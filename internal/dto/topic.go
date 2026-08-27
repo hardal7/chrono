@@ -6,7 +6,7 @@ type CreateTopicRequest struct {
 
 type EditTopicRequest struct {
 	Name    string `json:"name"`
-	NewName string `json:"new_name" validate:"omitempty,max=64"`
+	NewName string `json:"new_name" validate:"max=64"`
 }
 
 type DeleteTopicRequest struct {

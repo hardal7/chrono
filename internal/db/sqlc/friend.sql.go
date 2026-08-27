@@ -69,27 +69,29 @@ func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) erro
 }
 
 const getFriendRequests = `-- name: GetFriendRequests :many
-SELECT id, sender_id, recipient_id, is_accepted, created_at, updated_at FROM friends
-WHERE recipient_id = $1 AND is_accepted = FALSE
+SELECT friends.created_at, sender.username FROM friends
+JOIN users AS sender ON users.id = friends.sender_id
+JOIN users AS recipient ON users.id = friends.recipient_id
+WHERE 
+    recipient.id = $1
+    AND friends.is_accepted = FALSE
 `
 
-func (q *Queries) GetFriendRequests(ctx context.Context, recipientID uuid.UUID) ([]Friend, error) {
-	rows, err := q.db.Query(ctx, getFriendRequests, recipientID)
+type GetFriendRequestsRow struct {
+	CreatedAt pgtype.Timestamptz
+	Username  string
+}
+
+func (q *Queries) GetFriendRequests(ctx context.Context, id uuid.UUID) ([]GetFriendRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getFriendRequests, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Friend{}
+	items := []GetFriendRequestsRow{}
 	for rows.Next() {
-		var i Friend
-		if err := rows.Scan(
-			&i.ID,
-			&i.SenderID,
-			&i.RecipientID,
-			&i.IsAccepted,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
+		var i GetFriendRequestsRow
+		if err := rows.Scan(&i.CreatedAt, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

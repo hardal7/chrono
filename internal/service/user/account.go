@@ -14,27 +14,19 @@ import (
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	userID := middleware.UserID(ctx)
 
-	u, err := db.Queries.GetUserByID(ctx, userID)
-	if err != nil {
-		return fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
-	}
-
-	if r.NewUsername != "" {
-		u.Username = r.NewUsername
-	}
-
+	var password string
 	if r.NewPassword != "" {
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
 		if err != nil {
 			return fmt.Errorf("Failed to hash password: %w", err)
 		}
-		u.Password = string(passwordHash)
+		password = string(passwordHash)
 	}
 
-	err = db.Queries.UpdateUser(ctx, query.UpdateUserParams{
-		ID:       u.ID,
-		Username: u.Username,
-		Password: u.Password,
+	err := db.Queries.UpdateUser(ctx, query.UpdateUserParams{
+		ID:       userID,
+		Username: r.NewUsername,
+		Password: password,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to update user: %w: %w", db.ErrRunQuery, err)

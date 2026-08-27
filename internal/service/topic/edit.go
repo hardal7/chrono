@@ -13,22 +13,10 @@ import (
 func Edit(ctx context.Context, r dto.EditTopicRequest) error {
 	userID := middleware.UserID(ctx)
 
-	t, err := db.Queries.GetTopicByOwnerAndName(ctx, query.GetTopicByOwnerAndNameParams{
-		Name:    r.Name,
+	err := db.Queries.UpdateTopic(ctx, query.UpdateTopicParams{
 		OwnerID: userID,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to get topic: %w: %w", db.ErrRunQuery, err)
-	}
-
-	if r.NewName == "" {
-		return nil
-	}
-
-	t.Name = r.NewName
-	err = db.Queries.UpdateTopic(ctx, query.UpdateTopicParams{
-		ID:   t.ID,
-		Name: t.Name,
+		Name:    r.Name,
+		NewName: r.NewName,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to update topic: %w: %w", db.ErrRunQuery, err)
