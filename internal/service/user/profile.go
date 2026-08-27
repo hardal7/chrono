@@ -62,7 +62,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 	}
 
 	var country string
-	if user.HideCountry {
+	if user.HideCountry || user.Country.String == "" {
 		country = privateCountry
 	} else {
 		country = user.Country.String

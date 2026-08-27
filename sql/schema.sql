@@ -31,9 +31,12 @@ CREATE TABLE sessions (
     password TEXT,
     expires_at TIMESTAMPTZ,
     topic VARCHAR(64),
+    total_time_seconds INT NOT NULL DEFAULT 0,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (name, owner_id)
 );
 
 CREATE TABLE session_participants (

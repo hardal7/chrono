@@ -11,6 +11,7 @@ import (
 func SessionRoute(r chi.Router) {
 	r.Post("/create", CreateSessionHandler)
 	r.Post("/edit", EditSessionHandler)
+	r.Delete("/", EditSessionHandler)
 	r.Post("/join", JoinSessionHandler)
 	r.Get("/named", GetNamedSessionHandler)
 	r.Get("/all", GetAllSessionsHandler)
@@ -30,6 +31,15 @@ func EditSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = session.Edit(r.Context(), req)
+		processResponse(r.Context(), response{w, nil, err})
+	}
+}
+
+func DeleteSessionHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.DeleteSessionRequest
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = session.Delete(r.Context(), req)
 		processResponse(r.Context(), response{w, nil, err})
 	}
 }

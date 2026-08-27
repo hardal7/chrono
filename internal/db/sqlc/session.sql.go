@@ -41,16 +41,21 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 
 const deleteSession = `-- name: DeleteSession :exec
 DELETE FROM sessions
-WHERE id = $1
+WHERE owner_id = $1 AND name = $2
 `
 
-func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteSession, id)
+type DeleteSessionParams struct {
+	OwnerID uuid.UUID
+	Name    string
+}
+
+func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) error {
+	_, err := q.db.Exec(ctx, deleteSession, arg.OwnerID, arg.Name)
 	return err
 }
 
 const getSessionByNameAndOwnerID = `-- name: GetSessionByNameAndOwnerID :one
-SELECT id, owner_id, name, max_participants, password, expires_at, topic, is_active, created_at, updated_at FROM sessions
+SELECT id, owner_id, name, max_participants, password, expires_at, topic, total_time_seconds, is_active, created_at, updated_at FROM sessions
 WHERE name = $1 AND owner_id = $2
 `
 
@@ -70,6 +75,7 @@ func (q *Queries) GetSessionByNameAndOwnerID(ctx context.Context, arg GetSession
 		&i.Password,
 		&i.ExpiresAt,
 		&i.Topic,
+		&i.TotalTimeSeconds,
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -78,7 +84,7 @@ func (q *Queries) GetSessionByNameAndOwnerID(ctx context.Context, arg GetSession
 }
 
 const getSessionByNameAndOwnerName = `-- name: GetSessionByNameAndOwnerName :one
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.total_time_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
 JOIN users ON users.id = sessions.owner_id
 WHERE sessions.name = $1 AND users.username = $2
 `
@@ -99,6 +105,7 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 		&i.Password,
 		&i.ExpiresAt,
 		&i.Topic,
+		&i.TotalTimeSeconds,
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -108,7 +115,7 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 
 const getSessionParticipantsAsUsers = `-- name: GetSessionParticipantsAsUsers :many
 SELECT session_participants.id, user_id, session_id, last_seen_at, session_participants.total_time_tracked_seconds, session_participants.today_time_tracked_seconds, users.id, email, username, password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, country, hide_country, hide_user, created_at, updated_at FROM session_participants
-JOIN users ON sessions_participants.user_id = users.id
+JOIN users ON session_participants.user_id = users.id
 WHERE session_id = $1
 `
 
@@ -184,25 +191,29 @@ WITH friend_users AS (
         AND is_accepted = TRUE
 )
 SELECT 
-    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.is_active, sessions.created_at, sessions.updated_at,
-    users.username AS owner_username
+    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.total_time_seconds, sessions.is_active, sessions.created_at, sessions.updated_at,
+    users.username AS owner_username,
+    users.id AS owner_id
 FROM sessions
 JOIN friend_users ON sessions.owner_id = friend_users.friend_id
 JOIN users ON sessions.owner_id = users.id
+WHERE sessions.is_active = TRUE
 `
 
 type GetSessionsAllByFriendsRow struct {
-	ID              uuid.UUID
-	OwnerID         uuid.UUID
-	Name            string
-	MaxParticipants pgtype.Int4
-	Password        pgtype.Text
-	ExpiresAt       pgtype.Timestamptz
-	Topic           pgtype.Text
-	IsActive        bool
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	OwnerUsername   string
+	ID               uuid.UUID
+	OwnerID          uuid.UUID
+	Name             string
+	MaxParticipants  pgtype.Int4
+	Password         pgtype.Text
+	ExpiresAt        pgtype.Timestamptz
+	Topic            pgtype.Text
+	TotalTimeSeconds int32
+	IsActive         bool
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	OwnerUsername    string
+	OwnerID_2        uuid.UUID
 }
 
 func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUID) ([]GetSessionsAllByFriendsRow, error) {
@@ -222,10 +233,12 @@ func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUI
 			&i.Password,
 			&i.ExpiresAt,
 			&i.Topic,
+			&i.TotalTimeSeconds,
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.OwnerUsername,
+			&i.OwnerID_2,
 		); err != nil {
 			return nil, err
 		}
@@ -250,6 +263,28 @@ type JoinSessionParams struct {
 
 func (q *Queries) JoinSession(ctx context.Context, arg JoinSessionParams) error {
 	_, err := q.db.Exec(ctx, joinSession, arg.UserID, arg.SessionID, arg.LastSeenAt)
+	return err
+}
+
+const kickFromSession = `-- name: KickFromSession :exec
+DELETE FROM session_participants
+USING users, sessions
+WHERE
+    session_participants.user_id = users.id
+    AND session_participants.session_id = sessions.id
+    AND sessions.owner_id = $1 
+    AND sessions.name = $2
+    AND users.username = $3
+`
+
+type KickFromSessionParams struct {
+	OwnerID             uuid.UUID
+	Name                string
+	ParticipantUsername string
+}
+
+func (q *Queries) KickFromSession(ctx context.Context, arg KickFromSessionParams) error {
+	_, err := q.db.Exec(ctx, kickFromSession, arg.OwnerID, arg.Name, arg.ParticipantUsername)
 	return err
 }
 

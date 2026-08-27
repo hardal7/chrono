@@ -7,7 +7,7 @@ SET name = $2, max_participants = $3, password = $4, expires_at = $5, updated_at
 WHERE id = $1;
 -- name: DeleteSession :exec
 DELETE FROM sessions
-WHERE id = $1;
+WHERE owner_id = $1 AND name = $2;
 -- name: GetSessionByNameAndOwnerName :one
 SELECT sessions.* FROM sessions
 JOIN users ON users.id = sessions.owner_id
@@ -18,9 +18,18 @@ WHERE name = $1 AND owner_id = $2;
 -- name: JoinSession :exec
 INSERT INTO session_participants(user_id, session_id, last_seen_at)
 VALUES($1, $2, $3);
+-- name: KickFromSession :exec
+DELETE FROM session_participants
+USING users, sessions
+WHERE
+    session_participants.user_id = users.id
+    AND session_participants.session_id = sessions.id
+    AND sessions.owner_id = $1 
+    AND sessions.name = $2
+    AND users.username = sqlc.arg(participant_username);
 -- name: GetSessionParticipantsAsUsers :many
 SELECT * FROM session_participants
-JOIN users ON sessions_participants.user_id = users.id
+JOIN users ON session_participants.user_id = users.id
 WHERE session_id = $1;
 -- name: GetSessionsAllByFriends :many
 WITH friend_users AS (
@@ -37,7 +46,9 @@ WITH friend_users AS (
 )
 SELECT 
     sessions.*,
-    users.username AS owner_username
+    users.username AS owner_username,
+    users.id AS owner_id
 FROM sessions
 JOIN friend_users ON sessions.owner_id = friend_users.friend_id
-JOIN users ON sessions.owner_id = users.id;
+JOIN users ON sessions.owner_id = users.id
+WHERE sessions.is_active = TRUE;

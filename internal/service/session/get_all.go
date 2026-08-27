@@ -3,11 +3,13 @@ package session
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/util/config"
 )
 
 func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
@@ -27,13 +29,19 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 
 		minParticipants := []dto.MinParticipant{}
 		for _, participant := range p {
-			minParticipants = append(minParticipants, dto.MinParticipant{Name: participant.Username, AvatarPath: participant.ID.String()})
+			minParticipants = append(minParticipants, dto.MinParticipant{
+				Name:       participant.Username,
+				AvatarPath: filepath.Join(config.AvatarEndpoint, participant.ID.String()),
+			})
 		}
 
 		sessions = append(sessions, dto.SessionSelection{
 			Name:              session.Name,
-			MaxParticipants:   int(session.MaxParticipants.Int32),
 			OwnerUsername:     session.OwnerUsername,
+			OwnerAvatarPath:   filepath.Join(config.AvatarEndpoint, session.OwnerID.String()),
+			TotalTime:         int(session.TotalTimeSeconds),
+			ExpiresAt:         session.ExpiresAt.Time,
+			MaxParticipants:   int(session.MaxParticipants.Int32),
 			TotalParticipants: len(minParticipants),
 			Participants:      minParticipants,
 		})

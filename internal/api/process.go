@@ -56,6 +56,12 @@ func processResponse(ctx context.Context, r response) {
 		return
 	}
 
+	if errors.Is(r.err, apierror.ErrUnauthorized) {
+		logger.Debug(r.err.Error())
+		http.Error(r.w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	if r.err != nil {
 		logger.Debug(r.err.Error())
 		http.Error(r.w, "Bad Request", http.StatusBadRequest)

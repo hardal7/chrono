@@ -11,6 +11,7 @@ import (
 func TopicRoute(r chi.Router) {
 	r.Post("/create", CreateTopicHandler)
 	r.Post("/edit", EditTopicHandler)
+	r.Delete("/", DeleteTopicHandler)
 	r.Get("/all", GetAllTopicsHandler)
 	r.Get("/named", GetNamedTopicHandler)
 }
@@ -29,6 +30,15 @@ func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
 	err := processRequest(w, r, &req)
 	if err == nil {
 		err = topic.Edit(r.Context(), req)
+		processResponse(r.Context(), response{w, nil, err})
+	}
+}
+
+func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.DeleteTopicRequest
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = topic.Delete(r.Context(), req)
 		processResponse(r.Context(), response{w, nil, err})
 	}
 }

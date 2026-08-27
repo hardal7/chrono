@@ -28,11 +28,16 @@ func (q *Queries) CreateTopic(ctx context.Context, arg CreateTopicParams) error 
 
 const deleteTopic = `-- name: DeleteTopic :exec
 DELETE FROM topics
-WHERE id = $1
+WHERE owner_id = $1 AND name = $2
 `
 
-func (q *Queries) DeleteTopic(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteTopic, id)
+type DeleteTopicParams struct {
+	OwnerID uuid.UUID
+	Name    string
+}
+
+func (q *Queries) DeleteTopic(ctx context.Context, arg DeleteTopicParams) error {
+	_, err := q.db.Exec(ctx, deleteTopic, arg.OwnerID, arg.Name)
 	return err
 }
 

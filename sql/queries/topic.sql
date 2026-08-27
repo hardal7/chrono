@@ -7,7 +7,7 @@ SET name = $2, updated_at = now()
 WHERE id = $1;
 -- name: DeleteTopic :exec
 DELETE FROM topics
-WHERE id = $1;
+WHERE owner_id = $1 AND name = $2;
 -- name: GetTopicByID :one
 SELECT * FROM topics
 WHERE id = $1;

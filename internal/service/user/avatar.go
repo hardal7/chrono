@@ -37,7 +37,7 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
-		return fmt.Errorf("Invalid filetype: %w", err)
+		return fmt.Errorf("Invalid filetype")
 	}
 
 	userID := ctx.Value(middleware.UserID).(uuid.UUID).String()

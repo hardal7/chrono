@@ -7,7 +7,10 @@ type CreateTopicRequest struct {
 type EditTopicRequest struct {
 	Name    string `json:"name"`
 	NewName string `json:"new_name" validate:"omitempty,max=64"`
-	Delete  bool   `json:"delete" validate:"omitempty"`
+}
+
+type DeleteTopicRequest struct {
+	Name string `json:"name"`
 }
 
 type GetTopicNamedRequest struct {

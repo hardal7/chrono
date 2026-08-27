@@ -21,14 +21,6 @@ func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 		return fmt.Errorf("Failed to get session: %w: %w", db.ErrRunQuery, err)
 	}
 
-	if r.Delete {
-		err := db.Queries.DeleteSession(ctx, s.ID)
-		if err != nil {
-			return fmt.Errorf("Failed to delete session: %w: %w", db.ErrRunQuery, err)
-		}
-		return nil
-	}
-
 	if r.NewName == "" {
 		s.Name = r.NewName
 	}

@@ -16,14 +16,21 @@ type EditSessionRequest struct {
 	NewMaxParticipants int       `json:"max_participants" validate:"omitempty"`
 	NewPassword        string    `json:"password" validate:"omitempty"`
 	NewExpiresAt       time.Time `json:"expires_at" validate:"omitempty"`
-	KickedUsername     string    `json:"kicked_username" validate:"omitempty"`
-	Delete             bool      `json:"delete" validate:"omitempty"`
+}
+
+type DeleteSessionRequest struct {
+	Name string `json:"name"`
 }
 
 type JoinSessionRequest struct {
 	Name          string `json:"name"`
 	OwnerUsername string `json:"owner_username"`
 	Password      string `json:"password" validate:"omitempty"`
+}
+
+type KickFromSessionRequest struct {
+	SessionName         string `json:"session_name"`
+	ParticipantUsername string `json:"participant_username"`
 }
 
 type MinParticipant struct {
@@ -33,6 +40,9 @@ type MinParticipant struct {
 type SessionSelection struct {
 	Name              string           `json:"name"`
 	OwnerUsername     string           `json:"owner_username"`
+	OwnerAvatarPath   string           `json:"owner_avatar_path"`
+	ExpiresAt         time.Time        `json:"expires_at"`
+	TotalTime         int              `json:"total_time_seconds"`
 	TotalParticipants int              `json:"total_participants"`
 	MaxParticipants   int              `json:"max_participants"`
 	Participants      []MinParticipant `json:"participants"`

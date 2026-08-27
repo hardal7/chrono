@@ -37,6 +37,7 @@ func Serve() {
 	mainRouter.Get("/privacy", serveHTML("privacy.html"))
 	mainRouter.Get("/terms", serveHTML("terms.html"))
 	mainRouter.Get("/report", serveHTML("report.html"))
+	mainRouter.Get("/feature", serveHTML("feature.html"))
 
 	siteServer := http.FileServer(http.Dir("./static"))
 	mainRouter.Handle("/*", siteServer)
@@ -53,14 +54,14 @@ func runServer(name, port string, router *chi.Mux) {
 	}
 }
 
-var validate *validator.Validate
-
-func InitValidator() {
-	validate = validator.New(validator.WithRequiredStructEnabled())
-}
-
 func serveHTML(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/"+path)
 	}
+}
+
+var validate *validator.Validate
+
+func InitValidator() {
+	validate = validator.New(validator.WithRequiredStructEnabled())
 }

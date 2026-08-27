@@ -9,6 +9,7 @@ import (
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/util/apierror"
 )
 
 func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSessionNamedResponse, error) {
@@ -44,7 +45,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	}
 
 	if !isParticipant {
-		return resp, fmt.Errorf("Unauthorized session details requested")
+		return resp, fmt.Errorf("Unauthorized session details requested: %w", apierror.ErrUnauthorized)
 	}
 
 	resp = dto.GetSessionNamedResponse{
