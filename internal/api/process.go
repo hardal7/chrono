@@ -4,13 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/middleware"
-	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -38,33 +35,8 @@ type response struct {
 }
 
 func processResponse(ctx context.Context, r response) {
-	if errors.Is(r.err, db.ErrRunQuery) {
-		logger.Debug(r.err.Error())
-		http.Error(r.w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	if errors.Is(r.err, db.ErrNotFound) {
-		logger.Debug(r.err.Error())
-		http.Error(r.w, "Not Found", http.StatusNotFound)
-		return
-	}
-
-	if errors.Is(r.err, apierror.ErrAlreadyExists) {
-		logger.Debug(r.err.Error())
-		http.Error(r.w, "Already Exists", http.StatusConflict)
-		return
-	}
-
-	if errors.Is(r.err, apierror.ErrUnauthorized) {
-		logger.Debug(r.err.Error())
-		http.Error(r.w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
 	if r.err != nil {
-		logger.Debug(r.err.Error())
-		http.Error(r.w, "Bad Request", http.StatusBadRequest)
+		handleErrors(r.err, r.w)
 		return
 	}
 
