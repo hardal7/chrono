@@ -22,6 +22,12 @@ func handleErrors(err error, w http.ResponseWriter) {
 		return
 	}
 
+	if errors.Is(err, db.ErrCommitTransaction) {
+		logger.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	if errors.Is(err, db.ErrNotFound) {
 		logger.Debug(err.Error())
 		http.Error(w, "Not Found", http.StatusNotFound)

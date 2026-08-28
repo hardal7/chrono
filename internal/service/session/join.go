@@ -36,7 +36,7 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		return fmt.Errorf("Failed to check if session is full: %w: %w", db.ErrRunQuery, err)
 	}
 
-	if int(s.MaxParticipants.Int32) == len(p) {
+	if s.MaxParticipants.Valid && int(s.MaxParticipants.Int32) == len(p) {
 		return fmt.Errorf("Session is full")
 	}
 

@@ -61,6 +61,11 @@ func resetTodayTimes(ctx context.Context) error {
 		return fmt.Errorf("Failed to reset time tracked for today: type=session_participant, date=%s error=%q", time.Now().String(), err)
 	}
 
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to commit transaction: %w: %w", db.ErrCommitTransaction, err)
+	}
+
 	logger.Info("Reset times tracked today")
 	return nil
 }

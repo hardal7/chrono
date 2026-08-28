@@ -30,7 +30,7 @@ func Create(ctx context.Context, r dto.CreateSessionRequest) error {
 	u, _ := db.Queries.GetUserByID(ctx, userID)
 	err = Join(ctx, dto.JoinSessionRequest{Name: r.Name, Password: r.Password, OwnerUsername: u.Username})
 	if err != nil {
-		logger.Warn("Failed to join own session")
+		logger.Warn("Failed to join own session", err)
 	}
 
 	return nil

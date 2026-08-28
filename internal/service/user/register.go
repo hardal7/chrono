@@ -62,7 +62,7 @@ func initAccount(ctx context.Context, userID uuid.UUID) {
 	ctx = middleware.AsUserID(ctx, userID)
 	err := topic.InitFirst(ctx)
 	if err != nil {
-		logger.Warn("Failed to initialize first topic")
+		logger.Warn("Failed to initialize first topic", err)
 	}
 	err = InitAvatar(ctx)
 	if err != nil {

@@ -61,7 +61,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	}
 
 	for _, session := range s {
-		if r.Topic == session.Topic.String {
+		if session.Topic.Valid && (r.Topic != session.Topic.String) {
 			continue
 		}
 
@@ -69,6 +69,11 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to commit transaction: %w: %w", db.ErrCommitTransaction, err)
 	}
 
 	return nil
