@@ -21,17 +21,17 @@ type Friend struct {
 }
 
 type Session struct {
-	ID               uuid.UUID
-	OwnerID          uuid.UUID
-	Name             string
-	MaxParticipants  pgtype.Int4
-	Password         pgtype.Text
-	ExpiresAt        pgtype.Timestamptz
-	Topic            pgtype.Text
-	TotalTimeSeconds int32
-	IsActive         bool
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	ID                      uuid.UUID
+	OwnerID                 uuid.UUID
+	Name                    string
+	MaxParticipants         pgtype.Int4
+	Password                pgtype.Text
+	ExpiresAt               pgtype.Timestamptz
+	Topic                   pgtype.Text
+	TotalTimeTrackedSeconds int32
+	IsActive                bool
+	CreatedAt               time.Time
+	UpdatedAt               time.Time
 }
 
 type SessionParticipant struct {
@@ -46,8 +46,8 @@ type Topic struct {
 	ID                      uuid.UUID
 	Name                    string
 	Streak                  int32
-	TodayTimeTrackedSeconds int32
 	TotalTimeTrackedSeconds int32
+	TodayTimeTrackedSeconds int32
 	OwnerID                 uuid.UUID
 	CreatedAt               time.Time
 	UpdatedAt               time.Time

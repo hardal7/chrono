@@ -4,16 +4,24 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/jackc/pgx/v5"
 )
 
 func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	userID := middleware.UserID(ctx)
 
-	topic, err := db.Queries.GetTopicByOwnerAndName(ctx, query.GetTopicByOwnerAndNameParams{
+	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("Failed to begin new transaction: %w: %w", db.ErrBeginTransaction, err)
+	}
+	defer tx.Rollback(ctx)
+
+	topic, err := db.Queries.WithTx(tx).GetTopicByOwnerAndName(ctx, query.GetTopicByOwnerAndNameParams{
 		Name:    r.Topic,
 		OwnerID: userID,
 	})
@@ -21,16 +29,15 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		return fmt.Errorf("Failed to get topic by username: %w: %w", db.ErrRunQuery, err)
 	}
 
-	err = db.Queries.TrackTopicTime(ctx, query.TrackTopicTimeParams{
+	err = db.Queries.WithTx(tx).TrackTopicTime(ctx, query.TrackTopicTimeParams{
 		ID:          topic.ID,
-		OwnerID:     userID,
 		TimeTracked: int32(r.TimeSeconds),
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to track topic time: %w: %w", db.ErrRunQuery, err)
 	}
 
-	err = db.Queries.TrackUserTime(ctx, query.TrackUserTimeParams{
+	err = db.Queries.WithTx(tx).TrackUserTime(ctx, query.TrackUserTimeParams{
 		ID:          userID,
 		TimeTracked: int32(r.TimeSeconds),
 	})
@@ -38,7 +45,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 		return fmt.Errorf("Failed to track user time: %w: %w", db.ErrRunQuery, err)
 	}
 
-	err = db.Queries.CreateTopicEvent(ctx, query.CreateTopicEventParams{
+	err = db.Queries.WithTx(tx).CreateTopicEvent(ctx, query.CreateTopicEventParams{
 		UserID:             userID,
 		TopicID:            topic.ID,
 		TimeTrackedSeconds: int32(r.TimeSeconds),
@@ -46,6 +53,43 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to create topic event: %w: %w", db.ErrRunQuery, err)
+	}
+
+	s, err := db.Queries.WithTx(tx).GetJoinedSessions(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("Failed to get joined sessions: %w: %w", db.ErrRunQuery, err)
+	}
+
+	for _, session := range s {
+		if r.Topic == session.Topic.String {
+			continue
+		}
+
+		err = trackSessionTime(ctx, tx, userID, session, r)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func trackSessionTime(ctx context.Context, tx pgx.Tx, userID uuid.UUID, session query.Session, r dto.TrackTopicEventRequest) error {
+	err := db.Queries.WithTx(tx).TrackSessionTime(ctx, query.TrackSessionTimeParams{
+		ID:          session.ID,
+		TimeTracked: int32(r.TimeSeconds),
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to track session time: %w: %w", db.ErrRunQuery, err)
+	}
+
+	err = db.Queries.WithTx(tx).TrackSessionParticipantTime(ctx, query.TrackSessionParticipantTimeParams{
+		UserID:      userID,
+		SessionID:   session.ID,
+		TimeTracked: int32(r.TimeSeconds),
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to track session participant time: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

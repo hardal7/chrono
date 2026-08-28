@@ -84,6 +84,6 @@ func UserID(ctx context.Context) uuid.UUID {
 	return id
 }
 
-func AsUserID(ctx context.Context, userID uuid.UUID) context.Context {
-	return context.WithValue(ctx, userID, userID)
+func AsUserID(ctx context.Context, id uuid.UUID) context.Context {
+	return context.WithValue(ctx, userID, id)
 }

@@ -52,5 +52,13 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		return fmt.Errorf("Failed to join session: %w: %w", db.ErrRunQuery, err)
 	}
 
+	err = db.Queries.CreateTopic(ctx, query.CreateTopicParams{
+		OwnerID: userID,
+		Name:    s.Topic.String,
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to create topic of session: %w: %w", db.ErrRunQuery, err)
+	}
+
 	return nil
 }

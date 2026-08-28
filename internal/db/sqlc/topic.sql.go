@@ -42,7 +42,7 @@ func (q *Queries) DeleteTopic(ctx context.Context, arg DeleteTopicParams) error 
 }
 
 const getTopicByID = `-- name: GetTopicByID :one
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
+SELECT id, name, streak, total_time_tracked_seconds, today_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
 WHERE id = $1
 `
 
@@ -53,8 +53,8 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 		&i.ID,
 		&i.Name,
 		&i.Streak,
-		&i.TodayTimeTrackedSeconds,
 		&i.TotalTimeTrackedSeconds,
+		&i.TodayTimeTrackedSeconds,
 		&i.OwnerID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -63,7 +63,7 @@ func (q *Queries) GetTopicByID(ctx context.Context, id uuid.UUID) (Topic, error)
 }
 
 const getTopicByOwnerAndName = `-- name: GetTopicByOwnerAndName :one
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
+SELECT id, name, streak, total_time_tracked_seconds, today_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
 WHERE name = $1 AND owner_id = $2
 `
 
@@ -79,8 +79,8 @@ func (q *Queries) GetTopicByOwnerAndName(ctx context.Context, arg GetTopicByOwne
 		&i.ID,
 		&i.Name,
 		&i.Streak,
-		&i.TodayTimeTrackedSeconds,
 		&i.TotalTimeTrackedSeconds,
+		&i.TodayTimeTrackedSeconds,
 		&i.OwnerID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -89,7 +89,7 @@ func (q *Queries) GetTopicByOwnerAndName(ctx context.Context, arg GetTopicByOwne
 }
 
 const getTopicsAll = `-- name: GetTopicsAll :many
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
+SELECT id, name, streak, total_time_tracked_seconds, today_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
 `
 
 func (q *Queries) GetTopicsAll(ctx context.Context) ([]Topic, error) {
@@ -105,8 +105,8 @@ func (q *Queries) GetTopicsAll(ctx context.Context) ([]Topic, error) {
 			&i.ID,
 			&i.Name,
 			&i.Streak,
-			&i.TodayTimeTrackedSeconds,
 			&i.TotalTimeTrackedSeconds,
+			&i.TodayTimeTrackedSeconds,
 			&i.OwnerID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -122,7 +122,7 @@ func (q *Queries) GetTopicsAll(ctx context.Context) ([]Topic, error) {
 }
 
 const getTopicsByOwner = `-- name: GetTopicsByOwner :many
-SELECT id, name, streak, today_time_tracked_seconds, total_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
+SELECT id, name, streak, total_time_tracked_seconds, today_time_tracked_seconds, owner_id, created_at, updated_at FROM topics
 WHERE owner_id = $1
 `
 
@@ -139,8 +139,8 @@ func (q *Queries) GetTopicsByOwner(ctx context.Context, ownerID uuid.UUID) ([]To
 			&i.ID,
 			&i.Name,
 			&i.Streak,
-			&i.TodayTimeTrackedSeconds,
 			&i.TotalTimeTrackedSeconds,
+			&i.TodayTimeTrackedSeconds,
 			&i.OwnerID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -190,19 +190,18 @@ func (q *Queries) ResetTopicTimeTrackedToday(ctx context.Context) error {
 const trackTopicTime = `-- name: TrackTopicTime :exec
 UPDATE topics
 SET 
-    total_time_tracked_seconds = total_time_tracked_seconds + $3,
-    today_time_tracked_seconds = today_time_tracked_seconds + $3
-WHERE id = $1 AND owner_id = $2
+    total_time_tracked_seconds = total_time_tracked_seconds + $2,
+    today_time_tracked_seconds = today_time_tracked_seconds + $2
+WHERE id = $1
 `
 
 type TrackTopicTimeParams struct {
 	ID          uuid.UUID
-	OwnerID     uuid.UUID
 	TimeTracked int32
 }
 
 func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) error {
-	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.OwnerID, arg.TimeTracked)
+	_, err := q.db.Exec(ctx, trackTopicTime, arg.ID, arg.TimeTracked)
 	return err
 }
 

@@ -24,7 +24,6 @@ func main() {
 	pool, err := db.CreateDBConnection()
 	if err != nil {
 		logger.Fatal(err.Error())
-		return
 	}
 	defer pool.Close()
 

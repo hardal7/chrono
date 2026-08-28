@@ -74,4 +74,5 @@ func Error(msg string, args ...any) {
 
 func Fatal(msg string, args ...any) {
 	slog.Log(context.Background(), LevelFatal, msg, args...)
+	os.Exit(1)
 }

@@ -24,7 +24,7 @@ UPDATE topics
 SET 
     total_time_tracked_seconds = total_time_tracked_seconds + sqlc.arg(time_tracked),
     today_time_tracked_seconds = today_time_tracked_seconds + sqlc.arg(time_tracked)
-WHERE id = $1 AND owner_id = $2;
+WHERE id = $1;
 -- name: ResetTopicTimeTrackedToday :exec
 UPDATE topics
 SET today_time_tracked_seconds = 0;

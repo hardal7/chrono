@@ -9,5 +9,8 @@ import (
 func Bootstrap() {
 	config.Load()
 	logger.Init()
-	db.CreateDBConnection()
+	_, err := db.CreateDBConnection()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 }

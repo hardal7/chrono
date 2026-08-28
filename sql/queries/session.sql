@@ -8,6 +8,10 @@ WHERE owner_id = $1 AND name = $2;
 -- name: DeleteSession :exec
 DELETE FROM sessions
 WHERE owner_id = $1 AND name = $2;
+-- name: TrackSessionTime :exec
+UPDATE sessions
+SET total_time_tracked_seconds = total_time_tracked_seconds + sqlc.arg(time_tracked)
+WHERE id = $1;
 -- name: GetSessionByNameAndOwnerName :one
 SELECT sessions.* FROM sessions
 JOIN users ON users.id = sessions.owner_id
@@ -15,29 +19,15 @@ WHERE
     sessions.name = $1
     AND users.username = $2
     AND users.hide_user = FALSE;
+-- name: GetJoinedSessions :many
+SELECT sessions.* FROM session_participants
+JOIN sessions ON sessions.id = session_participants.session_id
+WHERE user_id = $1;
 -- name: GetSessionByNameAndOwnerID :one
 SELECT * FROM sessions
 WHERE 
     name = $1 
     AND owner_id = $2
-    AND users.hide_user = FALSE;
--- name: JoinSession :exec
-INSERT INTO session_participants(user_id, session_id)
-VALUES($1, $2);
--- name: KickFromSession :exec
-DELETE FROM session_participants
-USING users, sessions
-WHERE
-    session_participants.user_id = users.id
-    AND session_participants.session_id = sessions.id
-    AND sessions.owner_id = $1 
-    AND sessions.name = $2
-    AND users.username = sqlc.arg(participant_username);
--- name: GetSessionParticipantsAsUsers :many
-SELECT users.* FROM session_participants
-JOIN users ON session_participants.user_id = users.id
-WHERE 
-    session_id = $1
     AND users.hide_user = FALSE;
 -- name: GetSessionsAllByFriends :many
 WITH friend_users AS (

@@ -39,7 +39,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 			Name:              session.Name,
 			OwnerUsername:     session.OwnerUsername,
 			OwnerAvatarPath:   filepath.Join(config.AvatarEndpoint, session.OwnerID.String()),
-			TotalTime:         int(session.TotalTimeSeconds),
+			TotalTime:         int(session.TotalTimeTrackedSeconds),
 			ExpiresAt:         session.ExpiresAt.Time,
 			MaxParticipants:   int(session.MaxParticipants.Int32),
 			TotalParticipants: len(minParticipants),

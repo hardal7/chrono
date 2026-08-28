@@ -2,10 +2,12 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	conn "github.com/hardal7/chrono/internal/db"
+	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/jackc/pgx/v5"
 )
 
 func nextMidnight() time.Time {
@@ -26,43 +28,62 @@ func NewDay(ctx context.Context) {
 	for {
 		timer := time.NewTimer(time.Until(nextMidnight()))
 		<-timer.C
-		updateStreaks(ctx)
-		resetTodayTimes(ctx)
+		err := updateStreaks(ctx)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		err = resetTodayTimes(ctx)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 }
 
-func resetTodayTimes(ctx context.Context) {
+func resetTodayTimes(ctx context.Context) error {
 	logger.Info("Reseting times tracked today")
-	err := conn.Queries.ResetTopicTimeTrackedToday(ctx)
+
+	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		logger.Error("Failed to reset time tracked for today", "date", time.Now().String(), "error", err)
-		return
+		return fmt.Errorf("Failed to begin new transaction: %w", err)
 	}
-	err = conn.Queries.ResetUserTimeTrackedToday(ctx)
+	defer tx.Rollback(ctx)
+
+	err = db.Queries.WithTx(tx).ResetTopicTimeTrackedToday(ctx)
 	if err != nil {
-		logger.Error("Failed to reset time tracked for today", "date", time.Now().String(), "error", err)
-		return
+		return fmt.Errorf("Failed to reset time tracked for today: type=topic, date=%s error=%q", time.Now().String(), err)
 	}
+	err = db.Queries.WithTx(tx).ResetUserTimeTrackedToday(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to reset time tracked for today: type=user, date=%s error=%q", time.Now().String(), err)
+	}
+	err = db.Queries.WithTx(tx).ResetSessionParticipantTimeTrackedToday(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to reset time tracked for today: type=session_participant, date=%s error=%q", time.Now().String(), err)
+	}
+
 	logger.Info("Reset times tracked today")
+	return nil
 }
 
-func updateStreaks(ctx context.Context) {
+func updateStreaks(ctx context.Context) error {
 	logger.Info("Updating streaks")
-	topics, err := conn.Queries.GetTopicsAll(ctx)
+
+	topics, err := db.Queries.GetTopicsAll(ctx)
 	if err != nil {
-		logger.Error("Failed to get topics", "error", err)
-		return
+		return fmt.Errorf("Failed to get topics: %q", err)
 	}
 	for _, topic := range topics {
 		if topic.TodayTimeTrackedSeconds != 0 {
-			err = conn.Queries.IncreaseStreak(ctx, topic.ID)
+			err = db.Queries.IncreaseStreak(ctx, topic.ID)
 		} else {
-			err = conn.Queries.LoseStreak(ctx, topic.ID)
+			err = db.Queries.LoseStreak(ctx, topic.ID)
 		}
 
 		if err != nil {
-			logger.Error("Failed to update streak", "error", err)
+			return fmt.Errorf("Failed to update streak: %q", err)
 		}
 	}
+
 	logger.Info("Updated streaks", "topics", len(topics))
+	return nil
 }

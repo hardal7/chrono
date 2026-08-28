@@ -4,7 +4,7 @@ import "time"
 
 type TrackTopicEventRequest struct {
 	Topic       string    `json:"topic"`
-	TimeSeconds int       `json:"time_seconds"`
+	TimeSeconds int       `json:"time_seconds" validate:"min=0"`
 	Date        time.Time `json:"date"`
 }
 
