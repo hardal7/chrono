@@ -102,38 +102,17 @@ func (q *Queries) GetFriendRequests(ctx context.Context, id uuid.UUID) ([]GetFri
 	return items, nil
 }
 
-const getPossibleFriends = `-- name: GetPossibleFriends :many
-SELECT users.username, friends.is_accepted FROM friends
-JOIN users ON 
-    users.id = friends.recipient_id
-    OR users.id = friends.sender_id
-WHERE 
-    users.id = $1
+const getFriendStatus = `-- name: GetFriendStatus :one
+SELECT friends.is_accepted FROM friends
+JOIN users ON users.id = friends.recipient_id
+WHERE users.username = $1
 `
 
-type GetPossibleFriendsRow struct {
-	Username   string
-	IsAccepted bool
-}
-
-func (q *Queries) GetPossibleFriends(ctx context.Context, id uuid.UUID) ([]GetPossibleFriendsRow, error) {
-	rows, err := q.db.Query(ctx, getPossibleFriends, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetPossibleFriendsRow{}
-	for rows.Next() {
-		var i GetPossibleFriendsRow
-		if err := rows.Scan(&i.Username, &i.IsAccepted); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetFriendStatus(ctx context.Context, username string) (bool, error) {
+	row := q.db.QueryRow(ctx, getFriendStatus, username)
+	var is_accepted bool
+	err := row.Scan(&is_accepted)
+	return is_accepted, err
 }
 
 const getTopFriends = `-- name: GetTopFriends :many

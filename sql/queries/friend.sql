@@ -25,6 +25,10 @@ JOIN users AS recipient ON users.id = friends.recipient_id
 WHERE 
     recipient.id = $1
     AND friends.is_accepted = FALSE;
+-- name: GetFriendStatus :one
+SELECT friends.is_accepted FROM friends
+JOIN users ON users.id = friends.recipient_id
+WHERE users.username = $1;
 -- name: GetTopFriends :many
 SELECT users.* FROM friends
 JOIN users ON 
@@ -38,10 +42,3 @@ WHERE
     AND users.hide_user = FALSE
 ORDER BY users.total_time_tracked_seconds DESC
 LIMIT $3;
--- name: GetPossibleFriends :many
-SELECT users.username, friends.is_accepted FROM friends
-JOIN users ON 
-    users.id = friends.recipient_id
-    OR users.id = friends.sender_id
-WHERE 
-    users.id = $1;

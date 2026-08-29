@@ -8,7 +8,6 @@ import (
 
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/jackc/pgx/v5"
 )
@@ -22,7 +21,6 @@ const (
 )
 
 func GetProfile(ctx context.Context, username string) (dto.GetUserProfileResponse, error) {
-	userID := middleware.UserID(ctx)
 	resp := dto.GetUserProfileResponse{}
 
 	user, err := db.Queries.GetUserByUsername(ctx, username)
@@ -46,18 +44,19 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		}
 	}
 
-	possibleFriends, err := db.Queries.GetPossibleFriends(ctx, userID)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return resp, fmt.Errorf("Failed to get user friends: %w: %w", db.ErrRunQuery, err)
-	}
-	friendStatus := friendStatusNone
-	for _, friend := range possibleFriends {
-		if user.Username == friend.Username {
-			if friend.IsAccepted {
-				friendStatus = friendStatusAccepted
-			} else {
-				friendStatus = friendStatusPending
-			}
+	var friendStatus string
+	isAccepted, err := db.Queries.GetFriendStatus(ctx, username)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return resp, fmt.Errorf("Failed to get friend status: %w: %w", db.ErrRunQuery, err)
+		} else {
+			friendStatus = friendStatusNone
+		}
+	} else {
+		if isAccepted {
+			friendStatus = friendStatusAccepted
+		} else {
+			friendStatus = friendStatusPending
 		}
 	}
 

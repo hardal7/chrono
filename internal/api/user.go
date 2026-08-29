@@ -14,6 +14,7 @@ func UserRoute(r chi.Router) {
 	r.Post("/account", EditUserAccountHandler)
 	r.Delete("/account", DeleteUserAccountHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
+	r.Delete("/avatar", DeleteUserAvatarHandler)
 	r.Get("/profile/{username}", GetUserProfileHandler)
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
 }
@@ -48,6 +49,11 @@ func DeleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 func UploadUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	err := user.UploadAvatar(r.Context(), r.Body)
+	processResponse(r.Context(), response{w, nil, err})
+}
+
+func DeleteUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
+	err := user.DeleteAvatar(r.Context())
 	processResponse(r.Context(), response{w, nil, err})
 }
 

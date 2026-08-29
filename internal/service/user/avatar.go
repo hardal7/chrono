@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 const (
@@ -59,6 +60,23 @@ func createFile(fileBytes []byte, filename string) error {
 	err = os.WriteFile(path, fileBytes, filePerm)
 	if err != nil {
 		return fmt.Errorf("Failed to write file: %w", err)
+	}
+
+	return nil
+}
+
+func DeleteAvatar(ctx context.Context) error {
+	userID := middleware.UserID(ctx)
+
+	path := filepath.Join(AvatarDirectory, userID.String())
+	err := os.Remove(path)
+	if err != nil {
+		return fmt.Errorf("Failed to delete user avatar: %w", err)
+	}
+
+	err = InitAvatar(ctx)
+	if err != nil {
+		logger.Warn("Failed to initialize user avatar")
 	}
 
 	return nil

@@ -45,9 +45,9 @@ func (test Test) Run(t *testing.T) {
 			logger.Fatal("Failed to create test request", err)
 		}
 
+		req.Header.Add("X-Forwarded-For", "1.1.1.1")
 		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
 		ctx := middleware.AsUserID(req.Context(), testUUID)
-		req.Header.Add("X-Forwarded-For", "1.1.1.1")
 		req = req.WithContext(ctx)
 
 		logger.Info("=== RUNNING TEST ===", "case", c.Name)
