@@ -3,9 +3,9 @@ services:
     image: postgres:17
     container_name: test-db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
     healthcheck:
       test: "sh -c 'pg_isready -U $DB_USER'"
       interval: 1s
@@ -18,9 +18,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      POSTGRES_USER: ${DB_USER}
-      PGPASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: $DB_USER
+      PGPASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
     volumes:
       - ../sql/migrations:/srv/migrations
       - ../scripts/migrate.sh:/srv/migrate.sh

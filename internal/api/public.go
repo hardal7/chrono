@@ -6,16 +6,37 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/service/forms"
 	"github.com/hardal7/chrono/internal/service/user"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
 func publicRoutes(r chi.Router) {
+	r.Post("/report", BugReportHandler)
+	r.Post("/feature", FeatureRequestHandler)
 	r.Post("/register", RegisterUserHandler)
 	r.Post("/login", LoginUserHandler)
 	r.Get("/health", PingHandler)
 	r.Get(config.AvatarEndpoint+"/{id}", GetUserAvatarHandler)
+}
+
+func BugReportHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.CreateBugReport
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = forms.CreateBugReport(r.Context(), req)
+		processResponse(r.Context(), response{w, nil, err})
+	}
+}
+
+func FeatureRequestHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.CreateFeatureRequest
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = forms.CreateFeatureRequest(r.Context(), req)
+		processResponse(r.Context(), response{w, nil, err})
+	}
 }
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {

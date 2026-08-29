@@ -5,10 +5,66 @@
   <meta charset="UTF-8" />
   <title>Report a Bug</title>
   <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="style.css">
+  <script src="forms.js"></script>
 </head>
 
 <body>
-  <h1>Report a Bug</h1>
+  <main class="container">
+    <h1>Report a Bug</h1>
+
+    <p class="description">
+      Found something that isn't working correctly? Let us know and we'll look into it.
+    </p>
+
+    <div class="notice">
+      Please provide as much detail as possible so we can reproduce and fix the issue.
+    </div>
+
+    <form id="report-form">
+
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Your name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="title">Bug Title</label>
+        <input type="text" id="title" name="title" placeholder="Briefly describe the problem" required>
+      </div>
+
+      <div class="form-group">
+        <label for="description">What happened?</label>
+        <textarea id="description" name="description" placeholder="Describe the problem you encountered..."
+          required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="steps">Steps to Reproduce</label>
+        <textarea id="steps" name="steps"
+          placeholder="1. Go to...&#10;2. Click on...&#10;3. The problem occurs..."></textarea>
+        <span class="help">Tell us how we can reproduce the issue.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="environment">Browser / Device</label>
+        <input type="text" id="environment" name="environment" placeholder="e.g. Chrome on Windows 11">
+      </div>
+
+      <div class="form-group">
+        <label for="additional">Additional Information</label>
+        <textarea id="additional" name="additional" placeholder="Anything else that might help us?"></textarea>
+      </div>
+
+      <button type="submit">Submit Bug Report</button>
+
+    </form>
+  </main>
 </body>
 
 </html>

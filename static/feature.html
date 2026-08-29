@@ -5,10 +5,64 @@
   <meta charset="UTF-8" />
   <title>Feature Request</title>
   <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="style.css">
+  <script src="forms.js"></script>
 </head>
 
 <body>
-  <h1>Feature Request</h1>
+  <main class="container">
+    <h1>Feature Request</h1>
+
+    <p class="description">
+      Have an idea that could make the application better? We'd love to hear it.
+    </p>
+
+    <div class="notice">
+      Tell us what you'd like to see and, most importantly, how it would help you.
+    </div>
+
+    <form id="feature-form">
+
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Your name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="title">Feature Title</label>
+        <input type="text" id="title" name="title" placeholder="What feature would you like?" required>
+      </div>
+
+      <div class="form-group">
+        <label for="problem">What problem would this solve?</label>
+        <textarea id="problem" name="problem" placeholder="Describe the problem or limitation you're experiencing..."
+          required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="feature">Describe Your Idea</label>
+        <textarea id="feature" name="feature" placeholder="Tell us how you think the feature should work..."
+          required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="priority">How important is this to you?</label>
+        <select id="priority" name="priority">
+          <option value="low">Nice to have</option>
+          <option value="medium" selected>Would be useful</option>
+          <option value="high">Very important</option>
+        </select>
+      </div>
+
+      <button type="submit">Submit Feature Request</button>
+
+    </form>
+  </main>
 </body>
 
 </html>

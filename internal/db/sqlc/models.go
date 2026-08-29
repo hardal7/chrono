@@ -11,6 +11,29 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BugReport struct {
+	ID          int64
+	Name        pgtype.Text
+	Email       pgtype.Text
+	Title       string
+	Description string
+	Steps       pgtype.Text
+	Environment pgtype.Text
+	Additional  pgtype.Text
+	CreatedAt   time.Time
+}
+
+type FeatureRequest struct {
+	ID        int64
+	Name      pgtype.Text
+	Email     pgtype.Text
+	Title     string
+	Problem   string
+	Feature   string
+	Priority  string
+	CreatedAt time.Time
+}
+
 type Friend struct {
 	ID          uuid.UUID
 	SenderID    uuid.UUID

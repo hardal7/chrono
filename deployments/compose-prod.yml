@@ -3,13 +3,13 @@ services:
     image: postgres:17
     container_name: chrono-db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
     volumes:
       - /srv/db:/var/lib/postgresql/data:rw
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "$DB_PORT:$DB_PORT"
     healthcheck:
       test: "pg_isready -U $DB_USER"
       interval: 1s
@@ -22,9 +22,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      POSTGRES_USER: ${DB_USER}
-      PGPASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: $DB_USER
+      PGPASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
     volumes:
       - ../sql/migrations:/srv/migrations
       - ../scripts/migrate.sh:/srv/migrate.sh
@@ -34,9 +34,9 @@ services:
     image: redis:8.10-alpine
     container_name: chrono-redis
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: $REDIS_PASSWORD
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "$REDIS_PORT:$REDIS_PORT"
     healthcheck:
       test: "redis-cli --raw incr ping" 
       interval: 1s
@@ -48,8 +48,8 @@ services:
       dockerfile: deployments/Dockerfile
     container_name: chrono-api
     expose:
-      - "${APP_PORT}"
-      - "${ADMIN_PORT}"
+      - "$APP_PORT"
+      - "$ADMIN_PORT"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -64,16 +64,16 @@ services:
       # - "traefik.http.routers.chrono-api.tls=true"
       # - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
       # - "traefik.http.routers.chrono-api.entrypoints=websecure"
-      - "traefik.http.routers.chrono-api.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.services.chrono-api.loadbalancer.server.port=${APP_PORT}"
+      - "traefik.http.routers.chrono-api.rule=Host(`$DOMAIN`)"
+      - "traefik.http.services.chrono-api.loadbalancer.server.port=$APP_PORT"
       - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,latencyCheck@file"
 
   traefik:
     image: traefik:v3.6
     container_name: traefik
     environment:
-      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
-    command: "--certificatesresolvers.cloudflare.acme.email=${CF_EMAIL}"
+      CF_DNS_API_TOKEN: $CF_DNS_API_TOKEN
+    command: "--certificatesresolvers.cloudflare.acme.email=$CF_EMAIL"
     ports:
       - "80:80"
       - "443:443"
@@ -109,7 +109,7 @@ services:
       victoria-metrics:
         condition: service_healthy
     environment:
-      ADMIN_PORT: ${ADMIN_PORT}
+      ADMIN_PORT: $ADMIN_PORT
     expose:
       - "8429"
     volumes:
@@ -154,8 +154,8 @@ services:
     environment:
       GF_PLUGINS_PREINSTALL: victoriametrics-logs-datasource
       GF_LOG_LEVEL: warn
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_SECURITY_ADMIN_USER: $GRAFANA_USER
+      GF_SECURITY_ADMIN_PASSWORD: $GRAFANA_PASSWORD
     ports:
       - "3000:3000"
     volumes:
