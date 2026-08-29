@@ -3,12 +3,14 @@ package session
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/apierror"
+	"github.com/hardal7/chrono/internal/util/config"
 )
 
 func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSessionNamedResponse, error) {
@@ -37,7 +39,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 
 		participants = append(participants, dto.Participant{
 			Name:             participant.Username,
-			AvatarPath:       participant.ID.String(),
+			AvatarPath:       filepath.Join(config.AvatarEndpoint, participant.ID.String()),
 			SessionTime:      int(participant.TotalTimeTrackedSeconds),
 			SessionTimeToday: int(participant.TodayTimeTrackedSeconds),
 			LastOnline:       int(participant.LastSeenAt.Unix()),
@@ -48,13 +50,19 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 		return resp, fmt.Errorf("Unauthorized session details requested: %w", apierror.ErrUnauthorized)
 	}
 
+	expiresAt := &s.ExpiresAt.Time
+	if s.ExpiresAt.Valid {
+		expiresAt = nil
+	}
+
 	resp = dto.GetSessionNamedResponse{
-		Name:                s.Name,
-		OwnerUsername:       r.OwnerUsername,
-		ExpiresAt:           s.ExpiresAt.Time,
-		MaxParticipants:     int(s.MaxParticipants.Int32),
-		TotalParticipants:   len(participants),
-		CurrentParticipants: participants,
+		Name:              s.Name,
+		OwnerUsername:     r.OwnerUsername,
+		ExpiresAt:         expiresAt,
+		TotalTime:         int(s.TotalTimeTrackedSeconds),
+		MaxParticipants:   int(s.MaxParticipants.Int32),
+		TotalParticipants: len(participants),
+		Participants:      participants,
 	}
 
 	return resp, nil

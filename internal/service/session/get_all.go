@@ -35,12 +35,17 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 			})
 		}
 
+		expiresAt := &session.ExpiresAt.Time
+		if !session.ExpiresAt.Valid {
+			expiresAt = nil
+		}
+
 		sessions = append(sessions, dto.SessionSelection{
 			Name:              session.Name,
 			OwnerUsername:     session.OwnerUsername,
 			OwnerAvatarPath:   filepath.Join(config.AvatarEndpoint, session.OwnerID.String()),
 			TotalTime:         int(session.TotalTimeTrackedSeconds),
-			ExpiresAt:         session.ExpiresAt.Time,
+			ExpiresAt:         expiresAt,
 			MaxParticipants:   int(session.MaxParticipants.Int32),
 			TotalParticipants: len(minParticipants),
 			Participants:      minParticipants,

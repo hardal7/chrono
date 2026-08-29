@@ -41,7 +41,7 @@ type SessionSelection struct {
 	Name              string           `json:"name"`
 	OwnerUsername     string           `json:"owner_username"`
 	OwnerAvatarPath   string           `json:"owner_avatar_path"`
-	ExpiresAt         time.Time        `json:"expires_at"`
+	ExpiresAt         *time.Time       `json:"expires_at"`
 	TotalTime         int              `json:"total_time_seconds"`
 	TotalParticipants int              `json:"total_participants"`
 	MaxParticipants   int              `json:"max_participants"`
@@ -63,10 +63,11 @@ type Participant struct {
 	LastOnline       int    `json:"last_online_seconds_ago"`
 }
 type GetSessionNamedResponse struct {
-	Name                string    `json:"name"`
-	OwnerUsername       string    `json:"owner_username"`
-	ExpiresAt           time.Time `json:"expires_at"`
-	TotalParticipants   int       `json:"total_participants"`
-	MaxParticipants     int       `json:"max_participants"`
-	CurrentParticipants []Participant
+	Name              string        `json:"name"`
+	OwnerUsername     string        `json:"owner_username"`
+	ExpiresAt         *time.Time    `json:"expires_at"`
+	TotalTime         int           `json:"total_time_tracked_seconds"`
+	TotalParticipants int           `json:"total_participants"`
+	MaxParticipants   int           `json:"max_participants"`
+	Participants      []Participant `json:"participants"`
 }

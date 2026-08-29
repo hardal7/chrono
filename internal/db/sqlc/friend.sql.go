@@ -69,11 +69,11 @@ func (q *Queries) DeleteFriend(ctx context.Context, arg DeleteFriendParams) erro
 }
 
 const getFriendRequests = `-- name: GetFriendRequests :many
-SELECT friends.created_at, sender.username FROM friends
-JOIN users AS sender ON users.id = friends.sender_id
-JOIN users AS recipient ON users.id = friends.recipient_id
+SELECT friends.created_at, senders.username FROM friends
+JOIN users AS senders ON senders.id = friends.sender_id
+JOIN users AS recipients ON recipients.id = friends.recipient_id
 WHERE 
-    recipient.id = $1
+    recipients.id = $1
     AND friends.is_accepted = FALSE
 `
 
@@ -104,8 +104,11 @@ func (q *Queries) GetFriendRequests(ctx context.Context, id uuid.UUID) ([]GetFri
 
 const getFriendStatus = `-- name: GetFriendStatus :one
 SELECT friends.is_accepted FROM friends
-JOIN users ON users.id = friends.recipient_id
-WHERE users.username = $1
+JOIN users AS senders ON senders.id = friends.sender_id
+JOIN users AS recipients ON recipients.id = friends.recipient_id
+WHERE 
+    recipients.username = $1
+    OR senders.username = $1
 `
 
 func (q *Queries) GetFriendStatus(ctx context.Context, username string) (bool, error) {
