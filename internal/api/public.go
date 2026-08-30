@@ -13,11 +13,12 @@ import (
 )
 
 func publicRoutes(r chi.Router) {
+	r.Get("/health", PingHandler)
 	r.Post("/report", BugReportHandler)
 	r.Post("/feature", FeatureRequestHandler)
 	r.Post("/register", RegisterUserHandler)
 	r.Post("/login", LoginUserHandler)
-	r.Get("/health", PingHandler)
+	r.Post("/reset-password", ResetUserPasswordHandler)
 	r.Get(config.AvatarEndpoint+"/{id}", GetUserAvatarHandler)
 }
 
@@ -54,6 +55,15 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		cookie, err := user.Login(r.Context(), req)
 		http.SetCookie(w, &cookie)
+		processResponse(r.Context(), response{w, nil, err})
+	}
+}
+
+func ResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.ResetUserPasswordRequest
+	err := processRequest(w, r, &req)
+	if err == nil {
+		err = user.ResetPassword(r.Context(), req)
 		processResponse(r.Context(), response{w, nil, err})
 	}
 }

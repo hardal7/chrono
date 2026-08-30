@@ -11,19 +11,25 @@ import (
 const AvatarEndpoint string = "/avatar"
 
 type Config struct {
-	Port           string
-	AdminPort      string
-	LogLevel       string
-	DB_PORT        string
-	DB_HOST        string
-	DB_USER        string
-	DB_NAME        string
-	DB_PASSWORD    string
+	Domain    string
+	Port      string
+	AdminPort string
+	LogLevel  string
+
+	DB_PORT     string
+	DB_HOST     string
+	DB_USER     string
+	DB_NAME     string
+	DB_PASSWORD string
+
 	REDIS_PORT     string
 	REDIS_HOST     string
 	REDIS_PASSWORD string
 
 	JWT_SECRET string
+
+	MAIL_API_KEY string
+	MailAddress  string
 }
 
 var App Config
@@ -44,9 +50,11 @@ func Load() {
 	}
 
 	App = Config{
-		Port:        os.Getenv("APP_PORT"),
-		AdminPort:   os.Getenv("ADMIN_PORT"),
-		LogLevel:    os.Getenv("LOG_LEVEL"),
+		Domain:    os.Getenv("DOMAIN"),
+		Port:      os.Getenv("APP_PORT"),
+		AdminPort: os.Getenv("ADMIN_PORT"),
+		LogLevel:  os.Getenv("LOG_LEVEL"),
+
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_HOST:     os.Getenv("DB_HOST"),
 		DB_USER:     os.Getenv("DB_USER"),
@@ -58,6 +66,9 @@ func Load() {
 		REDIS_PASSWORD: os.Getenv("REDIS_PASSWORD"),
 
 		JWT_SECRET: os.Getenv("JWT_SECRET"),
+
+		MAIL_API_KEY: os.Getenv("MAIL_API_KEY"),
+		MailAddress:  os.Getenv("MAIL_ADDRESS"),
 	}
 	slog.Info("Loaded environment variables")
 }
