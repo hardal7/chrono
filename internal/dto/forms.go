@@ -14,7 +14,7 @@ type CreateBugReport struct {
 	Email       string `json:"email"`
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description" validate:"required"`
-	Steps       string `json:"steps" form:"steps"`
+	Steps       string `json:"steps"`
 	Environment string `json:"environment"`
 	Additional  string `json:"additional"`
 }

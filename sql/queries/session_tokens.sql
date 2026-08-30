@@ -6,4 +6,4 @@ DELETE FROM session_tokens
 WHERE id = $1;
 -- name: GetSessionToken :one
 SELECT * FROM session_tokens
-WHERE hash = $1;
+WHERE hash = $1 AND expiry > now();

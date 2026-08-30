@@ -28,6 +28,8 @@ func Serve(ctx context.Context) {
 
 		r.Group(func(r chi.Router) {
 			r.Use(auth.Authenticate)
+			r.Use(middleware.Activity)
+
 			r.Route("/user", UserRoute)
 			r.Route("/location", LocationRoute)
 			r.Route("/topic", TopicRoute)

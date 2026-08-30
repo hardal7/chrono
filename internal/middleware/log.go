@@ -12,13 +12,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-)
-
-const (
-	IP        = "IP"
-	RequestID = "requestID"
 )
 
 func LogRequest(next http.Handler) http.Handler {
@@ -45,10 +41,10 @@ func LogRequest(next http.Handler) http.Handler {
 		}
 
 		address := r.Header.Get("X-Forwarded-For")
-		ctx := context.WithValue(r.Context(), IP, address)
+		ctx := context.WithValue(r.Context(), requestctx.IP, address)
 
 		requestID := uuid.New().String()
-		ctx = context.WithValue(ctx, RequestID, requestID)
+		ctx = context.WithValue(ctx, requestctx.RequestID, requestID)
 
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}

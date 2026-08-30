@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	db "github.com/hardal7/chrono/internal/db/sqlc"
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -55,10 +55,10 @@ func getConnectionString() string {
 type queryTracer struct{}
 
 func (t queryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
-	logger.Trace(data.SQL, "requestID", ctx.Value(middleware.RequestID).(string))
+	logger.Trace(data.SQL, "requestID", ctx.Value(requestctx.RequestID).(string))
 	return ctx
 }
 
 func (t queryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
-	logger.Trace(data.CommandTag.String(), "error", data.Err, "requestID", ctx.Value(middleware.RequestID).(string))
+	logger.Trace(data.CommandTag.String(), "error", data.Err, "requestID", ctx.Value(requestctx.RequestID).(string))
 }

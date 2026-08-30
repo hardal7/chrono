@@ -40,7 +40,7 @@ func (q *Queries) DeleteSessionToken(ctx context.Context, id uuid.UUID) error {
 
 const getSessionToken = `-- name: GetSessionToken :one
 SELECT id, user_id, hash, expiry, created_at, updated_at, last_used_at FROM session_tokens
-WHERE hash = $1
+WHERE hash = $1 AND expiry > now()
 `
 
 func (q *Queries) GetSessionToken(ctx context.Context, hash string) (SessionToken, error) {

@@ -9,14 +9,12 @@ import (
 	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 const (
 	AuthHeader = "Authorization"
 	Bearer     = "Bearer "
-
-	userID    = "userID"
-	sessionID = "sessionID"
 )
 
 func Authenticate(next http.Handler) http.Handler {
@@ -39,11 +37,11 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		uID := retrievedToken.UserID
-		sID := retrievedToken.ID
-		logger.Debug("Authenticated user", "userID", uID.String())
-		ctx := context.WithValue(r.Context(), userID, uID)
-		ctx = context.WithValue(ctx, sessionID, sID)
+		userID := retrievedToken.UserID
+		sessionID := retrievedToken.ID
+		logger.Debug("Authenticated user", "userID", userID.String())
+		ctx := context.WithValue(r.Context(), requestctx.UserID, userID)
+		ctx = context.WithValue(ctx, requestctx.SessionID, sessionID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -52,7 +50,7 @@ func Authenticate(next http.Handler) http.Handler {
 func UserID(ctx context.Context) uuid.UUID {
 	var id uuid.UUID
 
-	id, ok := ctx.Value(userID).(uuid.UUID)
+	id, ok := ctx.Value(requestctx.UserID).(uuid.UUID)
 	if !ok {
 		logger.Warn("Failed to fetch userID")
 		return uuid.Nil
@@ -60,17 +58,17 @@ func UserID(ctx context.Context) uuid.UUID {
 	return id
 }
 
+func AsUserID(ctx context.Context, userID uuid.UUID) context.Context {
+	return context.WithValue(ctx, requestctx.UserID, userID)
+}
+
 func SessionID(ctx context.Context) uuid.UUID {
 	var id uuid.UUID
 
-	id, ok := ctx.Value(sessionID).(uuid.UUID)
+	id, ok := ctx.Value(requestctx.SessionID).(uuid.UUID)
 	if !ok {
 		logger.Warn("Failed to fetch sessionID")
 		return uuid.Nil
 	}
 	return id
-}
-
-func AsUserID(ctx context.Context, id uuid.UUID) context.Context {
-	return context.WithValue(ctx, userID, id)
 }

@@ -270,3 +270,14 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Username, arg.Password)
 	return err
 }
+
+const updateUserActivity = `-- name: UpdateUserActivity :exec
+UPDATE users
+SET last_seen_at = now()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateUserActivity(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, updateUserActivity, id)
+	return err
+}

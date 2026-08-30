@@ -10,11 +10,11 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/service/location"
 	"github.com/hardal7/chrono/internal/service/topic"
 	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -36,7 +36,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		return fmt.Errorf("Failed to check if user is duplicate: %w: %w", db.ErrRunQuery, err)
 	}
 
-	country := location.IPToCountry(ctx.Value(middleware.IP).(string))
+	country := location.IPToCountry(ctx.Value(requestctx.IP).(string))
 	err = db.Queries.CreateUser(ctx, query.CreateUserParams{
 		Username: r.Username,
 		Email:    r.Email,

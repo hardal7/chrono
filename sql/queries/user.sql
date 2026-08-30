@@ -17,6 +17,10 @@ WHERE email = $1;
 -- name: GetUserByID :one
 SELECT * FROM users
 WHERE id = $1;
+-- name: UpdateUserActivity :exec
+UPDATE users
+SET last_seen_at = now()
+WHERE id = $1;
 -- name: GetTopUsers :many
 SELECT * FROM users
 WHERE 

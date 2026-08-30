@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func processRequest(w http.ResponseWriter, r *http.Request, req any) error {
@@ -52,7 +52,7 @@ func processResponse(ctx context.Context, r response) {
 		}
 
 		logger.Debug("Returning Response")
-		requestID := ctx.Value(middleware.RequestID).(string)
+		requestID := ctx.Value(requestctx.RequestID).(string)
 		logger.Debug(strings.TrimSpace(buf.String()), "requestID", requestID)
 
 		_, err = r.w.Write(buf.Bytes())
