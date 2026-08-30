@@ -7,12 +7,12 @@ import (
 
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/util/config"
 )
 
 func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 	resp := dto.GetSessionsAllResponse{}
 
 	s, err := db.Queries.GetSessionsAllByFriends(ctx, userID)

@@ -26,7 +26,7 @@ type Config struct {
 	REDIS_HOST     string
 	REDIS_PASSWORD string
 
-	JWT_SECRET string
+	HashSecret string
 
 	MAIL_API_KEY string
 	MailAddress  string
@@ -65,7 +65,7 @@ func Load() {
 		REDIS_HOST:     os.Getenv("REDIS_HOST"),
 		REDIS_PASSWORD: os.Getenv("REDIS_PASSWORD"),
 
-		JWT_SECRET: os.Getenv("JWT_SECRET"),
+		HashSecret: os.Getenv("HASH_SECRET"),
 
 		MAIL_API_KEY: os.Getenv("MAIL_API_KEY"),
 		MailAddress:  os.Getenv("MAIL_ADDRESS"),

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/util/logger"
 )
 
@@ -25,7 +25,7 @@ const (
 
 // TODO: Sanitize Image
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
@@ -66,7 +66,7 @@ func createFile(fileBytes []byte, filename string) error {
 }
 
 func DeleteAvatar(ctx context.Context) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	path := filepath.Join(AvatarDirectory, userID.String())
 	err := os.Remove(path)
@@ -83,7 +83,7 @@ func DeleteAvatar(ctx context.Context) error {
 }
 
 func InitAvatar(ctx context.Context) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	randomAvatar := strconv.Itoa(rand.IntN(defaultAvatarsNum))
 	avatarPath := filepath.Join(DefaultAvatarDirectory, randomAvatar)

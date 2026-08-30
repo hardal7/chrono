@@ -7,21 +7,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	day               = 3600 * 24
-	jwtExpirationDays = 30
-)
+const tokenExpiration = time.Hour * 24 * 30
 
 func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	var err error
@@ -46,20 +42,26 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		return cookie, fmt.Errorf("Failed to hash password: %w", err)
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": u.ID.String(),
-		"exp": time.Now().Add(time.Hour * 24 * time.Duration(jwtExpirationDays)).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
+	token, err := auth.GenerateToken()
 	if err != nil {
-		return cookie, fmt.Errorf("Failed to sign token: %w", err)
+		return cookie, fmt.Errorf("Failed to generate token: %q", err)
+	}
+	hashedToken := auth.HashToken(token, []byte(config.App.HashSecret))
+
+	err = db.Queries.CreateSessionToken(ctx, query.CreateSessionTokenParams{
+		UserID: u.ID,
+		Expiry: time.Now().Add(tokenExpiration),
+		Hash:   hashedToken,
+	})
+	if err != nil {
+		return cookie, fmt.Errorf("Failed to create session token: %w: %w", db.ErrRunQuery, err)
 	}
 
 	cookie = http.Cookie{
-		Name:     middleware.AuthHeader,
-		Value:    tokenString,
+		Name:     auth.AuthHeader,
+		Value:    token,
 		Path:     "/api",
-		MaxAge:   jwtExpirationDays,
+		MaxAge:   int(tokenExpiration.Seconds()),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,

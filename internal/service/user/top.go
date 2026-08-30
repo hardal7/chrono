@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -20,7 +20,7 @@ const (
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 	var users []query.User
 	var err error
 	resp := dto.GetTopUsersResponse{}

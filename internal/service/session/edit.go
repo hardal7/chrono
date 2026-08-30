@@ -7,12 +7,12 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Edit(ctx context.Context, r dto.EditSessionRequest) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	err := db.Queries.UpdateSession(ctx, query.UpdateSessionParams{
 		OwnerID:         userID,

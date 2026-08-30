@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,7 @@ func (test Test) Run(t *testing.T) {
 
 		req.Header.Add("X-Forwarded-For", "1.1.1.1")
 		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
-		ctx := middleware.AsUserID(req.Context(), testUUID)
+		ctx := auth.AsUserID(req.Context(), testUUID)
 		req = req.WithContext(ctx)
 
 		logger.Info("=== RUNNING TEST ===", "case", c.Name)

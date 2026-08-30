@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	IP        Key = "IP"
-	RequestID Key = "requestID"
+	IP        = "IP"
+	RequestID = "requestID"
 )
 
 func LogRequest(next http.Handler) http.Handler {

@@ -8,12 +8,12 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/jackc/pgx/v5"
 )
 
 func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

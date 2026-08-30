@@ -92,7 +92,7 @@ func generateResetToken(email string) (string, error) {
 		"exp":     time.Now().Add(time.Minute * time.Duration(otpExpirationMinutes)).Unix(),
 		"purpose": "password_reset",
 	})
-	tokenString, err := token.SignedString([]byte(config.App.JWT_SECRET))
+	tokenString, err := token.SignedString([]byte(config.App.HashSecret))
 	if err != nil {
 		return "", err
 	}

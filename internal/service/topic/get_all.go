@@ -6,11 +6,11 @@ import (
 
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 )
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 	resp := dto.GetTopicsAllResponse{}
 
 	t, err := db.Queries.GetTopicsByOwner(ctx, userID)

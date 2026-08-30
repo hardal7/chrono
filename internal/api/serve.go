@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -26,7 +27,7 @@ func Serve(ctx context.Context) {
 		r.Group(publicRoutes)
 
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.Authenticate)
+			r.Use(auth.Authenticate)
 			r.Route("/user", UserRoute)
 			r.Route("/location", LocationRoute)
 			r.Route("/topic", TopicRoute)

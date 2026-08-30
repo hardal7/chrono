@@ -7,11 +7,11 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/middleware"
+	"github.com/hardal7/chrono/internal/auth"
 )
 
 func CreateRequest(ctx context.Context, r dto.CreateFriendRequestRequest) error {
-	userID := middleware.UserID(ctx)
+	userID := auth.UserID(ctx)
 
 	err := db.Queries.CreateFriendRequest(ctx, query.CreateFriendRequestParams{
 		SenderID: userID,

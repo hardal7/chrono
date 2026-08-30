@@ -65,6 +65,16 @@ type SessionParticipant struct {
 	TodayTimeTrackedSeconds int32
 }
 
+type SessionToken struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	Hash       string
+	Expiry     time.Time
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	LastUsedAt pgtype.Timestamptz
+}
+
 type Topic struct {
 	ID                      uuid.UUID
 	Name                    string
