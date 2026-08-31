@@ -19,9 +19,13 @@ type EditUserAccountRequest struct {
 	NewPassword string `json:"password" validate:"omitempty"`
 }
 
-type ResetUserPasswordRequest struct {
+type RequestUserPasswordResetRequest struct {
 	Email    string `json:"email" validate:"omitempty,email"`
 	Username string `json:"username" validate:"omitempty,min=4,max=32"`
+}
+
+type UserPasswordResetRequest struct {
+	NewPassword string `json:"new_password"`
 }
 
 type GetTopUsersRequest struct {

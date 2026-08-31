@@ -7,45 +7,69 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/db"
+	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/mailgun/mailgun-go/v5"
 )
 
-const otpExpirationMinutes = 5
+const otpExpiration = time.Minute * 5
 
-func ResetPassword(ctx context.Context, r dto.ResetUserPasswordRequest) error {
+func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetRequest) error {
 	if r.Email == "" && r.Username == "" {
 		return fmt.Errorf("Both email and username fields cannot be empty")
 	}
 
 	var err error
-	email := r.Email
-	if r.Email == "" {
-		email, err = getEmail(ctx, r.Username)
+	var user query.User
+	if r.Email != "" {
+		user, err = db.Queries.GetUserByUsername(ctx, r.Username)
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to get user by username: %w: %w", db.ErrRunQuery, err)
+		}
+	} else {
+		user, err = db.Queries.GetUserByEmail(ctx, r.Email)
+		if err != nil {
+			return fmt.Errorf("Failed to get user by username: %w: %w", db.ErrRunQuery, err)
 		}
 	}
 
-	err = sendResetEmail(email)
+	auth.AsUserID(ctx, user.ID)
+
+	err = sendResetEmail(ctx, user.Email)
 
 	return err
 }
 
-func getEmail(ctx context.Context, username string) (string, error) {
-	user, err := db.Queries.GetUserByUsername(ctx, username)
+func PasswordReset(ctx context.Context, otp string, r dto.UserPasswordResetRequest) error {
+	hashedOTP := auth.HashToken(otp, []byte(config.App.HashSecret))
+	token, err := db.Queries.GetOTPToken(ctx, hashedOTP)
 	if err != nil {
-		return "", err
+		return fmt.Errorf("Failed to retrieve OTP token: %w: %w", db.ErrRunQuery, err)
 	}
 
-	return user.Email, nil
+	if token.Expiry.After(time.Now()) {
+		return fmt.Errorf("OTP token has expired")
+	}
+
+	auth.AsUserID(ctx, token.UserID)
+	err = EditAccount(ctx, dto.EditUserAccountRequest{NewPassword: r.NewPassword})
+	if err != nil {
+		return err
+	}
+
+	err = db.Queries.DeleteOTPToken(ctx, token.ID)
+	if err != nil {
+		return fmt.Errorf("Failed to invalidate consumed OTP token: %w: %w", db.ErrRunQuery, err)
+	}
+
+	return nil
 }
 
-func sendResetEmail(email string) error {
+func sendResetEmail(ctx context.Context, email string) error {
 	mg := mailgun.NewMailgun(config.App.MAIL_API_KEY)
 	err := mg.SetAPIBase(mailgun.APIBaseEU)
 	if err != nil {
@@ -53,7 +77,7 @@ func sendResetEmail(email string) error {
 		return err
 	}
 
-	token, err := generateResetToken(email)
+	token, err := generateOTPToken(ctx)
 	if err != nil {
 		return err
 	}
@@ -62,9 +86,9 @@ func sendResetEmail(email string) error {
 	recipient := email
 	sender := config.App.MailAddress
 	subject := "Password Reset"
-	body := "Click this link to reset your password: https://" + domain + "/reset-password?token=" + token
+	body := "Click this link to reset your password: https://" + domain + "/password-reset?otp=" + token
 
-	data, err := os.ReadFile("static/reset-password.html")
+	data, err := os.ReadFile("static/mail/password-reset.html")
 	if err != nil {
 		return err
 	}
@@ -86,21 +110,23 @@ func sendResetEmail(email string) error {
 	return nil
 }
 
-func generateResetToken(email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":     email,
-		"exp":     time.Now().Add(time.Minute * time.Duration(otpExpirationMinutes)).Unix(),
-		"purpose": "password_reset",
-	})
-	tokenString, err := token.SignedString([]byte(config.App.HashSecret))
+func generateOTPToken(ctx context.Context) (string, error) {
+	var otp string
+	token, err := auth.GenerateToken()
 	if err != nil {
-		return "", err
+		return otp, fmt.Errorf("Failed to generate token: %w", err)
 	}
 
-	return tokenString, nil
+	hashedToken := auth.HashToken(token, []byte(config.App.HashSecret))
+
+	err = db.Queries.CreateOTPToken(ctx, query.CreateOTPTokenParams{
+		UserID: auth.UserID(ctx),
+		Expiry: time.Now().Add(otpExpiration),
+		Hash:   hashedToken,
+	})
+	if err != nil {
+		return otp, fmt.Errorf("Failed to create session token: %w: %w", db.ErrRunQuery, err)
+	}
+
+	return token, nil
 }
-
-// TODO: Invalidate past session tokens on password reset
-// Also implement in account endpoint
-
-// TODO: Expire token after consuming, not only after expiration

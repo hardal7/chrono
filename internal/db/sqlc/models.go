@@ -43,6 +43,14 @@ type Friend struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type OtpToken struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Hash      string
+	Expiry    time.Time
+	CreatedAt pgtype.Timestamptz
+}
+
 type Session struct {
 	ID                      uuid.UUID
 	OwnerID                 uuid.UUID

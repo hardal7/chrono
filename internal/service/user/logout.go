@@ -13,7 +13,7 @@ func Logout(ctx context.Context) error {
 
 	err := db.Queries.DeleteSessionToken(ctx, sessionID)
 	if err != nil {
-		return fmt.Errorf("Failed to delete session token: %q: %q", db.ErrRunQuery, err)
+		return fmt.Errorf("Failed to delete session token: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

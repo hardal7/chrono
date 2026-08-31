@@ -14,6 +14,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const siteDir = "./static/site/"
+
 func Serve(ctx context.Context) {
 	InitValidator()
 
@@ -39,12 +41,12 @@ func Serve(ctx context.Context) {
 		})
 	})
 
-	mainRouter.Get("/privacy", serveHTML("privacy.html"))
-	mainRouter.Get("/terms", serveHTML("terms.html"))
-	mainRouter.Get("/report", serveHTML("report.html"))
-	mainRouter.Get("/feature", serveHTML("feature.html"))
+	siteRoutes := []string{"privacy", "terms", "report", "feature"}
+	for _, route := range siteRoutes {
+		mainRouter.Get("/"+route, serveHTML(route+".html"))
+	}
 
-	siteServer := http.FileServer(http.Dir("./static"))
+	siteServer := http.FileServer(http.Dir(siteDir))
 	mainRouter.Handle("/*", siteServer)
 
 	go runServer(ctx, "main", config.App.Port, mainRouter)
@@ -78,7 +80,7 @@ func runServer(ctx context.Context, name, port string, router *chi.Mux) {
 
 func serveHTML(path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/"+path)
+		http.ServeFile(w, r, siteDir+path)
 	}
 }
 

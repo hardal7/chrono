@@ -13,6 +13,7 @@ func UserRoute(r chi.Router) {
 	r.Get("/account", GetUserAccountHandler)
 	r.Post("/account", EditUserAccountHandler)
 	r.Delete("/account", DeleteUserAccountHandler)
+	r.Post("/logout", LogoutUserHandler)
 	r.Post("/avatar", UploadUserAvatarHandler)
 	r.Delete("/avatar", DeleteUserAvatarHandler)
 	r.Get("/profile/{username}", GetUserProfileHandler)
@@ -44,6 +45,11 @@ func GetUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUserAccountHandler(w http.ResponseWriter, r *http.Request) {
 	err := user.DeleteAccount(r.Context())
+	processResponse(r.Context(), response{w, nil, err})
+}
+
+func LogoutUserHandler(w http.ResponseWriter, r *http.Request) {
+	err := user.Logout(r.Context())
 	processResponse(r.Context(), response{w, nil, err})
 }
 

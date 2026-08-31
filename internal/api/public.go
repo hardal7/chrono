@@ -18,7 +18,8 @@ func publicRoutes(r chi.Router) {
 	r.Post("/feature", FeatureRequestHandler)
 	r.Post("/register", RegisterUserHandler)
 	r.Post("/login", LoginUserHandler)
-	r.Post("/reset-password", ResetUserPasswordHandler)
+	r.Post("/password-reset", RequestUserPasswordResetHandler)
+	r.Get("/password-reset", UserPasswordResetHandler)
 	r.Get(config.AvatarEndpoint+"/{id}", GetUserAvatarHandler)
 }
 
@@ -59,11 +60,21 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	var req dto.ResetUserPasswordRequest
+func RequestUserPasswordResetHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.RequestUserPasswordResetRequest
 	err := processRequest(w, r, &req)
 	if err == nil {
-		err = user.ResetPassword(r.Context(), req)
+		err = user.RequestPasswordReset(r.Context(), req)
+		processResponse(r.Context(), response{w, nil, err})
+	}
+}
+
+func UserPasswordResetHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.UserPasswordResetRequest
+	err := processRequest(w, r, &req)
+	if err != nil {
+		otp := r.URL.Query().Get("otp")
+		err = user.PasswordReset(r.Context(), otp, req)
 		processResponse(r.Context(), response{w, nil, err})
 	}
 }
