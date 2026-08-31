@@ -8,6 +8,7 @@ import (
 
 var RDB *redis.Client
 
+// TODO: Store Session tokens on Redis
 func CreateRedisConnection() {
 	logger.Info("Connecting to redis server", "host", config.App.REDIS_HOST)
 	RDB = redis.NewClient(&redis.Options{
