@@ -57,6 +57,7 @@ type GetUserProfileResponse struct {
 	Country          string `json:"country"`
 	TotalTimeSeconds int    `json:"total_time_seconds"`
 	TodayTimeSeconds int    `json:"today_time_seconds"`
+	Streak           int    `json:"streak"`
 	BestTopic        string `json:"best_topic"`
 	FriendStatus     string `json:"friend_status"`
 }

@@ -5,6 +5,7 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
+    streak INT NOT NULL DEFAULT 0,
     country VARCHAR(64),
     hide_country BOOLEAN NOT NULL DEFAULT FALSE,
     hide_user BOOLEAN NOT NULL DEFAULT FALSE,

@@ -5,6 +5,7 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
+    streak INT NOT NULL DEFAULT 0,
     country VARCHAR(64),
     hide_country BOOLEAN NOT NULL DEFAULT FALSE,
     hide_user BOOLEAN NOT NULL DEFAULT FALSE,
@@ -29,7 +30,6 @@ CREATE TABLE sessions (
     owner_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(64) NOT NULL,
     max_participants INT,
-    password TEXT,
     expires_at TIMESTAMPTZ,
     topic VARCHAR(64),
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
@@ -53,7 +53,6 @@ CREATE TABLE session_participants (
 CREATE TABLE topics (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
-    streak INT NOT NULL DEFAULT 0,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,
     owner_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,

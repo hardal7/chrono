@@ -1,9 +1,9 @@
 -- name: CreateSession :exec
-INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic)
-VALUES($1, $2, $3, $4, $5, $6);
+INSERT INTO sessions(name, owner_id, max_participants, expires_at, topic)
+VALUES($1, $2, $3, $4, $5);
 -- name: UpdateSession :exec
 UPDATE sessions
-SET name = COALESCE(sqlc.arg(new_name), name), max_participants = $3, password = $4, expires_at = $5, updated_at = now()
+SET name = COALESCE(sqlc.arg(new_name), name), max_participants = $3, expires_at = $4, updated_at = now()
 WHERE owner_id = $1 AND name = $2;
 -- name: DeleteSession :exec
 DELETE FROM sessions

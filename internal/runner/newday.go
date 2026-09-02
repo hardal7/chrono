@@ -73,15 +73,15 @@ func resetTodayTimes(ctx context.Context) error {
 func updateStreaks(ctx context.Context) error {
 	logger.Info("Updating streaks")
 
-	topics, err := db.Queries.GetTopicsAll(ctx)
+	users, err := db.Queries.GetUsersAll(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to get topics: %q", err)
+		return fmt.Errorf("Failed to get users: %q", err)
 	}
-	for _, topic := range topics {
-		if topic.TodayTimeTrackedSeconds != 0 {
-			err = db.Queries.IncreaseStreak(ctx, topic.ID)
+	for _, user := range users {
+		if user.TodayTimeTrackedSeconds != 0 {
+			err = db.Queries.IncreaseStreak(ctx, user.ID)
 		} else {
-			err = db.Queries.LoseStreak(ctx, topic.ID)
+			err = db.Queries.LoseStreak(ctx, user.ID)
 		}
 
 		if err != nil {
@@ -89,6 +89,6 @@ func updateStreaks(ctx context.Context) error {
 		}
 	}
 
-	logger.Info("Updated streaks", "topics", len(topics))
+	logger.Info("Updated streaks", "users", len(users))
 	return nil
 }

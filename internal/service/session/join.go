@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/auth"
 	"github.com/jackc/pgx/v5"
 )
 
+// TODO: Join via link
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	userID := auth.UserID(ctx)
 
@@ -25,10 +26,6 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 
 	if err != nil {
 		return fmt.Errorf("Failed to find session: %w: %w", db.ErrRunQuery, err)
-	}
-
-	if r.Password != s.Password.String {
-		return fmt.Errorf("Wrong password for session")
 	}
 
 	p, err := db.Queries.GetSessionParticipantsAsUsers(ctx, s.ID)

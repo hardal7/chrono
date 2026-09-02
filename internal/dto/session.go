@@ -5,7 +5,6 @@ import "time"
 type CreateSessionRequest struct {
 	Name            string    `json:"name" validate:"max=64"`
 	MaxParticipants int       `json:"max_participants" validate:"omitempty,max=1024"`
-	Password        string    `json:"password" validate:"omitempty"`
 	ExpiresAt       time.Time `json:"expires_at" validate:"omitempty"`
 	Topic           string    `json:"topic" validate:"omitempty"`
 }
@@ -14,7 +13,6 @@ type EditSessionRequest struct {
 	Name               string    `json:"name"`
 	NewName            string    `json:"new_name" validate:"omitempty"`
 	NewMaxParticipants int       `json:"max_participants" validate:"omitempty"`
-	NewPassword        string    `json:"password" validate:"omitempty"`
 	NewExpiresAt       time.Time `json:"expires_at" validate:"omitempty"`
 }
 
@@ -25,7 +23,6 @@ type DeleteSessionRequest struct {
 type JoinSessionRequest struct {
 	Name          string `json:"name"`
 	OwnerUsername string `json:"owner_username"`
-	Password      string `json:"password" validate:"omitempty"`
 }
 
 type KickFromSessionRequest struct {

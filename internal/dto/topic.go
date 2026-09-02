@@ -18,7 +18,6 @@ type GetTopicNamedRequest struct {
 }
 type GetTopicNamedResponse struct {
 	TotalTime int `json:"total_time_tracked_seconds"`
-	Streak    int `json:"streak"`
 }
 
 type TopicSelection struct {

@@ -56,7 +56,6 @@ type Session struct {
 	OwnerID                 uuid.UUID
 	Name                    string
 	MaxParticipants         pgtype.Int4
-	Password                pgtype.Text
 	ExpiresAt               pgtype.Timestamptz
 	Topic                   pgtype.Text
 	TotalTimeTrackedSeconds int32
@@ -86,7 +85,6 @@ type SessionToken struct {
 type Topic struct {
 	ID                      uuid.UUID
 	Name                    string
-	Streak                  int32
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
 	OwnerID                 uuid.UUID
@@ -109,6 +107,7 @@ type User struct {
 	Password                string
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
+	Streak                  int32
 	Country                 pgtype.Text
 	HideCountry             bool
 	HideUser                bool

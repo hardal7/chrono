@@ -11,8 +11,6 @@ WHERE owner_id = $1 AND name = $2;
 -- name: GetTopicByID :one
 SELECT * FROM topics
 WHERE id = $1;
--- name: GetTopicsAll :many
-SELECT * FROM topics;
 -- name: GetTopicsByOwner :many
 SELECT * FROM topics
 WHERE owner_id = $1;
@@ -28,11 +26,3 @@ WHERE id = $1;
 -- name: ResetTopicTimeTrackedToday :exec
 UPDATE topics
 SET today_time_tracked_seconds = 0;
--- name: IncreaseStreak :exec
-UPDATE topics
-SET streak = streak + 1
-WHERE id = $1;
--- name: LoseStreak :exec
-UPDATE topics
-SET streak = 0
-WHERE id = $1;

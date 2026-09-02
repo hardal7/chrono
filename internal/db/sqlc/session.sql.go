@@ -14,15 +14,14 @@ import (
 )
 
 const createSession = `-- name: CreateSession :exec
-INSERT INTO sessions(name, owner_id, max_participants, password, expires_at, topic)
-VALUES($1, $2, $3, $4, $5, $6)
+INSERT INTO sessions(name, owner_id, max_participants, expires_at, topic)
+VALUES($1, $2, $3, $4, $5)
 `
 
 type CreateSessionParams struct {
 	Name            string
 	OwnerID         uuid.UUID
 	MaxParticipants pgtype.Int4
-	Password        pgtype.Text
 	ExpiresAt       pgtype.Timestamptz
 	Topic           pgtype.Text
 }
@@ -32,7 +31,6 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 		arg.Name,
 		arg.OwnerID,
 		arg.MaxParticipants,
-		arg.Password,
 		arg.ExpiresAt,
 		arg.Topic,
 	)
@@ -55,7 +53,7 @@ func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) er
 }
 
 const getJoinedSessions = `-- name: GetJoinedSessions :many
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM session_participants
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM session_participants
 JOIN sessions ON sessions.id = session_participants.session_id
 WHERE user_id = $1
 `
@@ -74,7 +72,6 @@ func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Se
 			&i.OwnerID,
 			&i.Name,
 			&i.MaxParticipants,
-			&i.Password,
 			&i.ExpiresAt,
 			&i.Topic,
 			&i.TotalTimeTrackedSeconds,
@@ -93,7 +90,7 @@ func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Se
 }
 
 const getSessionByNameAndOwnerID = `-- name: GetSessionByNameAndOwnerID :one
-SELECT id, owner_id, name, max_participants, password, expires_at, topic, total_time_tracked_seconds, is_active, created_at, updated_at FROM sessions
+SELECT id, owner_id, name, max_participants, expires_at, topic, total_time_tracked_seconds, is_active, created_at, updated_at FROM sessions
 WHERE 
     name = $1 
     AND owner_id = $2
@@ -113,7 +110,6 @@ func (q *Queries) GetSessionByNameAndOwnerID(ctx context.Context, arg GetSession
 		&i.OwnerID,
 		&i.Name,
 		&i.MaxParticipants,
-		&i.Password,
 		&i.ExpiresAt,
 		&i.Topic,
 		&i.TotalTimeTrackedSeconds,
@@ -125,7 +121,7 @@ func (q *Queries) GetSessionByNameAndOwnerID(ctx context.Context, arg GetSession
 }
 
 const getSessionByNameAndOwnerName = `-- name: GetSessionByNameAndOwnerName :one
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
 JOIN users ON users.id = sessions.owner_id
 WHERE 
     sessions.name = $1
@@ -146,7 +142,6 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 		&i.OwnerID,
 		&i.Name,
 		&i.MaxParticipants,
-		&i.Password,
 		&i.ExpiresAt,
 		&i.Topic,
 		&i.TotalTimeTrackedSeconds,
@@ -171,7 +166,7 @@ WITH friend_users AS (
         AND is_accepted = TRUE
 )
 SELECT 
-    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.password, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at,
+    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at,
     users.username AS owner_username,
     users.id AS owner_id
 FROM sessions
@@ -187,7 +182,6 @@ type GetSessionsAllByFriendsRow struct {
 	OwnerID                 uuid.UUID
 	Name                    string
 	MaxParticipants         pgtype.Int4
-	Password                pgtype.Text
 	ExpiresAt               pgtype.Timestamptz
 	Topic                   pgtype.Text
 	TotalTimeTrackedSeconds int32
@@ -212,7 +206,6 @@ func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUI
 			&i.OwnerID,
 			&i.Name,
 			&i.MaxParticipants,
-			&i.Password,
 			&i.ExpiresAt,
 			&i.Topic,
 			&i.TotalTimeTrackedSeconds,
@@ -250,7 +243,7 @@ func (q *Queries) TrackSessionTime(ctx context.Context, arg TrackSessionTimePara
 
 const updateSession = `-- name: UpdateSession :exec
 UPDATE sessions
-SET name = COALESCE($6, name), max_participants = $3, password = $4, expires_at = $5, updated_at = now()
+SET name = COALESCE($5, name), max_participants = $3, expires_at = $4, updated_at = now()
 WHERE owner_id = $1 AND name = $2
 `
 
@@ -258,7 +251,6 @@ type UpdateSessionParams struct {
 	OwnerID         uuid.UUID
 	Name            string
 	MaxParticipants pgtype.Int4
-	Password        pgtype.Text
 	ExpiresAt       pgtype.Timestamptz
 	NewName         string
 }
@@ -268,7 +260,6 @@ func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) er
 		arg.OwnerID,
 		arg.Name,
 		arg.MaxParticipants,
-		arg.Password,
 		arg.ExpiresAt,
 		arg.NewName,
 	)

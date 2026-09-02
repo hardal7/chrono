@@ -49,3 +49,13 @@ WHERE id = $1;
 -- name: ResetUserTimeTrackedToday :exec
 UPDATE users
 SET today_time_tracked_seconds = 0;
+-- name: GetUsersAll :many
+SELECT * FROM users;
+-- name: IncreaseStreak :exec
+UPDATE users
+SET streak = streak + 1
+WHERE id = $1;
+-- name: LoseStreak :exec
+UPDATE users
+SET streak = 0
+WHERE id = $1;

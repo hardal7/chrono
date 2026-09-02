@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/auth"
 )
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {

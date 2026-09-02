@@ -2,6 +2,7 @@ package forms
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
@@ -19,7 +20,7 @@ func CreateFeatureRequest(ctx context.Context, r dto.CreateFeatureRequest) error
 		Priority: r.Priority,
 	})
 
-	return err
+	return fmt.Errorf("Failed to create feature request: %w: %w", db.ErrRunQuery, err)
 }
 
 func CreateBugReport(ctx context.Context, r dto.CreateBugReport) error {
@@ -33,5 +34,5 @@ func CreateBugReport(ctx context.Context, r dto.CreateBugReport) error {
 		Additional:  pgtype.Text{String: r.Additional, Valid: r.Additional != ""},
 	})
 
-	return err
+	return fmt.Errorf("Failed to create bug report: %w: %w", db.ErrRunQuery, err)
 }

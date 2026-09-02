@@ -72,6 +72,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		AvatarPath:       filepath.Join(config.AvatarEndpoint, user.ID.String()),
 		TotalTimeSeconds: int(user.TotalTimeTrackedSeconds),
 		TodayTimeSeconds: int(user.TodayTimeTrackedSeconds),
+		Streak:           int(user.Streak),
 		Country:          country,
 		BestTopic:        bestTopic,
 		FriendStatus:     friendStatus,

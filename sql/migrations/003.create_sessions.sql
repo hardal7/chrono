@@ -3,7 +3,6 @@ CREATE TABLE sessions (
     owner_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(64) NOT NULL,
     max_participants INT,
-    password TEXT,
     expires_at TIMESTAMPTZ,
     topic VARCHAR(64),
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
-	"github.com/hardal7/chrono/internal/auth"
 )
 
 const firstTopic string = "General"

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/auth"
 )
 
 func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicNamedResponse, error) {
@@ -24,7 +24,6 @@ func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicName
 
 	resp = dto.GetTopicNamedResponse{
 		TotalTime: int(t.TotalTimeTrackedSeconds),
-		Streak:    int(t.Streak),
 	}
 
 	return resp, nil
