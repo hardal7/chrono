@@ -40,8 +40,8 @@ JOIN users ON
 WHERE 
     users.id = $1
     AND friends.is_accepted = TRUE
-    AND users.total_time_tracked_seconds < $2
+    AND users.week_time_tracked_seconds < sqlc.arg(cursor)
     AND username ILIKE sqlc.arg(match_name) || '%'
     AND users.hide_user = FALSE
-ORDER BY users.total_time_tracked_seconds DESC
-LIMIT $3;
+ORDER BY users.week_time_tracked_seconds DESC
+LIMIT $2;

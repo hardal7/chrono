@@ -30,6 +30,7 @@ func main() {
 	db.CreateRedisConnection()
 
 	go runner.NewDay(ctx)
+	go runner.NewWeek(ctx)
 	api.Serve(ctx)
 	<-ctx.Done()
 }

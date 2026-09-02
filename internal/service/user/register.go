@@ -37,7 +37,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 	}
 
 	country := location.IPToCountry(ctx.Value(requestctx.IP).(string))
-	err = db.Queries.CreateUser(ctx, query.CreateUserParams{
+	userID, err := db.Queries.CreateUser(ctx, query.CreateUserParams{
 		Username: r.Username,
 		Email:    r.Email,
 		Password: string(passwordHash),
@@ -50,12 +50,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		return fmt.Errorf("Failed to create user: %w", err)
 	}
 
-	u, err := db.Queries.GetUserByUsername(ctx, r.Username)
-	if err != nil {
-		logger.Warn("Failed to get created user", "username", r.Username)
-	} else {
-		initAccount(ctx, u.ID)
-	}
+	initAccount(ctx, userID)
 	return nil
 }
 

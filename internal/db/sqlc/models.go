@@ -43,6 +43,21 @@ type Friend struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type LeaderboardSnapshot struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+}
+
+type LeaderboardUser struct {
+	ID         uuid.UUID
+	SnapshotID uuid.UUID
+	UserID     uuid.UUID
+	Rank       int32
+	RankChange int32
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 type OtpToken struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
@@ -107,6 +122,7 @@ type User struct {
 	Password                string
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
+	WeekTimeTrackedSeconds  int32
 	Streak                  int32
 	Country                 pgtype.Text
 	HideCountry             bool

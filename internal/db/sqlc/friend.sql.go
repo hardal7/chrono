@@ -119,32 +119,32 @@ func (q *Queries) GetFriendStatus(ctx context.Context, username string) (bool, e
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM friends
 JOIN users ON 
     users.id = friends.recipient_id
     OR users.id = friends.sender_id
 WHERE 
     users.id = $1
     AND friends.is_accepted = TRUE
-    AND users.total_time_tracked_seconds < $2
+    AND users.week_time_tracked_seconds < $3
     AND username ILIKE $4 || '%'
     AND users.hide_user = FALSE
-ORDER BY users.total_time_tracked_seconds DESC
-LIMIT $3
+ORDER BY users.week_time_tracked_seconds DESC
+LIMIT $2
 `
 
 type GetTopFriendsParams struct {
-	ID                      uuid.UUID
-	TotalTimeTrackedSeconds int32
-	Limit                   int32
-	MatchName               pgtype.Text
+	ID        uuid.UUID
+	Limit     int32
+	Cursor    int32
+	MatchName pgtype.Text
 }
 
 func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([]User, error) {
 	rows, err := q.db.Query(ctx, getTopFriends,
 		arg.ID,
-		arg.TotalTimeTrackedSeconds,
 		arg.Limit,
+		arg.Cursor,
 		arg.MatchName,
 	)
 	if err != nil {
@@ -161,6 +161,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
+			&i.WeekTimeTrackedSeconds,
 			&i.Streak,
 			&i.Country,
 			&i.HideCountry,

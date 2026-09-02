@@ -24,15 +24,15 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	var users []query.User
 	var err error
 	resp := dto.GetTopUsersResponse{}
-	matchName := pgtype.Text{String: r.MatchName, Valid: true}
+	matchName := pgtype.Text{String: r.MatchName, Valid: r.MatchName != ""}
 
 	switch r.Scope {
 	case scopeFriends:
 		users, err = db.Queries.GetTopFriends(ctx, query.GetTopFriendsParams{
-			ID:                      userID,
-			TotalTimeTrackedSeconds: int32(r.Cursor),
-			Limit:                   int32(r.Limit),
-			MatchName:               matchName,
+			ID:        userID,
+			Cursor:    int32(r.Cursor),
+			Limit:     int32(r.Limit),
+			MatchName: matchName,
 		})
 		user, err := db.Queries.GetUserByID(ctx, userID)
 		if err != nil {
@@ -42,18 +42,18 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 
 	case scopeLocal:
 		users, err = db.Queries.GetTopUsersLocal(ctx, query.GetTopUsersLocalParams{
-			ID:                      userID,
-			TotalTimeTrackedSeconds: int32(r.Cursor),
-			Limit:                   int32(r.Limit),
-			MatchName:               matchName,
+			ID:        userID,
+			Cursor:    int32(r.Cursor),
+			Limit:     int32(r.Limit),
+			MatchName: matchName,
 		})
 
 	case scopeGlobal:
 		// TODO: Cache this with redis (update on 1m?)
 		users, err = db.Queries.GetTopUsers(ctx, query.GetTopUsersParams{
-			TotalTimeTrackedSeconds: int32(r.Cursor),
-			Limit:                   int32(r.Limit),
-			MatchName:               matchName,
+			Cursor:    int32(r.Cursor),
+			Limit:     int32(r.Limit),
+			MatchName: matchName,
 		})
 
 	default:

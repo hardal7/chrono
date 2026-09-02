@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func nextMidnight() time.Time {
+func retrieveDate(day int) time.Time {
 	now := time.Now()
-	tomorrow := now.AddDate(0, 0, 1)
+	tomorrow := now.AddDate(0, 0, day)
 
 	return time.Date(
 		tomorrow.Year(),
@@ -23,10 +23,12 @@ func nextMidnight() time.Time {
 	)
 }
 
+const nextMidnight = 1
+
 func NewDay(ctx context.Context) {
 	logger.Info("Started runner", "name", "new_day")
 	for {
-		timer := time.NewTimer(time.Until(nextMidnight()))
+		timer := time.NewTimer(time.Until(retrieveDate(nextMidnight)))
 		<-timer.C
 		err := updateStreaks(ctx)
 		if err != nil {
@@ -50,15 +52,15 @@ func resetTodayTimes(ctx context.Context) error {
 
 	err = db.Queries.WithTx(tx).ResetTopicTimeTrackedToday(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to reset time tracked for today: type=topic, date=%s error=%q", time.Now().String(), err)
+		return fmt.Errorf("Failed to reset time tracked for today: type=topic, date=%s error=%w:%w", time.Now().String(), db.ErrRunQuery, err)
 	}
 	err = db.Queries.WithTx(tx).ResetUserTimeTrackedToday(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to reset time tracked for today: type=user, date=%s error=%q", time.Now().String(), err)
+		return fmt.Errorf("Failed to reset time tracked for today: type=user, date=%s error=%w:%w", time.Now().String(), db.ErrRunQuery, err)
 	}
 	err = db.Queries.WithTx(tx).ResetSessionParticipantTimeTrackedToday(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to reset time tracked for today: type=session_participant, date=%s error=%q", time.Now().String(), err)
+		return fmt.Errorf("Failed to reset time tracked for today: type=session_participant, date=%s error=%w:%w", time.Now().String(), db.ErrRunQuery, err)
 	}
 
 	err = tx.Commit(ctx)
@@ -75,7 +77,7 @@ func updateStreaks(ctx context.Context) error {
 
 	users, err := db.Queries.GetUsersAll(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to get users: %q", err)
+		return fmt.Errorf("Failed to get users: %w: %w", db.ErrRunQuery, err)
 	}
 	for _, user := range users {
 		if user.TodayTimeTrackedSeconds != 0 {
@@ -85,7 +87,7 @@ func updateStreaks(ctx context.Context) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("Failed to update streak: %q", err)
+			return fmt.Errorf("Failed to update streak: %w: %w", db.ErrRunQuery, err)
 		}
 	}
 

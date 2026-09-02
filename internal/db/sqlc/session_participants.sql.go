@@ -12,7 +12,7 @@ import (
 )
 
 const getSessionParticipantsAsUsers = `-- name: GetSessionParticipantsAsUsers :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM session_participants
+SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM session_participants
 JOIN users ON session_participants.user_id = users.id
 WHERE 
     session_id = $1
@@ -35,6 +35,7 @@ func (q *Queries) GetSessionParticipantsAsUsers(ctx context.Context, sessionID u
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
+			&i.WeekTimeTrackedSeconds,
 			&i.Streak,
 			&i.Country,
 			&i.HideCountry,
