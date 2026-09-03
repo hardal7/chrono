@@ -36,6 +36,7 @@ type GetTopUsersRequest struct {
 }
 type TopUser struct {
 	Rank       int    `json:"rank"`
+	RankChange int    `json:"rank_change"`
 	Username   string `json:"username"`
 	TotalTime  int    `json:"total_time"`
 	TodayTime  int    `json:"today_time"`

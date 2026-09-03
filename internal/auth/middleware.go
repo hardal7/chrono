@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	AuthHeader = "Authorization"
+	AuthCookie = "Authorization"
 	Bearer     = "Bearer "
 )
 
@@ -20,13 +20,17 @@ func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger.Debug("Authenticating user")
 
-		token := r.Header.Get(AuthHeader)
-		if token == "" {
+		cookie, err := r.Cookie(AuthCookie)
+		if cookie == nil {
 			logger.Debug("No token provided")
 			http.Error(w, "No token provided", http.StatusUnauthorized)
 			return
+		} else if err != nil {
+			logger.Debug("Invalid cookie")
+			http.Error(w, "Invalid cookie", http.StatusUnauthorized)
+			return
 		}
-		token = strings.TrimPrefix(token, Bearer)
+		token := strings.TrimPrefix(cookie.Value, Bearer)
 
 		tokenHash := HashToken(token, []byte(config.App.HashSecret))
 		retrievedToken, err := db.Queries.GetSessionToken(r.Context(), tokenHash)

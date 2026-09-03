@@ -63,9 +63,11 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		return resp, fmt.Errorf("Failed to get users: %w: %w", db.ErrRunQuery, err)
 	}
 
+	// TODO: Rank changes
 	for i, user := range users {
 		resp.Users = append(resp.Users, dto.TopUser{
 			Rank:       i + 1,
+			RankChange: 7,
 			Username:   user.Username,
 			TotalTime:  int(user.TotalTimeTrackedSeconds),
 			TodayTime:  int(user.TodayTimeTrackedSeconds),

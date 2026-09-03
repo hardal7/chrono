@@ -58,7 +58,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 	}
 
 	cookie = http.Cookie{
-		Name:     auth.AuthHeader,
+		Name:     auth.AuthCookie,
 		Value:    token,
 		Path:     "/api",
 		MaxAge:   int(tokenExpiration.Seconds()),

@@ -17,6 +17,7 @@ JOIN users ON session_participants.user_id = users.id
 WHERE 
     session_id = $1
     AND users.hide_user = FALSE
+ORDER BY session_participants.total_time_tracked_seconds DESC
 `
 
 func (q *Queries) GetSessionParticipantsAsUsers(ctx context.Context, sessionID uuid.UUID) ([]User, error) {

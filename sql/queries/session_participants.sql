@@ -3,7 +3,8 @@ SELECT users.* FROM session_participants
 JOIN users ON session_participants.user_id = users.id
 WHERE 
     session_id = $1
-    AND users.hide_user = FALSE;
+    AND users.hide_user = FALSE
+ORDER BY session_participants.total_time_tracked_seconds DESC;
 -- name: JoinSession :exec
 INSERT INTO session_participants(user_id, session_id)
 VALUES($1, $2);
