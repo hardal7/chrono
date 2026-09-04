@@ -29,26 +29,34 @@ WHERE
     name = $1 
     AND owner_id = $2
     AND users.hide_user = FALSE;
--- name: GetSessionsAllByFriends :many
-WITH friend_users AS (
-    SELECT
-        CASE
-            WHEN sender_id = $1 THEN recipient_id
-            ELSE sender_id
-        END
-    AS friend_id
-    FROM friends
-    WHERE
-        (sender_id = $1 OR recipient_id = $1)
-        AND is_accepted = TRUE
-)
-SELECT 
+-- name: GetSessionsAll :many
+SELECT
     sessions.*,
     users.username AS owner_username,
     users.id AS owner_id
 FROM sessions
-JOIN friend_users ON sessions.owner_id = friend_users.friend_id
 JOIN users ON sessions.owner_id = users.id
-WHERE 
+WHERE
     sessions.is_active = TRUE
-    AND users.hide_user = FALSE;
+    AND users.hide_user = FALSE
+    AND (
+        EXISTS (
+            SELECT 1
+            FROM friends
+            WHERE
+                friends.is_accepted = TRUE
+                AND (
+                    (friends.sender_id = $1 AND friends.recipient_id = sessions.owner_id)
+                    OR
+                    (friends.recipient_id = $1 AND friends.sender_id = sessions.owner_id)
+                )
+        )
+        OR
+        EXISTS (
+            SELECT 1
+            FROM session_participants
+            WHERE
+                session_participants.session_id = sessions.id
+                AND session_participants.user_id = $1
+        )
+    );

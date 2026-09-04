@@ -15,10 +15,12 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 	userID := auth.UserID(ctx)
 	resp := dto.GetSessionsAllResponse{}
 
-	s, err := db.Queries.GetSessionsAllByFriends(ctx, userID)
+	s, err := db.Queries.GetSessionsAll(ctx, userID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get all sessions of friends: %w: %w", db.ErrRunQuery, err)
 	}
+
+	joined := false
 
 	sessions := []dto.SessionSelection{}
 	for _, session := range s {
@@ -33,6 +35,10 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 				Name:       participant.Username,
 				AvatarPath: filepath.Join(config.AvatarEndpoint, participant.ID.String()),
 			})
+
+			if participant.ID == userID {
+				joined = true
+			}
 		}
 
 		expiresAt := &session.ExpiresAt.Time
@@ -43,6 +49,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 		sessions = append(sessions, dto.SessionSelection{
 			Name:              session.Name,
 			OwnerUsername:     session.OwnerUsername,
+			Joined:            joined,
 			OwnerAvatarPath:   filepath.Join(config.AvatarEndpoint, session.OwnerID.String()),
 			TotalTime:         int(session.TotalTimeTrackedSeconds),
 			ExpiresAt:         expiresAt,

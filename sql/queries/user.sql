@@ -27,7 +27,7 @@ SELECT * FROM users
 WHERE 
     week_time_tracked_seconds < sqlc.arg(cursor)
     AND username ILIKE sqlc.arg(match_name) || '%'
-    AND users.hide_user = FALSE
+    AND hide_user = FALSE
 ORDER BY week_time_tracked_seconds DESC
 LIMIT $1;
 -- name: GetTopUsersLocal :many
@@ -36,7 +36,7 @@ JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.country = target_user.country
     AND users.week_time_tracked_seconds < sqlc.arg(cursor)
-    AND username ILIKE sqlc.arg(match_name) || '%'
+    AND users.username ILIKE sqlc.arg(match_name) || '%'
     AND users.hide_country = FALSE
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC

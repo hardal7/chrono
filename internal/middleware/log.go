@@ -27,11 +27,14 @@ func LogRequest(next http.Handler) http.Handler {
 		}
 		r.Body = io.NopCloser(bytes.NewReader(body))
 
+		requestID := uuid.New().String()
+		ctx := context.WithValue(r.Context(), requestctx.RequestID, requestID)
+
 		logger.Trace("Received Request")
 		contentType := r.Header.Get("Content-Type")
 		if strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/plain") {
 			// TODO: Do not print sensitive information
-			logger.Debug(string(body))
+			logger.Debug(string(body), "requestID", requestID)
 		} else {
 			logger.Debug(fmt.Sprintf(
 				"Request body omitted (Content-Type: %s, %d bytes)",
@@ -41,10 +44,7 @@ func LogRequest(next http.Handler) http.Handler {
 		}
 
 		address := r.Header.Get("X-Forwarded-For")
-		ctx := context.WithValue(r.Context(), requestctx.IP, address)
-
-		requestID := uuid.New().String()
-		ctx = context.WithValue(ctx, requestctx.RequestID, requestID)
+		ctx = context.WithValue(ctx, requestctx.IP, address)
 
 		start := time.Now()
 		ww := &statusWriter{ResponseWriter: w, status: 200}

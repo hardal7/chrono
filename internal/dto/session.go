@@ -37,6 +37,7 @@ type MinParticipant struct {
 type SessionSelection struct {
 	Name              string           `json:"name"`
 	OwnerUsername     string           `json:"owner_username"`
+	Joined            bool             `json:"joined"`
 	OwnerAvatarPath   string           `json:"owner_avatar_path"`
 	ExpiresAt         *time.Time       `json:"expires_at"`
 	TotalTime         int              `json:"total_time_seconds"`

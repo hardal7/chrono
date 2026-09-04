@@ -27,6 +27,11 @@ const (
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 	userID := auth.UserID(ctx)
 
+	err := DeleteAvatar(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to delete previous avatar: %w", err)
+	}
+
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
 	if err != nil {

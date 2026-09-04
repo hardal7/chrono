@@ -52,7 +52,7 @@ SELECT id, email, username, password, total_time_tracked_seconds, today_time_tra
 WHERE 
     week_time_tracked_seconds < $2
     AND username ILIKE $3 || '%'
-    AND users.hide_user = FALSE
+    AND hide_user = FALSE
 ORDER BY week_time_tracked_seconds DESC
 LIMIT $1
 `
@@ -104,7 +104,7 @@ JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.country = target_user.country
     AND users.week_time_tracked_seconds < $3
-    AND username ILIKE $4 || '%'
+    AND users.username ILIKE $4 || '%'
     AND users.hide_country = FALSE
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC

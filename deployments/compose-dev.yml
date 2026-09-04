@@ -63,7 +63,7 @@ services:
       # - "traefik.http.routers.chrono-api.entrypoints=websecure"
       - "traefik.http.routers.chrono-api.rule=Host(`$DOMAIN`)"
       - "traefik.http.services.chrono-api.loadbalancer.server.port=$APP_PORT"
-      - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,latencyCheck@file"
+      - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,limitBody@file"
 
   traefik:
     image: traefik:v3.6

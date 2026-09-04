@@ -152,32 +152,40 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 	return i, err
 }
 
-const getSessionsAllByFriends = `-- name: GetSessionsAllByFriends :many
-WITH friend_users AS (
-    SELECT
-        CASE
-            WHEN sender_id = $1 THEN recipient_id
-            ELSE sender_id
-        END
-    AS friend_id
-    FROM friends
-    WHERE
-        (sender_id = $1 OR recipient_id = $1)
-        AND is_accepted = TRUE
-)
-SELECT 
+const getSessionsAll = `-- name: GetSessionsAll :many
+SELECT
     sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at,
     users.username AS owner_username,
     users.id AS owner_id
 FROM sessions
-JOIN friend_users ON sessions.owner_id = friend_users.friend_id
 JOIN users ON sessions.owner_id = users.id
-WHERE 
+WHERE
     sessions.is_active = TRUE
     AND users.hide_user = FALSE
+    AND (
+        EXISTS (
+            SELECT 1
+            FROM friends
+            WHERE
+                friends.is_accepted = TRUE
+                AND (
+                    (friends.sender_id = $1 AND friends.recipient_id = sessions.owner_id)
+                    OR
+                    (friends.recipient_id = $1 AND friends.sender_id = sessions.owner_id)
+                )
+        )
+        OR
+        EXISTS (
+            SELECT 1
+            FROM session_participants
+            WHERE
+                session_participants.session_id = sessions.id
+                AND session_participants.user_id = $1
+        )
+    )
 `
 
-type GetSessionsAllByFriendsRow struct {
+type GetSessionsAllRow struct {
 	ID                      uuid.UUID
 	OwnerID                 uuid.UUID
 	Name                    string
@@ -192,15 +200,15 @@ type GetSessionsAllByFriendsRow struct {
 	OwnerID_2               uuid.UUID
 }
 
-func (q *Queries) GetSessionsAllByFriends(ctx context.Context, senderID uuid.UUID) ([]GetSessionsAllByFriendsRow, error) {
-	rows, err := q.db.Query(ctx, getSessionsAllByFriends, senderID)
+func (q *Queries) GetSessionsAll(ctx context.Context, senderID uuid.UUID) ([]GetSessionsAllRow, error) {
+	rows, err := q.db.Query(ctx, getSessionsAll, senderID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetSessionsAllByFriendsRow{}
+	items := []GetSessionsAllRow{}
 	for rows.Next() {
-		var i GetSessionsAllByFriendsRow
+		var i GetSessionsAllRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.OwnerID,

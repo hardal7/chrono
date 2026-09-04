@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.chrono.app",
+      "sha256_cert_fingerprints": [
+        "87:60:CB:B3:C8:5C:94:22:F1:DC:A5:BD:FA:C3:41:3C:A8:30:17:A3:FE:E3:DA:37:16:B3:09:64:A0:EE:3D:46"
+      ]
+    }
+  }
+]

@@ -24,7 +24,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	var users []query.User
 	var err error
 	resp := dto.GetTopUsersResponse{}
-	matchName := pgtype.Text{String: r.MatchName, Valid: r.MatchName != ""}
+	matchName := pgtype.Text{String: r.MatchName, Valid: true}
 
 	switch r.Scope {
 	case scopeFriends:
