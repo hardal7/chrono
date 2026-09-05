@@ -58,7 +58,7 @@ type Participant struct {
 	AvatarPath       string `json:"avatar_path"`
 	SessionTime      int    `json:"session_time_tracked_seconds"`
 	SessionTimeToday int    `json:"session_time_tracked_today_seconds"`
-	LastOnline       int    `json:"last_online_seconds_ago"`
+	LastOnlineAgo    int    `json:"last_online_minutes_ago"`
 }
 type GetSessionNamedResponse struct {
 	Name              string        `json:"name"`

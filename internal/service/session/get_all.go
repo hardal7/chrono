@@ -24,7 +24,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 
 	sessions := []dto.SessionSelection{}
 	for _, session := range s {
-		p, err := db.Queries.GetSessionParticipantsAsUsers(ctx, session.ID)
+		p, err := db.Queries.GetSessionParticipants(ctx, session.ID)
 		if err != nil {
 			return resp, fmt.Errorf("Failed to get participants of session %q: %w: %w", session.Name, db.ErrRunQuery, err)
 		}
@@ -36,7 +36,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 				AvatarPath: filepath.Join(config.AvatarEndpoint, participant.ID.String()),
 			})
 
-			if participant.ID == userID {
+			if participant.UserID == userID {
 				joined = true
 			}
 		}

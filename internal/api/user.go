@@ -10,6 +10,7 @@ import (
 )
 
 func UserRoute(r chi.Router) {
+	r.Post("/activity", PostUserActivityHandler)
 	r.Get("/account", GetUserAccountHandler)
 	r.Post("/account", EditUserAccountHandler)
 	r.Delete("/account", DeleteUserAccountHandler)
@@ -20,13 +21,8 @@ func UserRoute(r chi.Router) {
 	r.With(middleware.Paginate).Get("/top", GetTopUsersHandler)
 }
 
-func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
-	var req dto.GetTopUsersRequest
-	err := processRequest(w, r, &req)
-	if err == nil {
-		resp, err := user.GetTopUsers(r.Context(), req)
-		processResponse(r.Context(), response{w, resp, err})
-	}
+func PostUserActivityHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func EditUserAccountHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,4 +63,13 @@ func GetUserProfileHandler(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 	resp, err := user.GetProfile(r.Context(), username)
 	processResponse(r.Context(), response{w, resp, err})
+}
+
+func GetTopUsersHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.GetTopUsersRequest
+	err := processRequest(w, r, &req)
+	if err == nil {
+		resp, err := user.GetTopUsers(r.Context(), req)
+		processResponse(r.Context(), response{w, resp, err})
+	}
 }

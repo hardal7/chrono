@@ -2,6 +2,7 @@ CREATE TABLE users (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     email VARCHAR(64) NOT NULL UNIQUE,
     username VARCHAR(64) NOT NULL UNIQUE,
+    username_normalized text GENERATED ALWAYS AS (LOWER(username)) STORED,
     password TEXT NOT NULL,
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
     today_time_tracked_seconds INT NOT NULL DEFAULT 0,

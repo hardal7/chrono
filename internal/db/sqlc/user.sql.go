@@ -48,10 +48,10 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTopUsers = `-- name: GetTopUsers :many
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
+SELECT id, email, username, username_normalized, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
 WHERE 
     week_time_tracked_seconds < $2
-    AND username ILIKE $3 || '%'
+    AND username_normalized ILIKE $3 || '%'
     AND hide_user = FALSE
 ORDER BY week_time_tracked_seconds DESC
 LIMIT $1
@@ -76,6 +76,7 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 			&i.ID,
 			&i.Email,
 			&i.Username,
+			&i.UsernameNormalized,
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
@@ -99,12 +100,12 @@ func (q *Queries) GetTopUsers(ctx context.Context, arg GetTopUsersParams) ([]Use
 }
 
 const getTopUsersLocal = `-- name: GetTopUsersLocal :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM users
+SELECT users.id, users.email, users.username, users.username_normalized, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM users
 JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.country = target_user.country
     AND users.week_time_tracked_seconds < $3
-    AND users.username ILIKE $4 || '%'
+    AND users.username_normalized ILIKE $4 || '%'
     AND users.hide_country = FALSE
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC
@@ -136,6 +137,7 @@ func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalPara
 			&i.ID,
 			&i.Email,
 			&i.Username,
+			&i.UsernameNormalized,
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
@@ -159,7 +161,7 @@ func (q *Queries) GetTopUsersLocal(ctx context.Context, arg GetTopUsersLocalPara
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
+SELECT id, email, username, username_normalized, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
 WHERE email = $1
 `
 
@@ -170,6 +172,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.ID,
 		&i.Email,
 		&i.Username,
+		&i.UsernameNormalized,
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
@@ -186,7 +189,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
+SELECT id, email, username, username_normalized, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
 WHERE id = $1
 `
 
@@ -197,6 +200,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.ID,
 		&i.Email,
 		&i.Username,
+		&i.UsernameNormalized,
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
@@ -213,8 +217,8 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
-WHERE username = $1
+SELECT id, email, username, username_normalized, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
+WHERE username_normalized = LOWER($1)
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -224,6 +228,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.ID,
 		&i.Email,
 		&i.Username,
+		&i.UsernameNormalized,
 		&i.Password,
 		&i.TotalTimeTrackedSeconds,
 		&i.TodayTimeTrackedSeconds,
@@ -240,7 +245,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUsersAll = `-- name: GetUsersAll :many
-SELECT id, email, username, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
+SELECT id, email, username, username_normalized, password, total_time_tracked_seconds, today_time_tracked_seconds, week_time_tracked_seconds, streak, country, hide_country, hide_user, last_seen_at, created_at, updated_at FROM users
 `
 
 func (q *Queries) GetUsersAll(ctx context.Context) ([]User, error) {
@@ -256,6 +261,7 @@ func (q *Queries) GetUsersAll(ctx context.Context) ([]User, error) {
 			&i.ID,
 			&i.Email,
 			&i.Username,
+			&i.UsernameNormalized,
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
@@ -341,7 +347,10 @@ func (q *Queries) TrackUserTime(ctx context.Context, arg TrackUserTimeParams) er
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET username = COALESCE($2, username), password = $3, updated_at = now()
+SET 
+  username = COALESCE($2, username),
+  password = $3,
+  updated_at = NOW()
 WHERE id = $1
 `
 
@@ -358,7 +367,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 
 const updateUserActivity = `-- name: UpdateUserActivity :exec
 UPDATE users
-SET last_seen_at = now()
+SET last_seen_at = NOW()
 WHERE id = $1
 `
 

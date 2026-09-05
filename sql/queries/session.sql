@@ -3,7 +3,7 @@ INSERT INTO sessions(name, owner_id, max_participants, expires_at, topic)
 VALUES($1, $2, $3, $4, $5);
 -- name: UpdateSession :exec
 UPDATE sessions
-SET name = COALESCE(sqlc.arg(new_name), name), max_participants = $3, expires_at = $4, updated_at = now()
+SET name = COALESCE(sqlc.arg(new_name), name), max_participants = $3, expires_at = $4, updated_at = NOW()
 WHERE owner_id = $1 AND name = $2;
 -- name: DeleteSession :exec
 DELETE FROM sessions
@@ -17,7 +17,7 @@ SELECT sessions.* FROM sessions
 JOIN users ON users.id = sessions.owner_id
 WHERE 
     sessions.name = $1
-    AND users.username = $2
+    AND users.username_normalized = LOWER(sqlc.arg(owner_username))
     AND users.hide_user = FALSE;
 -- name: GetJoinedSessions :many
 SELECT sessions.* FROM session_participants

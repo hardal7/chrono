@@ -17,8 +17,8 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	userID := auth.UserID(ctx)
 
 	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
-		Name:     r.Name,
-		Username: r.OwnerUsername,
+		Name:          r.Name,
+		OwnerUsername: r.OwnerUsername,
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return fmt.Errorf("Session not found: %w", db.ErrNotFound)
@@ -28,7 +28,7 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 		return fmt.Errorf("Failed to find session: %w: %w", db.ErrRunQuery, err)
 	}
 
-	p, err := db.Queries.GetSessionParticipantsAsUsers(ctx, s.ID)
+	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
 		return fmt.Errorf("Failed to check if session is full: %w: %w", db.ErrRunQuery, err)
 	}

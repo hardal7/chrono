@@ -16,19 +16,19 @@ const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
 SET 
     is_accepted = true,
-    updated_at = now()
+    updated_at = NOW()
 FROM users WHERE
     users.id = friends.sender_id
-    AND users.username = $1 AND recipient_id = $2
+    AND users.username_normalized = LOWER($2) AND recipient_id = $1
 `
 
 type AcceptFriendRequestParams struct {
-	Username    string
 	RecipientID uuid.UUID
+	Username    string
 }
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.Username, arg.RecipientID)
+	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.RecipientID, arg.Username)
 	return err
 }
 
@@ -36,7 +36,7 @@ const createFriendRequest = `-- name: CreateFriendRequest :exec
 INSERT INTO friends(sender_id, recipient_id)
 SELECT $1, id
 FROM users
-WHERE username = $2
+WHERE username_normalized = LOWER($2)
 `
 
 type CreateFriendRequestParams struct {
@@ -51,11 +51,13 @@ func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendReque
 
 const deleteFriend = `-- name: DeleteFriend :exec
 DELETE FROM friends
-USING users
-WHERE 
-    users.username = $2 AND
-    ((sender_id = $1 AND recipient_id = $2)
-    OR (sender_id = $2 AND recipient_id = $1))
+USING users 
+WHERE users.username_normalized = LOWER($2)
+  AND (
+    (friends.sender_id = $1 AND friends.recipient_id = users.id)
+    OR
+    (friends.sender_id = users.id AND friends.recipient_id = $1)
+  )
 `
 
 type DeleteFriendParams struct {
@@ -107,8 +109,8 @@ SELECT friends.is_accepted FROM friends
 JOIN users AS senders ON senders.id = friends.sender_id
 JOIN users AS recipients ON recipients.id = friends.recipient_id
 WHERE 
-    recipients.username = $1
-    OR senders.username = $1
+    recipients.username_normalized = LOWER($1)
+    OR senders.username_normalized = LOWER($1)
 `
 
 func (q *Queries) GetFriendStatus(ctx context.Context, username string) (bool, error) {
@@ -119,7 +121,7 @@ func (q *Queries) GetFriendStatus(ctx context.Context, username string) (bool, e
 }
 
 const getTopFriends = `-- name: GetTopFriends :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM friends
+SELECT users.id, users.email, users.username, users.username_normalized, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM friends
 JOIN users ON 
     users.id = friends.recipient_id
     OR users.id = friends.sender_id
@@ -127,7 +129,7 @@ WHERE
     users.id = $1
     AND friends.is_accepted = TRUE
     AND users.week_time_tracked_seconds < $3
-    AND users.username ILIKE $4 || '%'
+    AND users.username_normalized ILIKE $4 || '%'
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC
 LIMIT $2
@@ -158,6 +160,7 @@ func (q *Queries) GetTopFriends(ctx context.Context, arg GetTopFriendsParams) ([
 			&i.ID,
 			&i.Email,
 			&i.Username,
+			&i.UsernameNormalized,
 			&i.Password,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,

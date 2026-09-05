@@ -1,5 +1,6 @@
--- name: GetSessionParticipantsAsUsers :many
-SELECT users.* FROM session_participants
+-- name: GetSessionParticipants :many
+SELECT users.username, users.last_seen_at, session_participants.*
+FROM session_participants
 JOIN users ON session_participants.user_id = users.id
 WHERE 
     session_id = $1
@@ -16,7 +17,7 @@ WHERE
     AND session_participants.session_id = sessions.id
     AND sessions.owner_id = $1 
     AND sessions.name = $2
-    AND users.username = sqlc.arg(participant_username);
+    AND users.username_normalized = LOWER(sqlc.arg(participant_username));
 -- name: TrackSessionParticipantTime :exec
 UPDATE session_participants
 SET

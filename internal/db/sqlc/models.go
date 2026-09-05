@@ -119,6 +119,7 @@ type User struct {
 	ID                      uuid.UUID
 	Email                   string
 	Username                string
+	UsernameNormalized      pgtype.Text
 	Password                string
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32

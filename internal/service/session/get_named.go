@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
@@ -18,14 +19,14 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	resp := dto.GetSessionNamedResponse{}
 
 	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
-		Name:     r.Name,
-		Username: r.OwnerUsername,
+		Name:          r.Name,
+		OwnerUsername: r.OwnerUsername,
 	})
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get session by username: %w: %w", db.ErrRunQuery, err)
 	}
 
-	p, err := db.Queries.GetSessionParticipantsAsUsers(ctx, s.ID)
+	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get participants of the session: %w: %w", db.ErrRunQuery, err)
 	}
@@ -37,12 +38,14 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 			isParticipant = true
 		}
 
+		lastOnlineAgo := int(time.Since(participant.LastSeenAt).Minutes())
+
 		participants = append(participants, dto.Participant{
 			Name:             participant.Username,
-			AvatarPath:       filepath.Join(config.AvatarEndpoint, participant.ID.String()),
+			AvatarPath:       filepath.Join(config.AvatarEndpoint, participant.UserID.String()),
 			SessionTime:      int(participant.TotalTimeTrackedSeconds),
 			SessionTimeToday: int(participant.TodayTimeTrackedSeconds),
-			LastOnline:       int(participant.LastSeenAt.Unix()),
+			LastOnlineAgo:    lastOnlineAgo,
 		})
 	}
 
@@ -51,7 +54,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	}
 
 	expiresAt := &s.ExpiresAt.Time
-	if s.ExpiresAt.Valid {
+	if !s.ExpiresAt.Valid {
 		expiresAt = nil
 	}
 

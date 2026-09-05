@@ -2,22 +2,24 @@
 INSERT INTO friends(sender_id, recipient_id)
 SELECT $1, id
 FROM users
-WHERE username = $2;
+WHERE username_normalized = LOWER(sqlc.arg(username));
 -- name: DeleteFriend :exec
 DELETE FROM friends
-USING users
-WHERE 
-    users.username = $2 AND
-    ((sender_id = $1 AND recipient_id = $2)
-    OR (sender_id = $2 AND recipient_id = $1));
+USING users 
+WHERE users.username_normalized = LOWER(sqlc.arg(username))
+  AND (
+    (friends.sender_id = $1 AND friends.recipient_id = users.id)
+    OR
+    (friends.sender_id = users.id AND friends.recipient_id = $1)
+  );
 -- name: AcceptFriendRequest :exec
 UPDATE friends
 SET 
     is_accepted = true,
-    updated_at = now()
+    updated_at = NOW()
 FROM users WHERE
     users.id = friends.sender_id
-    AND users.username = $1 AND recipient_id = $2;
+    AND users.username_normalized = LOWER(sqlc.arg(username)) AND recipient_id = $1;
 -- name: GetFriendRequests :many
 SELECT friends.created_at, senders.username FROM friends
 JOIN users AS senders ON senders.id = friends.sender_id
@@ -30,8 +32,8 @@ SELECT friends.is_accepted FROM friends
 JOIN users AS senders ON senders.id = friends.sender_id
 JOIN users AS recipients ON recipients.id = friends.recipient_id
 WHERE 
-    recipients.username = $1
-    OR senders.username = $1;
+    recipients.username_normalized = LOWER(sqlc.arg(username))
+    OR senders.username_normalized = LOWER(sqlc.arg(username));
 -- name: GetTopFriends :many
 SELECT users.* FROM friends
 JOIN users ON 
@@ -41,7 +43,7 @@ WHERE
     users.id = $1
     AND friends.is_accepted = TRUE
     AND users.week_time_tracked_seconds < sqlc.arg(cursor)
-    AND users.username ILIKE sqlc.arg(match_name) || '%'
+    AND users.username_normalized ILIKE sqlc.arg(match_name) || '%'
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC
 LIMIT $2;

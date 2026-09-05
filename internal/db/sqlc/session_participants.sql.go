@@ -7,12 +7,14 @@ package query
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-const getSessionParticipantsAsUsers = `-- name: GetSessionParticipantsAsUsers :many
-SELECT users.id, users.email, users.username, users.password, users.total_time_tracked_seconds, users.today_time_tracked_seconds, users.week_time_tracked_seconds, users.streak, users.country, users.hide_country, users.hide_user, users.last_seen_at, users.created_at, users.updated_at FROM session_participants
+const getSessionParticipants = `-- name: GetSessionParticipants :many
+SELECT users.username, users.last_seen_at, session_participants.id, session_participants.user_id, session_participants.session_id, session_participants.total_time_tracked_seconds, session_participants.today_time_tracked_seconds
+FROM session_participants
 JOIN users ON session_participants.user_id = users.id
 WHERE 
     session_id = $1
@@ -20,30 +22,33 @@ WHERE
 ORDER BY session_participants.total_time_tracked_seconds DESC
 `
 
-func (q *Queries) GetSessionParticipantsAsUsers(ctx context.Context, sessionID uuid.UUID) ([]User, error) {
-	rows, err := q.db.Query(ctx, getSessionParticipantsAsUsers, sessionID)
+type GetSessionParticipantsRow struct {
+	Username                string
+	LastSeenAt              time.Time
+	ID                      uuid.UUID
+	UserID                  uuid.UUID
+	SessionID               uuid.UUID
+	TotalTimeTrackedSeconds int32
+	TodayTimeTrackedSeconds int32
+}
+
+func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUID) ([]GetSessionParticipantsRow, error) {
+	rows, err := q.db.Query(ctx, getSessionParticipants, sessionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []GetSessionParticipantsRow{}
 	for rows.Next() {
-		var i User
+		var i GetSessionParticipantsRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
 			&i.Username,
-			&i.Password,
+			&i.LastSeenAt,
+			&i.ID,
+			&i.UserID,
+			&i.SessionID,
 			&i.TotalTimeTrackedSeconds,
 			&i.TodayTimeTrackedSeconds,
-			&i.WeekTimeTrackedSeconds,
-			&i.Streak,
-			&i.Country,
-			&i.HideCountry,
-			&i.HideUser,
-			&i.LastSeenAt,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -78,7 +83,7 @@ WHERE
     AND session_participants.session_id = sessions.id
     AND sessions.owner_id = $1 
     AND sessions.name = $2
-    AND users.username = $3
+    AND users.username_normalized = LOWER($3)
 `
 
 type KickFromSessionParams struct {

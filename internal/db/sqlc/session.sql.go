@@ -125,17 +125,17 @@ SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants,
 JOIN users ON users.id = sessions.owner_id
 WHERE 
     sessions.name = $1
-    AND users.username = $2
+    AND users.username_normalized = LOWER($2)
     AND users.hide_user = FALSE
 `
 
 type GetSessionByNameAndOwnerNameParams struct {
-	Name     string
-	Username string
+	Name          string
+	OwnerUsername string
 }
 
 func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessionByNameAndOwnerNameParams) (Session, error) {
-	row := q.db.QueryRow(ctx, getSessionByNameAndOwnerName, arg.Name, arg.Username)
+	row := q.db.QueryRow(ctx, getSessionByNameAndOwnerName, arg.Name, arg.OwnerUsername)
 	var i Session
 	err := row.Scan(
 		&i.ID,
@@ -251,7 +251,7 @@ func (q *Queries) TrackSessionTime(ctx context.Context, arg TrackSessionTimePara
 
 const updateSession = `-- name: UpdateSession :exec
 UPDATE sessions
-SET name = COALESCE($5, name), max_participants = $3, expires_at = $4, updated_at = now()
+SET name = COALESCE($5, name), max_participants = $3, expires_at = $4, updated_at = NOW()
 WHERE owner_id = $1 AND name = $2
 `
 

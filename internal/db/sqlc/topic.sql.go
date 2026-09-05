@@ -149,7 +149,7 @@ func (q *Queries) TrackTopicTime(ctx context.Context, arg TrackTopicTimeParams) 
 
 const updateTopic = `-- name: UpdateTopic :exec
 UPDATE topics
-SET name = COALESCE($3), updated_at = now()
+SET name = COALESCE($3), updated_at = NOW()
 WHERE owner_id = $1 AND name = $2
 `
 

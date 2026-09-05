@@ -4,14 +4,17 @@ VALUES($1, $2, $3, $4)
 RETURNING id;
 -- name: UpdateUser :exec
 UPDATE users
-SET username = COALESCE($2, username), password = $3, updated_at = now()
+SET 
+  username = COALESCE($2, username),
+  password = $3,
+  updated_at = NOW()
 WHERE id = $1;
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1;
 -- name: GetUserByUsername :one
 SELECT * FROM users
-WHERE username = $1;
+WHERE username_normalized = LOWER(sqlc.arg(username));
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE email = $1;
@@ -20,13 +23,13 @@ SELECT * FROM users
 WHERE id = $1;
 -- name: UpdateUserActivity :exec
 UPDATE users
-SET last_seen_at = now()
+SET last_seen_at = NOW()
 WHERE id = $1;
 -- name: GetTopUsers :many
 SELECT * FROM users
 WHERE 
     week_time_tracked_seconds < sqlc.arg(cursor)
-    AND username ILIKE sqlc.arg(match_name) || '%'
+    AND username_normalized ILIKE sqlc.arg(match_name) || '%'
     AND hide_user = FALSE
 ORDER BY week_time_tracked_seconds DESC
 LIMIT $1;
@@ -36,7 +39,7 @@ JOIN users AS target_user ON target_user.id = $1
 WHERE 
     users.country = target_user.country
     AND users.week_time_tracked_seconds < sqlc.arg(cursor)
-    AND users.username ILIKE sqlc.arg(match_name) || '%'
+    AND users.username_normalized ILIKE sqlc.arg(match_name) || '%'
     AND users.hide_country = FALSE
     AND users.hide_user = FALSE
 ORDER BY users.week_time_tracked_seconds DESC

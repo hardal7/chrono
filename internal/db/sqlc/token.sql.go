@@ -76,7 +76,7 @@ func (q *Queries) DeleteSessionTokensOfUser(ctx context.Context, userID uuid.UUI
 
 const getOTPToken = `-- name: GetOTPToken :one
 SELECT id, user_id, hash, expiry, created_at FROM otp_tokens
-WHERE hash = $1 AND expiry > now()
+WHERE hash = $1 AND expiry > NOW()
 `
 
 func (q *Queries) GetOTPToken(ctx context.Context, hash string) (OtpToken, error) {
@@ -94,7 +94,7 @@ func (q *Queries) GetOTPToken(ctx context.Context, hash string) (OtpToken, error
 
 const getSessionToken = `-- name: GetSessionToken :one
 SELECT id, user_id, hash, expiry, created_at, updated_at, last_used_at FROM session_tokens
-WHERE hash = $1 AND expiry > now()
+WHERE hash = $1 AND expiry > NOW()
 `
 
 func (q *Queries) GetSessionToken(ctx context.Context, hash string) (SessionToken, error) {
