@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -16,16 +17,19 @@ import (
 	"github.com/mailgun/mailgun-go/v5"
 )
 
-const otpExpiration = time.Minute * 5
+const (
+	otpExpiration = time.Minute * 5
+	mailTimeout   = time.Second * 10
+)
 
 func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetRequest) error {
 	if r.Email == "" && r.Username == "" {
-		return fmt.Errorf("Both email and username fields cannot be empty")
+		return errors.New("Both email and username fields cannot be empty")
 	}
 
 	var err error
 	var user query.User
-	if r.Email != "" {
+	if r.Email == "" {
 		user, err = db.Queries.GetUserByUsername(ctx, r.Username)
 		if err != nil {
 			return fmt.Errorf("Failed to get user by username: %w: %w", db.ErrRunQuery, err)
@@ -51,11 +55,11 @@ func PasswordReset(ctx context.Context, otp string, r dto.UserPasswordResetReque
 		return fmt.Errorf("Failed to retrieve OTP token: %w: %w", db.ErrRunQuery, err)
 	}
 
-	if token.Expiry.After(time.Now()) {
-		return fmt.Errorf("OTP token has expired")
+	if !token.Expiry.After(time.Now()) {
+		return errors.New("OTP token has expired")
 	}
 
-	auth.AsUserID(ctx, token.UserID)
+	ctx = auth.AsUserID(ctx, token.UserID)
 	err = EditAccount(ctx, dto.EditUserAccountRequest{NewPassword: r.NewPassword})
 	if err != nil {
 		return err
@@ -70,7 +74,7 @@ func PasswordReset(ctx context.Context, otp string, r dto.UserPasswordResetReque
 }
 
 func sendResetEmail(ctx context.Context, email string) error {
-	mg := mailgun.NewMailgun(config.App.MAIL_API_KEY)
+	mg := mailgun.NewMailgun(config.App.MailAPIKey)
 	err := mg.SetAPIBase(mailgun.APIBaseEU)
 	if err != nil {
 		logger.Warn("Failed to set API Base for email")
@@ -99,7 +103,7 @@ func sendResetEmail(ctx context.Context, email string) error {
 	message := mailgun.NewMessage(domain, sender, subject, body, recipient)
 	message.SetHTML(html)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), mailTimeout)
 	defer cancel()
 
 	_, err = mg.Send(ctx, message)

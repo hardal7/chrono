@@ -34,7 +34,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	participants := []dto.Participant{}
 	isParticipant := false
 	for _, participant := range p {
-		if participant.ID == userID {
+		if participant.UserID == userID {
 			isParticipant = true
 		}
 

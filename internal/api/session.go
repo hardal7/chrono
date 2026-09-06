@@ -61,6 +61,7 @@ func GetNamedSessionHandler(w http.ResponseWriter, r *http.Request) {
 		processResponse(r.Context(), response{w, resp, err})
 	}
 }
+
 func GetAllSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := session.GetAll(r.Context())
 	processResponse(r.Context(), response{w, resp, err})

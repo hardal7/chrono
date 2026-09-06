@@ -16,7 +16,7 @@ func IPToCountry(ip string) string {
 		return ""
 	}
 	defer func() {
-		err := db.Close()
+		err = db.Close()
 		if err != nil {
 			logger.Warn("Failed to close location database")
 		}

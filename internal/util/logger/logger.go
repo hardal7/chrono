@@ -9,9 +9,14 @@ import (
 	"github.com/lmittmann/tint"
 )
 
+const (
+	blue = 1
+	red  = 2
+)
+
 func Init() {
 	w := os.Stderr
-	logger := (slog.New(
+	logger := slog.New(
 		tint.NewHandler(w, &tint.Options{
 			Level: getLevel(config.App.LogLevel),
 			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
@@ -19,9 +24,9 @@ func Init() {
 					level, ok := a.Value.Any().(slog.Level)
 					if ok {
 						if level <= LevelTrace {
-							return tint.Attr(1, slog.String(a.Key, "TRC"))
+							return tint.Attr(blue, slog.String(a.Key, "TRC"))
 						} else if level >= LevelFatal {
-							return tint.Attr(2, slog.String(a.Key, "FTL"))
+							return tint.Attr(red, slog.String(a.Key, "FTL"))
 						}
 					}
 				}
@@ -29,12 +34,14 @@ func Init() {
 			},
 			TimeFormat: "15:04:05",
 		}),
-	))
+	)
 	slog.SetDefault(logger)
 }
 
-const LevelTrace = slog.Level(-8)
-const LevelFatal = slog.Level(12)
+const (
+	LevelTrace = slog.Level(-8)
+	LevelFatal = slog.Level(12)
+)
 
 func getLevel(level string) slog.Level {
 	switch level {

@@ -10,12 +10,12 @@ var RDB *redis.Client
 
 // TODO: Store Session tokens on Redis
 func CreateRedisConnection() {
-	logger.Info("Connecting to redis server", "host", config.App.REDIS_HOST)
+	logger.Info("Connecting to redis server", "host", config.App.RedisHost)
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     config.App.REDIS_HOST + ":" + config.App.REDIS_PORT,
-		Password: config.App.REDIS_PASSWORD,
+		Addr:     config.App.RedisHost + ":" + config.App.RedisPort,
+		Password: config.App.RedisPassword,
 		DB:       0,
 	})
 
-	logger.Info("Connected to redis server", "host", config.App.REDIS_HOST)
+	logger.Info("Connected to redis server", "host", config.App.RedisHost)
 }

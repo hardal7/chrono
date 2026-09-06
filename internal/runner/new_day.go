@@ -48,7 +48,12 @@ func resetTodayTimes(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("Failed to begin new transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil {
+			logger.Warn("Failed to rollback transaction")
+		}
+	}()
 
 	err = db.Queries.WithTx(tx).ResetTopicTimeTrackedToday(ctx)
 	if err != nil {

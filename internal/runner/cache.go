@@ -22,5 +22,4 @@ func Cache(ctx context.Context) {
 }
 
 func updateCache(ctx context.Context) {
-
 }

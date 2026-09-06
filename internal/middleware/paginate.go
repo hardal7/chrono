@@ -26,7 +26,7 @@ func Paginate(next http.Handler) http.Handler {
 		r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 		var req listRequest
-		if err := json.Unmarshal(body, &req); err != nil {
+		if err = json.Unmarshal(body, &req); err != nil {
 			logger.Debug("Failed to unmarshal body", "error", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return

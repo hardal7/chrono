@@ -2,13 +2,14 @@ package user
 
 import (
 	"context"
+	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
-	"math/rand/v2"
+	"math/big"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/hardal7/chrono/internal/auth"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -16,7 +17,7 @@ import (
 
 const (
 	maxBytes = 1024 * 1024 * 5 // 5 MB
-	filePerm = 0644            // Don't execute the file
+	filePerm = 0o644           // Don't execute the file
 
 	AvatarDirectory        = "/srv/avatars"
 	DefaultAvatarDirectory = "default"
@@ -39,12 +40,12 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 	}
 
 	if len(fileBytes) > maxBytes {
-		return fmt.Errorf("File size too large")
+		return errors.New("File size too large")
 	}
 
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
-		return fmt.Errorf("Invalid filetype")
+		return errors.New("Invalid filetype")
 	}
 
 	err = createFile(fileBytes, userID.String())
@@ -89,11 +90,15 @@ func DeleteAvatar(ctx context.Context) error {
 
 func InitAvatar(ctx context.Context) error {
 	userID := auth.UserID(ctx)
-
-	randomAvatar := strconv.Itoa(rand.IntN(defaultAvatarsNum))
+	n, err := rand.Int(rand.Reader, big.NewInt(defaultAvatarsNum))
+	if err != nil {
+		logger.Warn("Failed to generate random number")
+		return err
+	}
+	randomAvatar := n.String()
 	avatarPath := filepath.Join(DefaultAvatarDirectory, randomAvatar)
 
-	err := createSymlink(avatarPath, userID.String())
+	err = createSymlink(avatarPath, userID.String())
 
 	return err
 }

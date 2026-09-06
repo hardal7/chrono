@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -34,7 +35,12 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 			Limit:     int32(r.Limit),
 			MatchName: matchName,
 		})
-		user, err := db.Queries.GetUserByID(ctx, userID)
+		if err != nil {
+			break
+		}
+
+		var user query.User
+		user, err = db.Queries.GetUserByID(ctx, userID)
 		if err != nil {
 			return resp, fmt.Errorf("Failed to retrieve user: %w: %w", db.ErrRunQuery, err)
 		}
@@ -57,7 +63,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		})
 
 	default:
-		return resp, fmt.Errorf("Invalid scope queried")
+		return resp, errors.New("Invalid scope queried")
 	}
 	if err != nil {
 		return resp, fmt.Errorf("Failed to get users: %w: %w", db.ErrRunQuery, err)

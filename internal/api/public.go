@@ -92,7 +92,7 @@ func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-		err := dir.Close()
+		err = dir.Close()
 		if err != nil {
 			logger.Warn("Failed to close avatar directory")
 		}
@@ -105,7 +105,7 @@ func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-		err := file.Close()
+		err = file.Close()
 		if err != nil {
 			logger.Warn("Failed to close avatar file")
 		}

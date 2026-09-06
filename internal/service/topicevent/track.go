@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -19,7 +20,12 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	if err != nil {
 		return fmt.Errorf("Failed to begin new transaction: %w: %w", db.ErrBeginTransaction, err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil {
+			logger.Warn("Failed to rollback transaction")
+		}
+	}()
 
 	topic, err := db.Queries.WithTx(tx).GetTopicByOwnerAndName(ctx, query.GetTopicByOwnerAndNameParams{
 		Name:    r.Topic,

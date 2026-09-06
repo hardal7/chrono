@@ -18,7 +18,7 @@ var (
 )
 
 func CreateDBConnection() (*pgxpool.Pool, error) {
-	logger.Info("Connecting to database server", "host", config.App.DB_HOST)
+	logger.Info("Connecting to database server", "host", config.App.DBHost)
 
 	cfg, err := pgxpool.ParseConfig(getConnectionString())
 	if err != nil {
@@ -39,16 +39,16 @@ func CreateDBConnection() (*pgxpool.Pool, error) {
 	}
 	Queries = db.New(DB)
 
-	logger.Info("Connected to database server", "host", config.App.DB_HOST)
+	logger.Info("Connected to database server", "host", config.App.DBHost)
 	return DB, nil
 }
 
 func getConnectionString() string {
-	return "host=" + config.App.DB_HOST +
-		" user=" + config.App.DB_USER +
-		" password=" + config.App.DB_PASSWORD +
-		" dbname=" + config.App.DB_NAME +
-		" port=" + config.App.DB_PORT +
+	return "host=" + config.App.DBHost +
+		" user=" + config.App.DBUser +
+		" password=" + config.App.DBPassword +
+		" dbname=" + config.App.DBName +
+		" port=" + config.App.DBPort +
 		" sslmode=disable"
 }
 

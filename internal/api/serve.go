@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -55,8 +56,9 @@ func Serve(ctx context.Context) {
 
 func runServer(ctx context.Context, name, port string, router *chi.Mux) {
 	server := &http.Server{
-		Addr:    ":" + port,
-		Handler: router,
+		ReadHeaderTimeout: time.Second,
+		Addr:              ":" + port,
+		Handler:           router,
 	}
 
 	go func() {

@@ -34,11 +34,11 @@ func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	}
 
 	if s.MaxParticipants.Valid && int(s.MaxParticipants.Int32) == len(p) {
-		return fmt.Errorf("Session is full")
+		return errors.New("Session is full")
 	}
 
 	if !s.IsActive {
-		return fmt.Errorf("Session has expired")
+		return errors.New("Session has expired")
 	}
 
 	err = db.Queries.JoinSession(ctx, query.JoinSessionParams{

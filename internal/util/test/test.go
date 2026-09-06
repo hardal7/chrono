@@ -2,6 +2,7 @@ package test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -41,15 +42,15 @@ func (test Test) Run(t *testing.T) {
 		}
 
 		res := httptest.NewRecorder()
-		req, err := http.NewRequest(test.Method, test.Endpoint, bytes.NewBuffer(payload))
+		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
+		ctx := auth.AsUserID(context.Background(), testUUID)
+
+		req, err := http.NewRequestWithContext(ctx, test.Method, test.Endpoint, bytes.NewBuffer(payload))
 		if err != nil {
 			logger.Fatal("Failed to create test request", err)
 		}
 
 		req.Header.Add("X-Forwarded-For", "1.1.1.1")
-		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
-		ctx := auth.AsUserID(req.Context(), testUUID)
-		req = req.WithContext(ctx)
 
 		logger.Info("=== RUNNING TEST ===", "case", c.Name)
 		handler := middleware.LogRequest(test.Handler)

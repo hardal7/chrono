@@ -30,13 +30,13 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		u, err = db.Queries.GetUserByEmail(ctx, r.Email)
 	}
 	if errors.Is(err, pgx.ErrNoRows) {
-		return cookie, fmt.Errorf("User not found")
+		return cookie, errors.New("User not found")
 	} else if err != nil {
 		return cookie, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password))
-	if err == bcrypt.ErrMismatchedHashAndPassword {
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 		return cookie, fmt.Errorf("Wrong password: %w", err)
 	} else if err != nil {
 		return cookie, fmt.Errorf("Failed to hash password: %w", err)
@@ -44,7 +44,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 
 	token, err := auth.GenerateToken()
 	if err != nil {
-		return cookie, fmt.Errorf("Failed to generate token: %q", err)
+		return cookie, fmt.Errorf("Failed to generate token: %w", err)
 	}
 	hashedToken := auth.HashToken(token, []byte(config.App.HashSecret))
 

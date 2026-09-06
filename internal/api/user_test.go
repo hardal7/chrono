@@ -15,15 +15,24 @@ func TestMain(m *testing.M) {
 	api.InitValidator()
 	m.Run()
 }
+
 func TestRegisterUser(t *testing.T) {
 	registerUserTest.Run(t)
 }
+
 func TestLoginUser(t *testing.T) {
 	loginUserTest.Run(t)
 }
+
 func TestGetUserAccount(t *testing.T) {
 	getUserAccountTest.Run(t)
 }
+
+const (
+	email    = "john@mail.com"
+	username = "johndoe"
+	password = "strongpassword"
+)
 
 var registerUserTest = test.Test{
 	Method:   http.MethodPost,
@@ -35,40 +44,40 @@ var registerUserTest = test.Test{
 			Body: dto.RegisterUserRequest{
 				Email:    "john2@mail.com",
 				Username: "john2doe",
-				Password: "strongpassword",
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "duplicate user",
 			Body: dto.RegisterUserRequest{
-				Email:    "john@mail.com",
-				Username: "johndoe",
-				Password: "strongpassword",
+				Email:    email,
+				Username: username,
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusConflict},
 		},
 		{
 			Name: "missing email",
 			Body: dto.RegisterUserRequest{
-				Username: "johndoe",
-				Password: "strongpassword",
+				Username: username,
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing username",
 			Body: dto.RegisterUserRequest{
-				Email:    "john@mail.com",
-				Password: "strongpassword",
+				Email:    email,
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing password",
 			Body: dto.RegisterUserRequest{
-				Email:    "john@mail.com",
-				Username: "johndoe",
+				Email:    email,
+				Username: username,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
@@ -82,13 +91,13 @@ var registerUserTest = test.Test{
 			Body: dto.RegisterUserRequest{
 				Email:    strings.Repeat("a", 5000) + "@mail.com",
 				Username: strings.Repeat("u", 5000),
-				Password: "strongpassword",
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name:             "malformed json",
-			RawBody:          `{"email":"john@mail.com","username":`,
+			RawBody:          `{"email":email,"username":`,
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 	},
@@ -102,23 +111,23 @@ var loginUserTest = test.Test{
 		{
 			Name: "successful login with username",
 			Body: dto.LoginUserRequest{
-				Username: "johndoe",
-				Password: "strongpassword",
+				Username: username,
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "successful login with email",
 			Body: dto.LoginUserRequest{
-				Email:    "john@mail.com",
-				Password: "strongpassword",
+				Email:    email,
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusOK},
 		},
 		{
 			Name: "incorrect password",
 			Body: dto.LoginUserRequest{
-				Username: "johndoe",
+				Username: username,
 				Password: "wrongpassword",
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
@@ -127,7 +136,7 @@ var loginUserTest = test.Test{
 			Name: "user not found by username",
 			Body: dto.LoginUserRequest{
 				Username: "unknownuser",
-				Password: "strongpassword",
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
@@ -135,21 +144,21 @@ var loginUserTest = test.Test{
 			Name: "user not found by email",
 			Body: dto.LoginUserRequest{
 				Email:    "unknown@mail.com",
-				Password: "strongpassword",
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "missing username and email",
 			Body: dto.LoginUserRequest{
-				Password: "strongpassword",
+				Password: password,
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},
 		},
 		{
 			Name: "empty password",
 			Body: dto.LoginUserRequest{
-				Username: "johndoe",
+				Username: username,
 				Password: "",
 			},
 			ExpectedResponse: test.Response{Status: http.StatusBadRequest},

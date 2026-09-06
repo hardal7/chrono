@@ -16,20 +16,20 @@ type Config struct {
 	AdminPort string
 	LogLevel  string
 
-	DB_PORT     string
-	DB_HOST     string
-	DB_USER     string
-	DB_NAME     string
-	DB_PASSWORD string
+	DBPort     string
+	DBHost     string
+	DBUser     string
+	DBName     string
+	DBPassword string
 
-	REDIS_PORT     string
-	REDIS_HOST     string
-	REDIS_PASSWORD string
+	RedisPort     string
+	RedisHost     string
+	RedisPassword string
 
 	HashSecret string
 
-	MAIL_API_KEY string
-	MailAddress  string
+	MailAPIKey  string
+	MailAddress string
 }
 
 var App Config
@@ -55,20 +55,20 @@ func Load() {
 		AdminPort: os.Getenv("ADMIN_PORT"),
 		LogLevel:  os.Getenv("LOG_LEVEL"),
 
-		DB_PORT:     os.Getenv("DB_PORT"),
-		DB_HOST:     os.Getenv("DB_HOST"),
-		DB_USER:     os.Getenv("DB_USER"),
-		DB_NAME:     os.Getenv("DB_NAME"),
-		DB_PASSWORD: os.Getenv("DB_PASSWORD"),
+		DBPort:     os.Getenv("DB_PORT"),
+		DBHost:     os.Getenv("DB_HOST"),
+		DBUser:     os.Getenv("DB_USER"),
+		DBName:     os.Getenv("DB_NAME"),
+		DBPassword: os.Getenv("DB_PASSWORD"),
 
-		REDIS_PORT:     os.Getenv("REDIS_PORT"),
-		REDIS_HOST:     os.Getenv("REDIS_HOST"),
-		REDIS_PASSWORD: os.Getenv("REDIS_PASSWORD"),
+		RedisPort:     os.Getenv("REDIS_PORT"),
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
 
 		HashSecret: os.Getenv("HASH_SECRET"),
 
-		MAIL_API_KEY: os.Getenv("MAIL_API_KEY"),
-		MailAddress:  os.Getenv("MAIL_ADDRESS"),
+		MailAPIKey:  os.Getenv("MAIL_API_KEY"),
+		MailAddress: os.Getenv("MAIL_ADDRESS"),
 	}
 	slog.Info("Loaded environment variables")
 }

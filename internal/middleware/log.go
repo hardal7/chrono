@@ -47,7 +47,7 @@ func LogRequest(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, requestctx.IP, address)
 
 		start := time.Now()
-		ww := &statusWriter{ResponseWriter: w, status: 200}
+		ww := &statusWriter{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(ww, r.WithContext(ctx))
 
 		duration := time.Since(start)

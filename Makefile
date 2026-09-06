@@ -14,6 +14,9 @@ run: build
 lint:
 	golangci-lint run
 
+fmt:
+	gofumpt -l -w .
+
 test:
 	go test -v ./internal/...
 

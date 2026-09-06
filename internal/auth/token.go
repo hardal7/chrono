@@ -9,7 +9,9 @@ import (
 )
 
 func GenerateToken() (string, error) {
-	b := make([]byte, 32)
+	const tokenBytes = 32
+
+	b := make([]byte, tokenBytes)
 
 	if _, err := rand.Read(b); err != nil {
 		return "", err
