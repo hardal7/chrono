@@ -21,16 +21,20 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	pool, err := db.CreateDBConnection()
+	pool, err := db.CreateDBConnection(ctx)
 	if err != nil {
 		logger.Fatal(err.Error())
+	} else {
+		defer pool.Close()
 	}
-	defer pool.Close()
 
-	db.CreateRedisConnection()
+	rdb := db.CreateRedisConnection()
+	defer rdb.Close()
 
 	go runner.NewDay(ctx)
 	go runner.NewWeek(ctx)
+
 	api.Serve(ctx)
+
 	<-ctx.Done()
 }

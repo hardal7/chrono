@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+
 	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -9,8 +11,7 @@ import (
 func Bootstrap() {
 	config.Load()
 	logger.Init()
-	_, err := db.CreateDBConnection()
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
+
+	db.CreateDBConnection(context.Background())
+	db.CreateRedisConnection()
 }

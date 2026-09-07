@@ -17,7 +17,7 @@ var (
 	Queries *db.Queries
 )
 
-func CreateDBConnection() (*pgxpool.Pool, error) {
+func CreateDBConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	logger.Info("Connecting to database server", "host", config.App.DBHost)
 
 	cfg, err := pgxpool.ParseConfig(getConnectionString())
@@ -26,14 +26,14 @@ func CreateDBConnection() (*pgxpool.Pool, error) {
 	}
 
 	cfg.ConnConfig.Tracer = queryTracer{}
-	DB, err = pgxpool.NewWithConfig(context.Background(), cfg)
+	DB, err = pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		DB.Close()
 		return nil, fmt.Errorf("Failed to create connection pool: %w", err)
 	}
 	logger.Info("Created connection pool")
 
-	if err := DB.Ping(context.Background()); err != nil {
+	if err := DB.Ping(ctx); err != nil {
 		DB.Close()
 		return nil, fmt.Errorf("Failed to connect to connection pool: %w", err)
 	}

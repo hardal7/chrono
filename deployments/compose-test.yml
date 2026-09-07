@@ -26,13 +26,26 @@ services:
       - ../scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh", "test"]
 
+  redis:
+    image: redis:8.10-alpine
+    container_name: chrono-redis
+    environment:
+      REDIS_PASSWORD: $REDIS_PASSWORD
+    ports:
+      - "$REDIS_PORT:$REDIS_PORT"
+    healthcheck:
+      test: "redis-cli --raw incr ping" 
+      interval: 1s
+      retries: 5
+
   api:
     build:
       context: ../
       dockerfile: deployments/Dockerfile
     container_name: test-api
     depends_on:
-      - migrate
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ../:/srv
-    entrypoint: ["/srv/scripts/test.sh"]
+    entrypoint: ["make", "test"]

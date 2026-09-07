@@ -129,21 +129,3 @@ CREATE TABLE bug_reports (
     additional TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-CREATE TABLE session_tokens (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    hash TEXT NOT NULL UNIQUE,
-    expiry TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    last_used_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE otp_tokens (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    hash TEXT NOT NULL UNIQUE,
-    expiry TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
