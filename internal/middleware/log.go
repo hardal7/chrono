@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"uuid"
 )
 
 func LogRequest(next http.Handler) http.Handler {

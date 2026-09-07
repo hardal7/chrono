@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/db"
 	"github.com/redis/go-redis/v9"
+	"uuid"
 )
 
 const otpExpiration = time.Minute * 5
@@ -32,7 +32,7 @@ func CheckOTP(ctx context.Context, otp string) (uuid.UUID, error) {
 
 	userIDStr, err := db.RDB.Get(ctx, hashToken(otp)).Result()
 	if errors.Is(err, redis.Nil) {
-		return uuid.Nil, errors.New("OTP expired or invalid")
+		return uuid.Nil(), errors.New("OTP expired or invalid")
 	} else if err != nil {
 		return userID, fmt.Errorf("Failed to get userID: %w", err)
 	}

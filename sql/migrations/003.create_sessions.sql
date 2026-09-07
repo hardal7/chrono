@@ -22,4 +22,5 @@ CREATE TABLE session_participants (
 
     UNIQUE (session_id, user_id)
 );
-
+CREATE INDEX idx_session_participants_user_id
+ON session_participants (user_id);

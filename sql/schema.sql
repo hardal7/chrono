@@ -15,6 +15,8 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+CREATE UNIQUE INDEX idx_users_username_normalized
+ON users (username_normalized);
 
 CREATE TABLE friends (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -26,6 +28,8 @@ CREATE TABLE friends (
 
     UNIQUE (sender_id, recipient_id)
 );
+CREATE INDEX idx_friends_recipient_id
+ON friends (recipient_id);
 
 CREATE TABLE sessions (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -51,6 +55,8 @@ CREATE TABLE session_participants (
 
     UNIQUE (session_id, user_id)
 );
+CREATE INDEX idx_session_participants_user_id
+ON session_participants (user_id);
 
 CREATE TABLE topics (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -63,6 +69,8 @@ CREATE TABLE topics (
 
     UNIQUE (name, owner_id)
 );
+CREATE INDEX idx_topics_owner_id
+ON topics (owner_id);
 
 CREATE TABLE topic_events (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -71,25 +79,14 @@ CREATE TABLE topic_events (
     time_tracked_seconds INT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_topic_events_user_created
+ON topic_events (user_id, created_at);
 
 CREATE TABLE leaderboard_snapshots (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 INSERT INTO leaderboard_snapshots DEFAULT VALUES;
-
-CREATE TABLE leaderboard_users (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    snapshot_id uuid NOT NULL REFERENCES leaderboard_snapshots(id) ON DELETE CASCADE,
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    rank INT NOT NULL,
-    rank_change INT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    UNIQUE (snapshot_id, rank),
-    UNIQUE (snapshot_id, user_id)
-);
 
 CREATE TABLE leaderboard_users (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,

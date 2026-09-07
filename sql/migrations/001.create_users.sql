@@ -15,3 +15,5 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+CREATE UNIQUE INDEX idx_users_username_normalized
+ON users (username_normalized);

@@ -8,7 +8,7 @@ package query
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"uuid"
 )
 
 const createLeaderboardSnapshot = `-- name: CreateLeaderboardSnapshot :one

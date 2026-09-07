@@ -8,4 +8,5 @@ CREATE TABLE friends (
 
     UNIQUE (sender_id, recipient_id)
 );
-
+CREATE INDEX idx_friends_recipient_id
+ON friends (recipient_id);

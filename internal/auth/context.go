@@ -3,9 +3,9 @@ package auth
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/hardal7/chrono/internal/util/requestctx"
+	"uuid"
 )
 
 func UserID(ctx context.Context) uuid.UUID {
@@ -14,7 +14,7 @@ func UserID(ctx context.Context) uuid.UUID {
 	id, ok := ctx.Value(requestctx.UserID).(uuid.UUID)
 	if !ok {
 		logger.Warn("Failed to fetch userID")
-		return uuid.Nil
+		return uuid.Nil()
 	}
 	return id
 }

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/db"
 	"github.com/redis/go-redis/v9"
+	"uuid"
 )
 
 const sessionExpiration = time.Hour * 24 * 30
@@ -54,7 +54,7 @@ func checkSession(ctx context.Context, session string) (uuid.UUID, error) {
 
 	userIDStr, err := db.RDB.Get(ctx, hashToken(session)).Result()
 	if errors.Is(err, redis.Nil) {
-		return uuid.Nil, errors.New("Session expired or invalid")
+		return uuid.Nil(), errors.New("Session expired or invalid")
 	} else if err != nil {
 		return userID, fmt.Errorf("Failed to get userID: %w", err)
 	}

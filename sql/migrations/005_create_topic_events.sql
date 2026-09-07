@@ -5,3 +5,5 @@ CREATE TABLE topic_events (
     time_tracked_seconds INT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_topic_events_user_created
+ON topic_events (user_id, created_at);

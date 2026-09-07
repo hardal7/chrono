@@ -9,8 +9,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"uuid"
 )
 
 const createSession = `-- name: CreateSession :exec
@@ -87,37 +87,6 @@ func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Se
 		return nil, err
 	}
 	return items, nil
-}
-
-const getSessionByNameAndOwnerID = `-- name: GetSessionByNameAndOwnerID :one
-SELECT id, owner_id, name, max_participants, expires_at, topic, total_time_tracked_seconds, is_active, created_at, updated_at FROM sessions
-WHERE 
-    name = $1 
-    AND owner_id = $2
-    AND users.hide_user = FALSE
-`
-
-type GetSessionByNameAndOwnerIDParams struct {
-	Name    string
-	OwnerID uuid.UUID
-}
-
-func (q *Queries) GetSessionByNameAndOwnerID(ctx context.Context, arg GetSessionByNameAndOwnerIDParams) (Session, error) {
-	row := q.db.QueryRow(ctx, getSessionByNameAndOwnerID, arg.Name, arg.OwnerID)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.OwnerID,
-		&i.Name,
-		&i.MaxParticipants,
-		&i.ExpiresAt,
-		&i.Topic,
-		&i.TotalTimeTrackedSeconds,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }
 
 const getSessionByNameAndOwnerName = `-- name: GetSessionByNameAndOwnerName :one

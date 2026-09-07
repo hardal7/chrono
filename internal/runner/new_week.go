@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5/pgtype"
+	"uuid"
 )
 
 const (

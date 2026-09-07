@@ -8,7 +8,7 @@ package query
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"uuid"
 )
 
 const setLocationPrivacy = `-- name: SetLocationPrivacy :exec

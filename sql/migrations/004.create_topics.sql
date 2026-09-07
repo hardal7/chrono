@@ -9,3 +9,5 @@ CREATE TABLE topics (
 
     UNIQUE (owner_id, name)
 );
+CREATE INDEX idx_topics_owner_id
+ON topics (owner_id);

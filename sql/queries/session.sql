@@ -23,12 +23,6 @@ WHERE
 SELECT sessions.* FROM session_participants
 JOIN sessions ON sessions.id = session_participants.session_id
 WHERE user_id = $1;
--- name: GetSessionByNameAndOwnerID :one
-SELECT * FROM sessions
-WHERE 
-    name = $1 
-    AND owner_id = $2
-    AND users.hide_user = FALSE;
 -- name: GetSessionsAll :many
 SELECT
     sessions.*,
