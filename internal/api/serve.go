@@ -51,7 +51,7 @@ func Serve(ctx context.Context) {
 	mainRouter.Handle("/*", siteServer)
 
 	go runServer(ctx, "main", config.App.Port, mainRouter)
-	runServer(ctx, "admin", config.App.AdminPort, adminRouter)
+	go runServer(ctx, "admin", config.App.AdminPort, adminRouter)
 }
 
 func runServer(ctx context.Context, name, port string, router *chi.Mux) {

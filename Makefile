@@ -21,6 +21,7 @@ test:
 	go test -v ./internal/...
 
 clean:
+	rm avatars/*
 	rm -rf $(BUILD_DIR)
 
 sqlc:
@@ -38,6 +39,7 @@ test-down:
 test-up: test-down
 	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up -d db
 	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml run --rm migrate
+	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up -d redis
 	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml run --rm api
 
 prod-down:

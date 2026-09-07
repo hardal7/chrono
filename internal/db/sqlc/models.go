@@ -58,14 +58,6 @@ type LeaderboardUser struct {
 	UpdatedAt  time.Time
 }
 
-type OtpToken struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	Hash      string
-	Expiry    time.Time
-	CreatedAt pgtype.Timestamptz
-}
-
 type Session struct {
 	ID                      uuid.UUID
 	OwnerID                 uuid.UUID
@@ -85,16 +77,6 @@ type SessionParticipant struct {
 	SessionID               uuid.UUID
 	TotalTimeTrackedSeconds int32
 	TodayTimeTrackedSeconds int32
-}
-
-type SessionToken struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	Hash       string
-	Expiry     time.Time
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	LastUsedAt pgtype.Timestamptz
 }
 
 type Topic struct {

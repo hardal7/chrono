@@ -17,10 +17,7 @@ import (
 	"github.com/mailgun/mailgun-go/v5"
 )
 
-const (
-	otpExpiration = time.Minute * 5
-	mailTimeout   = time.Second * 10
-)
+const mailTimeout = time.Second * 10
 
 func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetRequest) error {
 	if r.Email == "" && r.Username == "" {
@@ -49,25 +46,20 @@ func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetReq
 }
 
 func PasswordReset(ctx context.Context, otp string, r dto.UserPasswordResetRequest) error {
-	hashedOTP := auth.HashToken(otp, []byte(config.App.HashSecret))
-	token, err := db.Queries.GetOTPToken(ctx, hashedOTP)
+	userID, err := auth.CheckOTP(ctx, otp)
 	if err != nil {
-		return fmt.Errorf("Failed to retrieve OTP token: %w: %w", db.ErrRunQuery, err)
+		return err
 	}
 
-	if !token.Expiry.After(time.Now()) {
-		return errors.New("OTP token has expired")
-	}
-
-	ctx = auth.AsUserID(ctx, token.UserID)
+	ctx = auth.AsUserID(ctx, userID)
 	err = EditAccount(ctx, dto.EditUserAccountRequest{NewPassword: r.NewPassword})
 	if err != nil {
 		return err
 	}
 
-	err = db.Queries.DeleteOTPToken(ctx, token.ID)
+	err = auth.DeleteOTP(ctx, otp)
 	if err != nil {
-		return fmt.Errorf("Failed to invalidate consumed OTP token: %w: %w", db.ErrRunQuery, err)
+		return err
 	}
 
 	return nil
@@ -81,7 +73,7 @@ func sendResetEmail(ctx context.Context, email string) error {
 		return err
 	}
 
-	token, err := generateOTPToken(ctx)
+	token, err := auth.GenerateOTP(ctx)
 	if err != nil {
 		return err
 	}
@@ -112,25 +104,4 @@ func sendResetEmail(ctx context.Context, email string) error {
 	}
 
 	return nil
-}
-
-func generateOTPToken(ctx context.Context) (string, error) {
-	var otp string
-	token, err := auth.GenerateToken()
-	if err != nil {
-		return otp, fmt.Errorf("Failed to generate token: %w", err)
-	}
-
-	hashedToken := auth.HashToken(token, []byte(config.App.HashSecret))
-
-	err = db.Queries.CreateOTPToken(ctx, query.CreateOTPTokenParams{
-		UserID: auth.UserID(ctx),
-		Expiry: time.Now().Add(otpExpiration),
-		Hash:   hashedToken,
-	})
-	if err != nil {
-		return otp, fmt.Errorf("Failed to create session token: %w: %w", db.ErrRunQuery, err)
-	}
-
-	return token, nil
 }

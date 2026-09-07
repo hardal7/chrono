@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hardal7/chrono/internal/db"
-	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/hardal7/chrono/internal/util/requestctx"
 )
@@ -30,21 +28,19 @@ func Authenticate(next http.Handler) http.Handler {
 			http.Error(w, "Invalid cookie", http.StatusUnauthorized)
 			return
 		}
+
 		token := strings.TrimPrefix(cookie.Value, Bearer)
 
-		tokenHash := HashToken(token, []byte(config.App.HashSecret))
-		retrievedToken, err := db.Queries.GetSessionToken(r.Context(), tokenHash)
+		userID, err := checkSession(r.Context(), token)
 		if err != nil {
 			logger.Debug("Invalid token provided")
 			http.Error(w, "Invalid token provided", http.StatusUnauthorized)
 			return
 		}
 
-		userID := retrievedToken.UserID
-		sessionID := retrievedToken.ID
 		logger.Debug("Authenticated user", "userID", userID.String())
 		ctx := context.WithValue(r.Context(), requestctx.UserID, userID)
-		ctx = context.WithValue(ctx, requestctx.SessionID, sessionID)
+		ctx = context.WithValue(ctx, requestctx.SessionID, token)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

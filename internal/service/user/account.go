@@ -21,7 +21,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 			return fmt.Errorf("Failed to hash password: %w", err)
 		}
 
-		err = db.Queries.DeleteSessionTokensOfUser(ctx, userID)
+		err = auth.DeleteSession(ctx)
 		if err != nil {
 			return fmt.Errorf("Failed to invalidate session tokens of user: %w: %w", db.ErrRunQuery, err)
 		}

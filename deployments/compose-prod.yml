@@ -37,10 +37,13 @@ services:
       REDIS_PASSWORD: $REDIS_PASSWORD
     ports:
       - "$REDIS_PORT:$REDIS_PORT"
+    volumes:
+      - /srv/redis:/data
     healthcheck:
       test: "redis-cli --raw incr ping" 
       interval: 1s
       retries: 5
+    command: redis-server --appendonly yes
 
   api:
     build:
@@ -57,13 +60,13 @@ services:
         condition: service_healthy
     volumes:
       - ../:/srv
-    command: sh -c "make run -C /srv"
+    command: make run
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.chrono-api.entrypoints=web"
-      # - "traefik.http.routers.chrono-api.tls=true"
-      # - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
-      # - "traefik.http.routers.chrono-api.entrypoints=websecure"
+      - "traefik.http.routers.chrono-api.tls=true"
+      - "traefik.http.routers.chrono-api.tls.certresolver=cloudflare"
+      - "traefik.http.routers.chrono-api.entrypoints=websecure"
       - "traefik.http.routers.chrono-api.rule=Host(`$DOMAIN`)"
       - "traefik.http.services.chrono-api.loadbalancer.server.port=$APP_PORT"
       - "traefik.http.routers.chrono-api.middlewares=rateLimit@file,limitBody@file,latencyCheck@file"
