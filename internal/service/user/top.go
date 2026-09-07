@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -18,6 +19,8 @@ const (
 	scopeFriends = "friends"
 	scopeLocal   = "local"
 	scopeGlobal  = "global"
+
+	TopUsersKey = "top_users"
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
@@ -55,12 +58,16 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		})
 
 	case scopeGlobal:
-		// TODO: Cache this with redis (update on 1m?)
-		users, err = db.Queries.GetTopUsers(ctx, query.GetTopUsersParams{
-			Cursor:    int32(r.Cursor),
-			Limit:     int32(r.Limit),
-			MatchName: matchName,
-		})
+		var data []byte
+		data, err = db.RDB.Get(ctx, TopUsersKey).Bytes()
+		if err != nil {
+			break
+		}
+
+		err = json.Unmarshal(data, &resp)
+		if err != nil {
+			break
+		}
 
 	default:
 		return resp, errors.New("Invalid scope queried")
@@ -70,15 +77,17 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 	}
 
 	// TODO: Rank changes
-	for i, user := range users {
-		resp.Users = append(resp.Users, dto.TopUser{
-			Rank:       i + 1,
-			RankChange: 7,
-			Username:   user.Username,
-			TotalTime:  int(user.TotalTimeTrackedSeconds),
-			TodayTime:  int(user.TodayTimeTrackedSeconds),
-			AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
-		})
+	if r.Scope != scopeGlobal {
+		for i, user := range users {
+			resp.Users = append(resp.Users, dto.TopUser{
+				Rank:       i + 1,
+				RankChange: 7,
+				Username:   user.Username,
+				TotalTime:  int(user.TotalTimeTrackedSeconds),
+				TodayTime:  int(user.TodayTimeTrackedSeconds),
+				AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
+			})
+		}
 	}
 
 	return resp, nil
