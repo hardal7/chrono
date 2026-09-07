@@ -38,10 +38,8 @@ func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetReq
 		}
 	}
 
-	auth.AsUserID(ctx, user.ID)
-
+	ctx = auth.AsUserID(ctx, user.ID)
 	err = sendResetEmail(ctx, user.Email)
-
 	return err
 }
 

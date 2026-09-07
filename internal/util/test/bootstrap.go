@@ -13,5 +13,5 @@ func Bootstrap() {
 	logger.Init()
 
 	db.CreateDBConnection(context.Background())
-	db.CreateRedisConnection()
+	db.CreateRedisConnection(context.Background())
 }

@@ -28,8 +28,12 @@ func main() {
 		defer pool.Close()
 	}
 
-	rdb := db.CreateRedisConnection()
-	defer rdb.Close()
+	rdb, err := db.CreateRedisConnection(ctx)
+	if err != nil {
+		logger.Fatal(err.Error())
+	} else {
+		defer rdb.Close()
+	}
 
 	go runner.NewDay(ctx)
 	go runner.NewWeek(ctx)

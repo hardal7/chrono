@@ -21,7 +21,7 @@ test:
 	go test -v ./internal/...
 
 clean:
-	rm avatars/*
+	rm -f avatars/*
 	rm -rf $(BUILD_DIR)
 
 sqlc:

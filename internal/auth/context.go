@@ -23,13 +23,13 @@ func AsUserID(ctx context.Context, userID uuid.UUID) context.Context {
 	return context.WithValue(ctx, requestctx.UserID, userID)
 }
 
-func SessionID(ctx context.Context) uuid.UUID {
-	var id uuid.UUID
+func Session(ctx context.Context) string {
+	var session string
 
-	id, ok := ctx.Value(requestctx.SessionID).(uuid.UUID)
+	session, ok := ctx.Value(requestctx.SessionID).(string)
 	if !ok {
-		logger.Warn("Failed to fetch sessionID")
-		return uuid.Nil
+		logger.Warn("Failed to fetch session")
+		return ""
 	}
-	return id
+	return session
 }

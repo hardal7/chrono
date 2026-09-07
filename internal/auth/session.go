@@ -41,7 +41,7 @@ func generateSession(ctx context.Context) (string, error) {
 		return token, fmt.Errorf("Failed to generate session: %w", err)
 	}
 
-	err = db.RDB.Set(ctx, hashToken(token), UserID(ctx).String(), otpExpiration).Err()
+	err = db.RDB.Set(ctx, hashToken(token), UserID(ctx).String(), sessionExpiration).Err()
 	if err != nil {
 		return token, fmt.Errorf("Failed to set session values: %w", err)
 	}
@@ -68,8 +68,7 @@ func checkSession(ctx context.Context, session string) (uuid.UUID, error) {
 }
 
 func DeleteSession(ctx context.Context) error {
-	session := hashToken(SessionID(ctx).String())
-	err := db.RDB.Del(ctx, session).Err()
+	err := db.RDB.Del(ctx, hashToken(Session(ctx))).Err()
 	if err != nil {
 		return fmt.Errorf("Failed to delete consumed Session token: %w", err)
 	}

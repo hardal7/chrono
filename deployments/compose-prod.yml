@@ -43,7 +43,7 @@ services:
       test: "redis-cli --raw incr ping" 
       interval: 1s
       retries: 5
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes  --requirepass "${REDIS_PASSWORD}"
 
   api:
     build:
