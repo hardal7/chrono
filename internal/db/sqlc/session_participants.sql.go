@@ -9,6 +9,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"uuid"
 )
 
@@ -73,19 +74,46 @@ func (q *Queries) GetSessionParticipants(ctx context.Context, sessionID uuid.UUI
 	return items, nil
 }
 
-const joinSession = `-- name: JoinSession :exec
-INSERT INTO session_participants(user_id, session_id)
-VALUES($1, $2)
+const joinSession = `-- name: JoinSession :one
+INSERT INTO session_participants (user_id, session_id)
+SELECT
+    $1,
+    sessions.id
+FROM sessions
+JOIN users ON users.id = sessions.owner_id
+WHERE sessions.name = $2
+    AND users.username_normalized = LOWER($3)
+    AND users.hide_user = FALSE
+    AND (
+        sessions.expires_at IS NULL
+        OR sessions.expires_at > NOW()
+    )
+    AND (
+        sessions.max_participants IS NULL
+        OR (
+            SELECT COUNT(*)
+            FROM session_participants
+            WHERE session_id = sessions.id
+        ) < sessions.max_participants
+    )
+RETURNING (
+    SELECT topic
+    FROM sessions
+    WHERE sessions.id = session_participants.session_id
+) AS topic
 `
 
 type JoinSessionParams struct {
-	UserID    uuid.UUID
-	SessionID uuid.UUID
+	UserID        uuid.UUID
+	SessionName   string
+	OwnerUsername string
 }
 
-func (q *Queries) JoinSession(ctx context.Context, arg JoinSessionParams) error {
-	_, err := q.db.Exec(ctx, joinSession, arg.UserID, arg.SessionID)
-	return err
+func (q *Queries) JoinSession(ctx context.Context, arg JoinSessionParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, joinSession, arg.UserID, arg.SessionName, arg.OwnerUsername)
+	var topic pgtype.Text
+	err := row.Scan(&topic)
+	return topic, err
 }
 
 const kickFromSession = `-- name: KickFromSession :exec
@@ -107,6 +135,32 @@ type KickFromSessionParams struct {
 
 func (q *Queries) KickFromSession(ctx context.Context, arg KickFromSessionParams) error {
 	_, err := q.db.Exec(ctx, kickFromSession, arg.OwnerID, arg.Name, arg.ParticipantUsername)
+	return err
+}
+
+const leaveSession = `-- name: LeaveSession :exec
+DELETE FROM session_participants
+WHERE (
+    user_id = $1
+    AND session_id = (
+        SELECT sessions.id
+        FROM sessions
+        JOIN users ON users.id = sessions.owner_id
+        WHERE 
+          sessions.name = $2
+          AND users.username_normalized = LOWER($3)
+    )
+)
+`
+
+type LeaveSessionParams struct {
+	UserID        uuid.UUID
+	Name          string
+	OwnerUsername string
+}
+
+func (q *Queries) LeaveSession(ctx context.Context, arg LeaveSessionParams) error {
+	_, err := q.db.Exec(ctx, leaveSession, arg.UserID, arg.Name, arg.OwnerUsername)
 	return err
 }
 

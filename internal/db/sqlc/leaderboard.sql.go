@@ -31,7 +31,7 @@ type CreateLeaderboardUsersParams struct {
 }
 
 const getLastLeaderboardUsers = `-- name: GetLastLeaderboardUsers :many
-SELECT id, snapshot_id, user_id, rank, created_at, updated_at FROM leaderboard_users
+SELECT id, snapshot_id, user_id, rank FROM leaderboard_users
 WHERE snapshot_id = (
     SELECT id
     FROM leaderboard_snapshots
@@ -54,8 +54,6 @@ func (q *Queries) GetLastLeaderboardUsers(ctx context.Context) ([]LeaderboardUse
 			&i.SnapshotID,
 			&i.UserID,
 			&i.Rank,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

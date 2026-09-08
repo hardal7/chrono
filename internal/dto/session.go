@@ -25,6 +25,11 @@ type JoinSessionRequest struct {
 	OwnerUsername string `json:"owner_username"`
 }
 
+type LeaveSessionRequest struct {
+	Name          string `json:"name"`
+	OwnerUsername string `json:"owner_username"`
+}
+
 type KickFromSessionRequest struct {
 	SessionName         string `json:"session_name"`
 	ParticipantUsername string `json:"participant_username"`

@@ -17,7 +17,7 @@ import (
 
 const (
 	maxBytes = 1024 * 1024 * 5 // 5 MB
-	filePerm = 0o644           // Don't execute the file
+	filePerm = 0644            // Don't execute the file
 
 	AvatarDirectory        = "/srv/avatars"
 	DefaultAvatarDirectory = "default"

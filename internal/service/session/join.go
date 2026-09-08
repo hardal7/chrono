@@ -9,6 +9,7 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -16,47 +17,39 @@ import (
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
 	userID := auth.UserID(ctx)
 
-	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
-		Name:          r.Name,
+	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("Failed to begin new transaction: %w: %w", db.ErrBeginTransaction, err)
+	}
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			logger.Warn("Failed to rollback transaction")
+		}
+	}()
+
+	t, err := db.Queries.WithTx(tx).JoinSession(ctx, query.JoinSessionParams{
+		UserID:        userID,
 		OwnerUsername: r.OwnerUsername,
-	})
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("Session not found: %w", db.ErrNotFound)
-	}
-
-	if err != nil {
-		return fmt.Errorf("Failed to find session: %w: %w", db.ErrRunQuery, err)
-	}
-
-	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
-	if err != nil {
-		return fmt.Errorf("Failed to check if session is full: %w: %w", db.ErrRunQuery, err)
-	}
-
-	if s.MaxParticipants.Valid && int(s.MaxParticipants.Int32) == len(p) {
-		return errors.New("Session is full")
-	}
-
-	if !s.IsActive {
-		return errors.New("Session has expired")
-	}
-
-	err = db.Queries.JoinSession(ctx, query.JoinSessionParams{
-		UserID:    userID,
-		SessionID: s.ID,
+		SessionName:   r.Name,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to join session: %w: %w", db.ErrRunQuery, err)
 	}
 
-	if s.Topic.Valid {
-		err = db.Queries.CreateTopic(ctx, query.CreateTopicParams{
+	if t.Valid {
+		err = db.Queries.WithTx(tx).CreateTopic(ctx, query.CreateTopicParams{
 			OwnerID: userID,
-			Name:    s.Topic.String,
+			Name:    t.String,
 		})
 		if err != nil {
 			return fmt.Errorf("Failed to create topic of session: %w: %w", db.ErrRunQuery, err)
 		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to commit transaction: %w: %w", db.ErrCommitTransaction, err)
 	}
 
 	return nil

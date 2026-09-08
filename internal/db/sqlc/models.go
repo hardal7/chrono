@@ -53,8 +53,6 @@ type LeaderboardUser struct {
 	SnapshotID uuid.UUID
 	UserID     uuid.UUID
 	Rank       int32
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
 }
 
 type Session struct {
