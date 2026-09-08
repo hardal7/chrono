@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 )
 
 func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTopicEventsTodayResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	resp := dto.GetTopicEventsTodayResponse{}
 
 	if len(r.Topics) == 0 {

@@ -7,7 +7,7 @@ import (
 
 	"uuid"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -16,7 +16,7 @@ import (
 )
 
 func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

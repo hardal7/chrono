@@ -14,6 +14,7 @@ import (
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/mailgun/mailgun-go/v5"
 )
 
@@ -38,7 +39,7 @@ func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetReq
 		}
 	}
 
-	ctx = auth.AsUserID(ctx, user.ID)
+	ctx = requestctx.AsUserID(ctx, user.ID)
 	err = sendResetEmail(ctx, user.Email)
 	return err
 }
@@ -49,7 +50,7 @@ func PasswordReset(ctx context.Context, otp string, r dto.UserPasswordResetReque
 		return err
 	}
 
-	ctx = auth.AsUserID(ctx, userID)
+	ctx = requestctx.AsUserID(ctx, userID)
 	err = EditAccount(ctx, dto.EditUserAccountRequest{NewPassword: r.NewPassword})
 	if err != nil {
 		return err

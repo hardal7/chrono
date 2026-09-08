@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hardal7/chrono/internal/db"
-	"github.com/redis/go-redis/v9"
 	"uuid"
+
+	"github.com/hardal7/chrono/internal/db"
+	"github.com/hardal7/chrono/internal/util/requestctx"
+	"github.com/redis/go-redis/v9"
 )
 
 const sessionExpiration = time.Hour * 24 * 30
@@ -41,7 +43,7 @@ func generateSession(ctx context.Context) (string, error) {
 		return token, fmt.Errorf("Failed to generate session: %w", err)
 	}
 
-	err = db.RDB.Set(ctx, hashToken(token), UserID(ctx).String(), sessionExpiration).Err()
+	err = db.RDB.Set(ctx, hashToken(token), requestctx.GetUserID(ctx).String(), sessionExpiration).Err()
 	if err != nil {
 		return token, fmt.Errorf("Failed to set session values: %w", err)
 	}
@@ -68,7 +70,7 @@ func checkSession(ctx context.Context, session string) (uuid.UUID, error) {
 }
 
 func DeleteSession(ctx context.Context) error {
-	err := db.RDB.Del(ctx, hashToken(Session(ctx))).Err()
+	err := db.RDB.Del(ctx, hashToken(requestctx.GetSessionID(ctx))).Err()
 	if err != nil {
 		return fmt.Errorf("Failed to delete consumed Session token: %w", err)
 	}

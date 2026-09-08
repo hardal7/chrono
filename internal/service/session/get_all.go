@@ -3,16 +3,15 @@ package session
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 
-	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/util/config"
+	"github.com/hardal7/chrono/internal/service/user"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	resp := dto.GetSessionsAllResponse{}
 
 	s, err := db.Queries.GetSessionsAll(ctx, userID)
@@ -33,7 +32,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 		for _, participant := range p {
 			minParticipants = append(minParticipants, dto.MinParticipant{
 				Name:       participant.Username,
-				AvatarPath: filepath.Join(config.AvatarEndpoint, participant.ID.String()),
+				AvatarPath: user.GetAvatarPath(participant.UserID),
 			})
 
 			if participant.UserID == userID {
@@ -50,7 +49,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 			Name:              session.Name,
 			OwnerUsername:     session.OwnerUsername,
 			Joined:            joined,
-			OwnerAvatarPath:   filepath.Join(config.AvatarEndpoint, session.OwnerID.String()),
+			OwnerAvatarPath:   user.GetAvatarPath(session.OwnerID),
 			TotalTime:         int(session.TotalTimeTrackedSeconds),
 			ExpiresAt:         expiresAt,
 			MaxParticipants:   int(session.MaxParticipants.Int32),

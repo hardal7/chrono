@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 )
 
 func Kick(ctx context.Context, r dto.KickFromSessionRequest) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	err := db.Queries.KickFromSession(ctx, query.KickFromSessionParams{
 		OwnerID:             userID,

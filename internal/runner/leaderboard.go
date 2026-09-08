@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"path/filepath"
+
+	"uuid"
 
 	"github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
 	"github.com/hardal7/chrono/internal/service/user"
-	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"uuid"
 )
 
 func updateLeaderboard(ctx context.Context) error {
@@ -87,9 +86,9 @@ func calculateRanks(users []query.User, lastUsers []query.LeaderboardUser) []dto
 	}
 
 	var topUsers []dto.TopUser
-	for i, user := range users {
+	for i, u := range users {
 		rank := i + 1
-		lastRank, ok := lastRanks[user.ID]
+		lastRank, ok := lastRanks[u.ID]
 
 		rankChange := rank
 		if ok {
@@ -99,10 +98,10 @@ func calculateRanks(users []query.User, lastUsers []query.LeaderboardUser) []dto
 		topUsers = append(topUsers, dto.TopUser{
 			Rank:       rank,
 			RankChange: rankChange,
-			Username:   user.Username,
-			TotalTime:  int(user.TotalTimeTrackedSeconds),
-			TodayTime:  int(user.TodayTimeTrackedSeconds),
-			AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
+			Username:   u.Username,
+			TotalTime:  int(u.TotalTimeTrackedSeconds),
+			TodayTime:  int(u.TodayTimeTrackedSeconds),
+			AvatarPath: user.GetAvatarPath(u.ID),
 		})
 	}
 

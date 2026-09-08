@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	"uuid"
-	"github.com/hardal7/chrono/internal/auth"
+
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +44,7 @@ func (test Test) Run(t *testing.T) {
 
 		res := httptest.NewRecorder()
 		testUUID, _ := uuid.Parse("b60aa148-0849-4246-8fbd-3e7500316989")
-		ctx := auth.AsUserID(context.Background(), testUUID)
+		ctx := requestctx.AsUserID(context.Background(), testUUID)
 
 		req, err := http.NewRequestWithContext(ctx, test.Method, test.Endpoint, bytes.NewBuffer(payload))
 		if err != nil {

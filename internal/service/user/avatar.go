@@ -10,9 +10,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"uuid"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 const (
@@ -26,7 +28,7 @@ const (
 
 // TODO: Sanitize Image
 func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	err := DeleteAvatar(ctx)
 	if err != nil {
@@ -72,7 +74,7 @@ func createFile(fileBytes []byte, filename string) error {
 }
 
 func DeleteAvatar(ctx context.Context) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	path := filepath.Join(AvatarDirectory, userID.String())
 	err := os.Remove(path)
@@ -89,7 +91,7 @@ func DeleteAvatar(ctx context.Context) error {
 }
 
 func InitAvatar(ctx context.Context) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	n, err := rand.Int(rand.Reader, big.NewInt(defaultAvatarsNum))
 	if err != nil {
 		logger.Warn("Failed to generate random number")
@@ -111,4 +113,8 @@ func createSymlink(source, filename string) error {
 	}
 
 	return nil
+}
+
+func GetAvatarPath(userID uuid.UUID) string {
+	return filepath.Join(config.AvatarEndpoint, userID.String())
 }

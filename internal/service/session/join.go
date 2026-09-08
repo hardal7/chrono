@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -15,7 +15,7 @@ import (
 
 // TODO: Join via link
 func Join(ctx context.Context, r dto.JoinSessionRequest) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

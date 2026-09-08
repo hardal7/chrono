@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hardal7/chrono/internal/db"
-	"github.com/redis/go-redis/v9"
 	"uuid"
+
+	"github.com/hardal7/chrono/internal/db"
+	"github.com/hardal7/chrono/internal/util/requestctx"
+	"github.com/redis/go-redis/v9"
 )
 
 const otpExpiration = time.Minute * 5
@@ -19,7 +21,7 @@ func GenerateOTP(ctx context.Context) (string, error) {
 		return token, fmt.Errorf("Failed to generate OTP token: %w", err)
 	}
 
-	err = db.RDB.Set(ctx, hashToken(token), UserID(ctx).String(), otpExpiration).Err()
+	err = db.RDB.Set(ctx, hashToken(token), requestctx.GetUserID(ctx).String(), otpExpiration).Err()
 	if err != nil {
 		return token, fmt.Errorf("Failed to set OTP token values: %w", err)
 	}

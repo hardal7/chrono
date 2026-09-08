@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"uuid"
-	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
@@ -17,6 +15,7 @@ import (
 	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"uuid"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,7 +54,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 }
 
 func initAccount(ctx context.Context, userID uuid.UUID) {
-	ctx = auth.AsUserID(ctx, userID)
+	ctx = requestctx.AsUserID(ctx, userID)
 	err := topic.InitFirst(ctx)
 	if err != nil {
 		logger.Warn("Failed to initialize first topic", err)

@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path/filepath"
 
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -69,7 +67,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 
 	resp = dto.GetUserProfileResponse{
 		Username:         user.Username,
-		AvatarPath:       filepath.Join(config.AvatarEndpoint, user.ID.String()),
+		AvatarPath:       GetAvatarPath(user.ID),
 		TotalTimeSeconds: int(user.TotalTimeTrackedSeconds),
 		TodayTimeSeconds: int(user.TodayTimeTrackedSeconds),
 		Streak:           int(user.Streak),

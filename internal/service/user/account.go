@@ -8,11 +8,12 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	var password string
 	if r.NewPassword != "" {
@@ -42,7 +43,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 }
 
 func DeleteAccount(ctx context.Context) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	err := db.Queries.DeleteUser(ctx, userID)
 	if err != nil {
@@ -53,7 +54,7 @@ func DeleteAccount(ctx context.Context) error {
 }
 
 func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	resp := dto.GetUserAccountResponse{}
 
 	u, err := db.Queries.GetUserByID(ctx, userID)

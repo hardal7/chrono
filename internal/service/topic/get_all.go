@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
 )
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	resp := dto.GetTopicsAllResponse{}
 
 	t, err := db.Queries.GetTopicsByOwner(ctx, userID)

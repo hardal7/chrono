@@ -3,19 +3,18 @@ package session
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"time"
 
-	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/service/user"
 	"github.com/hardal7/chrono/internal/util/apierror"
-	"github.com/hardal7/chrono/internal/util/config"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSessionNamedResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	resp := dto.GetSessionNamedResponse{}
 
 	s, err := db.Queries.GetSessionByNameAndOwnerName(ctx, query.GetSessionByNameAndOwnerNameParams{
@@ -42,7 +41,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 
 		participants = append(participants, dto.Participant{
 			Name:             participant.Username,
-			AvatarPath:       filepath.Join(config.AvatarEndpoint, participant.UserID.String()),
+			AvatarPath:       user.GetAvatarPath(participant.UserID),
 			SessionTime:      int(participant.TotalTimeTrackedSeconds),
 			SessionTimeToday: int(participant.TodayTimeTrackedSeconds),
 			LastOnlineAgo:    lastOnlineAgo,

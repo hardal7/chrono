@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/auth"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 )
@@ -12,7 +12,7 @@ import (
 const firstTopic string = "General"
 
 func InitFirst(ctx context.Context) error {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 
 	err := db.Queries.CreateTopic(ctx, query.CreateTopicParams{
 		Name:    firstTopic,

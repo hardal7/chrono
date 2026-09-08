@@ -10,6 +10,7 @@ import (
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 
 	"golang.org/x/crypto/bcrypt"
@@ -38,7 +39,7 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		return cookie, fmt.Errorf("Failed to hash password: %w", err)
 	}
 
-	ctx = auth.AsUserID(ctx, u.ID)
+	ctx = requestctx.AsUserID(ctx, u.ID)
 	cookie, err = auth.GenerateCookie(ctx)
 	return cookie, err
 }

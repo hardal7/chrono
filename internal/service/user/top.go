@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"path/filepath"
 
-	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
-	"github.com/hardal7/chrono/internal/util/config"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -24,7 +22,7 @@ const (
 )
 
 func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsersResponse, error) {
-	userID := auth.UserID(ctx)
+	userID := requestctx.GetUserID(ctx)
 	var users []query.User
 	var err error
 	resp := dto.GetTopUsersResponse{}
@@ -85,7 +83,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 				Username:   user.Username,
 				TotalTime:  int(user.TotalTimeTrackedSeconds),
 				TodayTime:  int(user.TodayTimeTrackedSeconds),
-				AvatarPath: filepath.Join(config.AvatarEndpoint, user.ID.String()),
+				AvatarPath: GetAvatarPath(user.ID),
 			})
 		}
 	}
