@@ -10,6 +10,6 @@ WHERE snapshot_id = (
     ORDER BY created_at DESC
     LIMIT 1
 );
--- name: CreateLeaderboardUser :exec
-INSERT INTO leaderboard_users(snapshot_id, user_id, rank, rank_change)
-VALUES($1, $2, $3, $4);
+-- name: CreateLeaderboardUsers :copyfrom
+INSERT INTO leaderboard_users (snapshot_id, user_id, rank)
+VALUES ($1, $2, $3);

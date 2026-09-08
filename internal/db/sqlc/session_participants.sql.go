@@ -12,6 +12,19 @@ import (
 	"uuid"
 )
 
+const deleteExpiredSessionParticipants = `-- name: DeleteExpiredSessionParticipants :exec
+DELETE FROM session_participants
+USING sessions
+WHERE 
+  session_participants.session_id = sessions.id
+  AND (sessions.expires_at IS NOT NULL AND sessions.expires_at < NOW())
+`
+
+func (q *Queries) DeleteExpiredSessionParticipants(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, deleteExpiredSessionParticipants)
+	return err
+}
+
 const getSessionParticipants = `-- name: GetSessionParticipants :many
 SELECT users.username, users.last_seen_at, session_participants.id, session_participants.user_id, session_participants.session_id, session_participants.total_time_tracked_seconds, session_participants.today_time_tracked_seconds
 FROM session_participants

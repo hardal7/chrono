@@ -53,7 +53,6 @@ type LeaderboardUser struct {
 	SnapshotID uuid.UUID
 	UserID     uuid.UUID
 	Rank       int32
-	RankChange int32
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
@@ -66,7 +65,6 @@ type Session struct {
 	ExpiresAt               pgtype.Timestamptz
 	Topic                   pgtype.Text
 	TotalTimeTrackedSeconds int32
-	IsActive                bool
 	CreatedAt               time.Time
 	UpdatedAt               time.Time
 }

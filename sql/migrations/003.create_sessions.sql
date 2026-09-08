@@ -6,7 +6,6 @@ CREATE TABLE sessions (
     expires_at TIMESTAMPTZ,
     topic VARCHAR(64),
     total_time_tracked_seconds INT NOT NULL DEFAULT 0,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

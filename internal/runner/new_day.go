@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -50,7 +51,7 @@ func resetTodayTimes(ctx context.Context) error {
 	}
 	defer func() {
 		err = tx.Rollback(ctx)
-		if err != nil {
+		if err != nil && !errors.Is(err, pgx.ErrTxClosed) {
 			logger.Warn("Failed to rollback transaction")
 		}
 	}()

@@ -27,3 +27,9 @@ WHERE user_id = $1 AND session_id = $2;
 -- name: ResetSessionParticipantTimeTrackedToday :exec
 UPDATE session_participants
 SET today_time_tracked_seconds = 0;
+-- name: DeleteExpiredSessionParticipants :exec
+DELETE FROM session_participants
+USING sessions
+WHERE 
+  session_participants.session_id = sessions.id
+  AND (sessions.expires_at IS NOT NULL AND sessions.expires_at < NOW());

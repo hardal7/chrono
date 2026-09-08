@@ -37,6 +37,16 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 	return err
 }
 
+const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE (sessions.expires_at IS NOT NULL AND sessions.expires_at < NOW())
+`
+
+func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, deleteExpiredSessions)
+	return err
+}
+
 const deleteSession = `-- name: DeleteSession :exec
 DELETE FROM sessions
 WHERE owner_id = $1 AND name = $2
@@ -53,9 +63,11 @@ func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) er
 }
 
 const getJoinedSessions = `-- name: GetJoinedSessions :many
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM session_participants
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.created_at, sessions.updated_at FROM session_participants
 JOIN sessions ON sessions.id = session_participants.session_id
-WHERE user_id = $1
+WHERE 
+    user_id = $1
+    AND (sessions.expires_at IS NULL OR sessions.expires_at > NOW())
 `
 
 func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Session, error) {
@@ -75,7 +87,6 @@ func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Se
 			&i.ExpiresAt,
 			&i.Topic,
 			&i.TotalTimeTrackedSeconds,
-			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -90,10 +101,11 @@ func (q *Queries) GetJoinedSessions(ctx context.Context, userID uuid.UUID) ([]Se
 }
 
 const getSessionByNameAndOwnerName = `-- name: GetSessionByNameAndOwnerName :one
-SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at FROM sessions
+SELECT sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.created_at, sessions.updated_at FROM sessions
 JOIN users ON users.id = sessions.owner_id
 WHERE 
     sessions.name = $1
+    AND (sessions.expires_at IS NULL OR sessions.expires_at > NOW())
     AND users.username_normalized = LOWER($2)
     AND users.hide_user = FALSE
 `
@@ -114,7 +126,6 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 		&i.ExpiresAt,
 		&i.Topic,
 		&i.TotalTimeTrackedSeconds,
-		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -123,13 +134,13 @@ func (q *Queries) GetSessionByNameAndOwnerName(ctx context.Context, arg GetSessi
 
 const getSessionsAll = `-- name: GetSessionsAll :many
 SELECT
-    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.is_active, sessions.created_at, sessions.updated_at,
+    sessions.id, sessions.owner_id, sessions.name, sessions.max_participants, sessions.expires_at, sessions.topic, sessions.total_time_tracked_seconds, sessions.created_at, sessions.updated_at,
     users.username AS owner_username,
     users.id AS owner_id
 FROM sessions
 JOIN users ON sessions.owner_id = users.id
 WHERE
-    sessions.is_active = TRUE
+    (sessions.expires_at IS NULL OR sessions.expires_at > NOW())
     AND users.hide_user = FALSE
     AND (
         EXISTS (
@@ -162,7 +173,6 @@ type GetSessionsAllRow struct {
 	ExpiresAt               pgtype.Timestamptz
 	Topic                   pgtype.Text
 	TotalTimeTrackedSeconds int32
-	IsActive                bool
 	CreatedAt               time.Time
 	UpdatedAt               time.Time
 	OwnerUsername           string
@@ -186,7 +196,6 @@ func (q *Queries) GetSessionsAll(ctx context.Context, senderID uuid.UUID) ([]Get
 			&i.ExpiresAt,
 			&i.Topic,
 			&i.TotalTimeTrackedSeconds,
-			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.OwnerUsername,

@@ -17,12 +17,15 @@ SELECT sessions.* FROM sessions
 JOIN users ON users.id = sessions.owner_id
 WHERE 
     sessions.name = $1
+    AND (sessions.expires_at IS NULL OR sessions.expires_at > NOW())
     AND users.username_normalized = LOWER(sqlc.arg(owner_username))
     AND users.hide_user = FALSE;
 -- name: GetJoinedSessions :many
 SELECT sessions.* FROM session_participants
 JOIN sessions ON sessions.id = session_participants.session_id
-WHERE user_id = $1;
+WHERE 
+    user_id = $1
+    AND (sessions.expires_at IS NULL OR sessions.expires_at > NOW());
 -- name: GetSessionsAll :many
 SELECT
     sessions.*,
@@ -31,7 +34,7 @@ SELECT
 FROM sessions
 JOIN users ON sessions.owner_id = users.id
 WHERE
-    sessions.is_active = TRUE
+    (sessions.expires_at IS NULL OR sessions.expires_at > NOW())
     AND users.hide_user = FALSE
     AND (
         EXISTS (
@@ -54,3 +57,6 @@ WHERE
                 AND session_participants.user_id = $1
         )
     );
+-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE (sessions.expires_at IS NOT NULL AND sessions.expires_at < NOW());

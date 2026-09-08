@@ -2,9 +2,11 @@ package topicevent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"uuid"
+
 	"github.com/hardal7/chrono/internal/auth"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
@@ -22,7 +24,7 @@ func Track(ctx context.Context, r dto.TrackTopicEventRequest) error {
 	}
 	defer func() {
 		err = tx.Rollback(ctx)
-		if err != nil {
+		if err != nil && !errors.Is(err, pgx.ErrTxClosed) {
 			logger.Warn("Failed to rollback transaction")
 		}
 	}()

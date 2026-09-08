@@ -24,30 +24,14 @@ func (q *Queries) CreateLeaderboardSnapshot(ctx context.Context) (uuid.UUID, err
 	return id, err
 }
 
-const createLeaderboardUser = `-- name: CreateLeaderboardUser :exec
-INSERT INTO leaderboard_users(snapshot_id, user_id, rank, rank_change)
-VALUES($1, $2, $3, $4)
-`
-
-type CreateLeaderboardUserParams struct {
+type CreateLeaderboardUsersParams struct {
 	SnapshotID uuid.UUID
 	UserID     uuid.UUID
 	Rank       int32
-	RankChange int32
-}
-
-func (q *Queries) CreateLeaderboardUser(ctx context.Context, arg CreateLeaderboardUserParams) error {
-	_, err := q.db.Exec(ctx, createLeaderboardUser,
-		arg.SnapshotID,
-		arg.UserID,
-		arg.Rank,
-		arg.RankChange,
-	)
-	return err
 }
 
 const getLastLeaderboardUsers = `-- name: GetLastLeaderboardUsers :many
-SELECT id, snapshot_id, user_id, rank, rank_change, created_at, updated_at FROM leaderboard_users
+SELECT id, snapshot_id, user_id, rank, created_at, updated_at FROM leaderboard_users
 WHERE snapshot_id = (
     SELECT id
     FROM leaderboard_snapshots
@@ -70,7 +54,6 @@ func (q *Queries) GetLastLeaderboardUsers(ctx context.Context) ([]LeaderboardUse
 			&i.SnapshotID,
 			&i.UserID,
 			&i.Rank,
-			&i.RankChange,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
