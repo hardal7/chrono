@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	nextWeek = 1
+	nextWeek = 7
 	maxRank  = 100
 )
 

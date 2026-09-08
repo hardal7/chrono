@@ -35,6 +35,7 @@ func main() {
 		defer rdb.Close()
 	}
 
+	go runner.NewMinute(ctx)
 	go runner.NewDay(ctx)
 	go runner.NewWeek(ctx)
 
