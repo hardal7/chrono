@@ -16,11 +16,11 @@ type Config struct {
 	AdminPort string
 	LogLevel  string
 
-	DBPort     string
-	DBHost     string
-	DBUser     string
-	DBName     string
-	DBPassword string
+	PostgresHost     string
+	PostgresPort     string
+	PostgresUser     string
+	PostgresDB       string
+	PostgresPassword string
 
 	RedisPort     string
 	RedisHost     string
@@ -55,11 +55,11 @@ func Load() {
 		AdminPort: os.Getenv("ADMIN_PORT"),
 		LogLevel:  os.Getenv("LOG_LEVEL"),
 
-		DBPort:     os.Getenv("DB_PORT"),
-		DBHost:     os.Getenv("DB_HOST"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
+		PostgresHost:     os.Getenv("POSTGRES_HOST"),
+		PostgresPort:     os.Getenv("POSTGRES_PORT"),
+		PostgresUser:     os.Getenv("POSTGRES_USER"),
+		PostgresDB:       os.Getenv("POSTGRES_DB"),
+		PostgresPassword: os.Getenv("POSTGRES_PASSWORD"),
 
 		RedisPort:     os.Getenv("REDIS_PORT"),
 		RedisHost:     os.Getenv("REDIS_HOST"),

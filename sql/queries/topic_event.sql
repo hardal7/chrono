@@ -11,6 +11,12 @@ WHERE id = $1;
 -- name: GetTopicEventsAll :many
 SELECT * FROM topic_events
 WHERE user_id = $1;
+-- name: GetTopicEventsWeek :many
+SELECT * FROM topic_events
+WHERE 
+  user_id = $1
+  AND created_at >= DATE_TRUNC('week', CURRENT_DATE)
+ORDER BY created_at DESC;
 -- name: GetTopicEventsTodayAll :many
 SELECT * FROM topic_events
 WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE;

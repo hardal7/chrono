@@ -1,0 +1,6 @@
+FROM postgres:17-alpine
+
+COPY scripts/migrate.sh /usr/local/bin/migrate
+COPY sql/migrations /srv/migrations
+
+RUN chmod +x /usr/local/bin/migrate

@@ -21,6 +21,7 @@ test:
 	go test -v ./internal/...
 
 clean:
+	sudo rm -rf certs/
 	rm -f avatars/*
 	rm -rf $(BUILD_DIR)
 
@@ -28,22 +29,19 @@ sqlc:
 	rm -rf internal/db/sqlc && sqlc generate
 
 dev-down:
-	$(DOCKER) --env-file .env -f deployments/compose-dev.yml down
+	$(DOCKER) --env-file .env -f deployments/compose/dev.yml down
 
 dev-up: dev-down
-	$(DOCKER) --env-file .env -f deployments/compose-dev.yml up
+	$(DOCKER) --env-file .env -f deployments/compose/dev.yml up
 
 test-down:
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml down
+	$(DOCKER) --env-file .env.test -f deployments/compose/test.yml down
 
 test-up: test-down
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up -d db
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml run --rm migrate
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml up -d redis
-	$(DOCKER) --env-file .env.test -f deployments/compose-test.yml run --rm api
+	$(DOCKER) --env-file .env.test -f deployments/compose/test.yml up --exit-code-from=api --abort-on-container-failure
 
 prod-down:
-	$(DOCKER) --env-file .env -f deployments/compose-prod.yml down
+	$(DOCKER) --env-file .env -f deployments/compose/prod.yml down
 
 prod-up: prod-down
-	$(DOCKER) --env-file .env -f deployments/compose-prod.yml up
+	$(DOCKER) --env-file .env -f deployments/compose/prod.yml up

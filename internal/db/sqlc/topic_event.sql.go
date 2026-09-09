@@ -143,6 +143,40 @@ func (q *Queries) GetTopicEventsTodayWithTopicName(ctx context.Context, arg GetT
 	return items, nil
 }
 
+const getTopicEventsWeek = `-- name: GetTopicEventsWeek :many
+SELECT id, user_id, topic_id, time_tracked_seconds, created_at FROM topic_events
+WHERE 
+  user_id = $1
+  AND created_at >= NOW() - INTERVAL '1 week'
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetTopicEventsWeek(ctx context.Context, userID uuid.UUID) ([]TopicEvent, error) {
+	rows, err := q.db.Query(ctx, getTopicEventsWeek, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TopicEvent{}
+	for rows.Next() {
+		var i TopicEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TopicID,
+			&i.TimeTrackedSeconds,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateTopicEvent = `-- name: UpdateTopicEvent :exec
 UPDATE topic_events
 SET time_tracked_seconds = $2, created_at = $3

@@ -18,37 +18,36 @@ var (
 )
 
 func CreateDBConnection(ctx context.Context) (*pgxpool.Pool, error) {
-	logger.Info("Connecting to database server", "host", config.App.DBHost)
+	logger.Info("Connecting to database server", "host", config.App.PostgresHost)
 
 	cfg, err := pgxpool.ParseConfig(getConnectionString())
 	if err != nil {
-		return nil, fmt.Errorf("Invalid database connection string: %w", err)
+		return DB, fmt.Errorf("Invalid database connection string: %w", err)
 	}
 
 	cfg.ConnConfig.Tracer = queryTracer{}
 	DB, err = pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
-		DB.Close()
-		return nil, fmt.Errorf("Failed to create connection pool: %w", err)
+		return DB, fmt.Errorf("Failed to create connection pool: %w", err)
 	}
 	logger.Info("Created connection pool")
 
 	if err := DB.Ping(ctx); err != nil {
 		DB.Close()
-		return nil, fmt.Errorf("Failed to connect to connection pool: %w", err)
+		return DB, fmt.Errorf("Failed to connect to connection pool: %w", err)
 	}
 	Queries = db.New(DB)
 
-	logger.Info("Connected to database server", "host", config.App.DBHost)
+	logger.Info("Connected to database server", "host", config.App.PostgresHost)
 	return DB, nil
 }
 
 func getConnectionString() string {
-	return "host=" + config.App.DBHost +
-		" user=" + config.App.DBUser +
-		" password=" + config.App.DBPassword +
-		" dbname=" + config.App.DBName +
-		" port=" + config.App.DBPort +
+	return "host=" + config.App.PostgresHost +
+		" port=" + config.App.PostgresPort +
+		" user=" + config.App.PostgresUser +
+		" dbname=" + config.App.PostgresDB +
+		" password=" + config.App.PostgresPassword +
 		" sslmode=disable"
 }
 

@@ -65,11 +65,20 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 		country = user.Country.String
 	}
 
+	var statistics [7]int
+	events, err := db.Queries.GetTopicEventsWeek(ctx, user.ID)
+	for _, event := range events {
+		// Shift in values since Sunday = 0 and not Monday = 0
+		day := (int(event.CreatedAt.Weekday()) + 6) % 7
+		statistics[day] += int(event.TimeTrackedSeconds)
+	}
+
 	resp = dto.GetUserProfileResponse{
 		Username:         user.Username,
 		AvatarPath:       GetAvatarPath(user.ID),
 		TotalTimeSeconds: int(user.TotalTimeTrackedSeconds),
 		TodayTimeSeconds: int(user.TodayTimeTrackedSeconds),
+		Statistics:       statistics[:],
 		Streak:           int(user.Streak),
 		Country:          country,
 		BestTopic:        bestTopic,

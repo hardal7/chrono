@@ -1,40 +1,38 @@
 services:
-  db:
-    image: postgres:17
-    container_name: chrono-db
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
     environment:
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASSWORD
-      POSTGRES_DB: $DB_NAME
-    ports:
-      - "$DB_PORT:$DB_PORT"
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     healthcheck:
-      test: "pg_isready -U $DB_USER"
+      test: "pg_isready -U $POSTGRES_USER"
       interval: 1s
       retries: 5
 
   migrate:
     image: postgres:17-alpine
-    container_name: chrono-migrate
+    container_name: migrate
     depends_on: 
-      db:
+      postgres:
         condition: service_healthy
     environment:
-      POSTGRES_USER: $DB_USER
-      PGPASSWORD: $DB_PASSWORD
-      POSTGRES_DB: $DB_NAME
+      POSTGRES_HOST: $POSTGRES_HOST
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     volumes:
-      - ../sql/migrations:/srv/migrations
-      - ../scripts/migrate.sh:/srv/migrate.sh
+      - ../../sql/migrations:/srv/migrations
+      - ../../scripts/migrate.sh:/srv/migrate.sh
     entrypoint: ["/srv/migrate.sh"]
 
   redis:
     image: redis:8.10-alpine
-    container_name: chrono-redis
+    container_name: redis
     environment:
       REDIS_PASSWORD: $REDIS_PASSWORD
-    ports:
-      - "$REDIS_PORT:$REDIS_PORT"
     healthcheck:
       test: "redis-cli --raw incr ping" 
       interval: 1s
@@ -43,9 +41,9 @@ services:
 
   api:
     build:
-      context: ../
-      dockerfile: deployments/Dockerfile
-    container_name: chrono-api
+      context: ../..
+      dockerfile: deployments/Dockerfile.api
+    container_name: api
     expose:
       - "${APP_PORT}"
     depends_on:
@@ -54,7 +52,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ../:/srv
+      - ../../:/srv
     command: make run
     labels:
       - "traefik.enable=true"
@@ -74,7 +72,7 @@ services:
       - "443:443"
       - "8080:8080"
     volumes:
-      - ../configs/traefik.yml:/etc/traefik/traefik.yaml:ro
-      - ../configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
-      - ../certs:/var/traefik.certs:rw
+      - ../../configs/traefik.yml:/etc/traefik/traefik.yaml:ro
+      - ../../configs/traefik_dynamic.yml:/etc/traefik/traefik_dynamic.yml:ro
+      - ../../certs:/var/traefik.certs:rw
       - /var/run/docker.sock:/var/run/docker.sock
