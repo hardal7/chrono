@@ -1,0 +1,20 @@
+vmsingle:
+  spec:
+    retentionPeriod: "7d"
+    resources:
+      limits:
+        memory: 5Gi
+      requests:
+        memory: 1Gi
+    storage:
+      resources:
+        requests:
+          storage: 20Gi
+kubelet:
+  vmScrape:
+    spec:
+      relabelConfigs:
+        - sourceLabels: [__metrics_path__]
+          targetLabel: metrics_path
+        - targetLabel: job
+          replacement: kubelet

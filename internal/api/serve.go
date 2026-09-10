@@ -12,18 +12,27 @@ import (
 	"github.com/hardal7/chrono/internal/middleware"
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/telemetry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const siteDir = "./static/site/"
 
-func Serve(ctx context.Context) {
+func Serve(ctx context.Context) error {
 	InitValidator()
+
+	otelShutdown, err := telemetry.InitTracer(ctx)
+	if err != nil {
+		return err
+	}
+	defer otelShutdown(ctx)
 
 	adminRouter := chi.NewRouter()
 	adminRouter.Handle("/metrics", promhttp.Handler())
 
 	mainRouter := chi.NewRouter()
+	mainRouter.Use(otelhttp.NewMiddleware("api-server"))
 	mainRouter.Use(middleware.LogRequest)
 
 	mainRouter.Route("/api", func(r chi.Router) {
@@ -52,13 +61,15 @@ func Serve(ctx context.Context) {
 
 	go runServer(ctx, "main", config.App.Port, mainRouter)
 	go runServer(ctx, "admin", config.App.AdminPort, adminRouter)
+
+	return err
 }
 
-func runServer(ctx context.Context, name, port string, router *chi.Mux) {
+func runServer(ctx context.Context, name, port string, handler http.Handler) {
 	server := &http.Server{
 		ReadHeaderTimeout: time.Second,
 		Addr:              ":" + port,
-		Handler:           router,
+		Handler:           handler,
 	}
 
 	go func() {

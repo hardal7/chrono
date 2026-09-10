@@ -88,6 +88,8 @@ services:
   victoria-metrics:
     image: victoriametrics/victoria-metrics
     container_name: victoria-metrics
+    networks:
+      - monitoring 
     expose:
       - "8428"
     volumes:
@@ -105,6 +107,8 @@ services:
   vmagent:
     image: victoriametrics/vmagent
     container_name: vmagent
+    networks:
+      - monitoring 
     depends_on:
       victoria-metrics:
         condition: service_healthy
@@ -124,6 +128,8 @@ services:
   victoria-logs:
     image: victoriametrics/victoria-logs
     container_name: victoria-logs
+    networks:
+      - monitoring 
     depends_on:
       victoria-metrics:
         condition: service_healthy
@@ -139,6 +145,8 @@ services:
   vector:
     image: timberio/vector:latest-alpine
     container_name: vector
+    networks:
+      - monitoring 
     environment:
       VECTOR_LOG: warn
     depends_on:
@@ -147,10 +155,12 @@ services:
       - ../../configs/vector.yml:/etc/vector/vector.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  # Visualize logs & metrics
+  # Visualize logs, metrics & traces
   grafana:
     image: grafana/grafana-oss
     container_name: grafana
+    networks:
+      - monitoring 
     environment:
       GF_PLUGINS_PREINSTALL: victoriametrics-logs-datasource
       GF_LOG_LEVEL: warn
@@ -166,3 +176,6 @@ services:
     depends_on:
       victoria-metrics:
         condition: service_healthy
+
+networks:
+  monitoring:

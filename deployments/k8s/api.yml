@@ -55,6 +55,14 @@ spec:
             - name: http
               containerPort: 8080
 
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            failureThreshold: 10
+
           command: ["make"]
           args: ["run"]
 

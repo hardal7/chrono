@@ -8,6 +8,7 @@ import (
 
 	"github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,6 +25,9 @@ func NewMinute(ctx context.Context) {
 }
 
 func cleanExpiredSessions(ctx context.Context) error {
+	requestID := "SESSION_CLEANUP"
+	ctx = context.WithValue(ctx, requestctx.RequestID, requestID)
+
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return fmt.Errorf("Failed to begin new transaction: %w", err)

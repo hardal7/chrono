@@ -147,7 +147,7 @@ const getTopicEventsWeek = `-- name: GetTopicEventsWeek :many
 SELECT id, user_id, topic_id, time_tracked_seconds, created_at FROM topic_events
 WHERE 
   user_id = $1
-  AND created_at >= NOW() - INTERVAL '1 week'
+  AND created_at >= DATE_TRUNC('week', CURRENT_DATE)
 ORDER BY created_at DESC
 `
 

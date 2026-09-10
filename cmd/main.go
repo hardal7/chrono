@@ -37,7 +37,7 @@ func main() {
 
 		select {
 		case <-ctx.Done():
-			logger.Info("Shutdown requested:", ctx.Err())
+			logger.Info("Shutdown requested:", "error", ctx.Err())
 			return
 		case <-time.After(time.Second):
 		}
@@ -56,7 +56,7 @@ func main() {
 
 		select {
 		case <-ctx.Done():
-			logger.Info("Shutdown requested:", ctx.Err())
+			logger.Info("Shutdown requested:", "error", ctx.Err())
 			return
 		case <-time.After(time.Second):
 		}
@@ -67,7 +67,10 @@ func main() {
 	go runner.NewDay(ctx)
 	go runner.NewWeek(ctx)
 
-	api.Serve(ctx)
+	err = api.Serve(ctx)
+	if err != nil {
+		logger.Fatal("Failed to start API server", "error", err)
+	}
 
 	<-ctx.Done()
 }
