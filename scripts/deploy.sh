@@ -34,7 +34,7 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 helm repo update
 helm upgrade --install otel-gateway open-telemetry/opentelemetry-collector \
   --namespace monitoring \
-  -f deployments/k8s/otel-gateway-values.yaml
+  -f deployments/k8s/otel-gateway-values.yml
 
 echo "Deploying Postgres..."
 kubectl apply -f deployments/k8s/postgres.yml

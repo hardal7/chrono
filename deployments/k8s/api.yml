@@ -51,6 +51,9 @@ spec:
                   name: redis-secret
                   key: REDIS_PASSWORD
 
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: otel-gateway-opentelemetry-collector.monitoring.svc.cluster.local:4317
+
           ports:
             - name: http
               containerPort: 8080

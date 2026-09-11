@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
+	"uuid"
+
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/hardal7/chrono/internal/util/requestctx"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"uuid"
+	"github.com/hardal7/chrono/internal/util/telemetry"
 )
 
 func LogRequest(next http.Handler) http.Handler {
@@ -31,32 +30,58 @@ func LogRequest(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), requestctx.RequestID, requestID)
 
 		logger.Trace("Received Request")
+
 		contentType := r.Header.Get("Content-Type")
-		if strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/plain") {
+		if strings.HasPrefix(contentType, "application/json") ||
+			strings.HasPrefix(contentType, "text/plain") {
 			// TODO: Do not print sensitive information
 			logger.Debug(string(body), "requestID", requestID)
 		} else {
-			logger.Debug(fmt.Sprintf(
-				"Request body omitted (Content-Type: %s, %d bytes)",
-				contentType,
-				len(body),
-			))
+			logger.Debug(
+				fmt.Sprintf(
+					"Request body omitted (Content-Type: %s, %d bytes)",
+					contentType,
+					len(body),
+				),
+			)
 		}
 
 		address := r.Header.Get("X-Forwarded-For")
 		ctx = context.WithValue(ctx, requestctx.IP, address)
 
+		route := r.URL.Path
+
+		telemetry.RecordHTTPActiveRequest(ctx, r.Method, route)
+
 		start := time.Now()
-		ww := &statusWriter{ResponseWriter: w, status: http.StatusOK}
+
+		ww := &statusWriter{
+			ResponseWriter: w,
+			status:         http.StatusOK,
+		}
+
 		next.ServeHTTP(ww, r.WithContext(ctx))
 
 		duration := time.Since(start)
-		method := r.Method
-		endpoint := r.URL.Path
 		status := ww.status
-		logger.Info(strconv.Itoa(status) + " " + method + " " + endpoint + " " + address + " " + duration.String() + " " + requestID)
-		httpRequestsTotal.WithLabelValues(method, endpoint, http.StatusText(status)).Inc()
-		httpRequestDuration.WithLabelValues(method, endpoint).Observe(float64(duration.Milliseconds()))
+
+		telemetry.RecordHTTPResponse(
+			ctx,
+			r.Method,
+			route,
+			status,
+			duration,
+		)
+
+		logger.Info(fmt.Sprintf(
+			"%d %s %s %s %s %s",
+			status,
+			r.Method,
+			r.URL.Path,
+			address,
+			duration,
+			requestID,
+		))
 	})
 }
 
@@ -69,22 +94,3 @@ func (w *statusWriter) WriteHeader(status int) {
 	w.ResponseWriter.WriteHeader(status)
 	w.status = status
 }
-
-var (
-	httpRequestsTotal = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "api_requests_total",
-			Help: "Total number of API requests",
-		},
-		[]string{"method", "endpoint", "status"},
-	)
-
-	httpRequestDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "api_request_duration_milliseconds",
-			Help:    "API request duration in milliseconds",
-			Buckets: prometheus.DefBuckets,
-		},
-		[]string{"method", "endpoint"},
-	)
-)

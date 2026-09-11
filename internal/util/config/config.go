@@ -26,6 +26,8 @@ type Config struct {
 	RedisHost     string
 	RedisPassword string
 
+	OTelEndpoint string
+
 	HashSecret string
 
 	MailAPIKey  string
@@ -64,6 +66,8 @@ func Load() {
 		RedisPort:     os.Getenv("REDIS_PORT"),
 		RedisHost:     os.Getenv("REDIS_HOST"),
 		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+
+		OTelEndpoint: os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
 
 		HashSecret: os.Getenv("HASH_SECRET"),
 

@@ -10,11 +10,33 @@ vmsingle:
       resources:
         requests:
           storage: 20Gi
-kubelet:
-  vmScrape:
-    spec:
-      relabelConfigs:
-        - sourceLabels: [__metrics_path__]
-          targetLabel: metrics_path
-        - targetLabel: job
-          replacement: kubelet
+
+vlsingle:
+  enabled: true
+  spec:
+    retentionPeriod: "7d"
+    storage:
+      resources:
+        requests:
+          storage: 10Gi
+
+vlagent:
+  enabled: true
+  spec:
+    k8sCollector:
+      enabled: true
+
+vtsingle:
+  enabled: true
+  spec:
+    retentionPeriod: "7d"
+    storage:
+      resources:
+        requests:
+          storage: 10Gi
+
+grafana:
+  service:
+    type: LoadBalancer
+  plugins:
+    - victoriametrics-logs-datasource

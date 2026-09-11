@@ -13,7 +13,6 @@ import (
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
 	"github.com/hardal7/chrono/internal/util/telemetry"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -22,14 +21,11 @@ const siteDir = "./static/site/"
 func Serve(ctx context.Context) error {
 	InitValidator()
 
-	otelShutdown, err := telemetry.InitTracer(ctx)
+	otelShutdown, err := telemetry.InitOTel(ctx)
 	if err != nil {
 		return err
 	}
 	defer otelShutdown(ctx)
-
-	adminRouter := chi.NewRouter()
-	adminRouter.Handle("/metrics", promhttp.Handler())
 
 	mainRouter := chi.NewRouter()
 	mainRouter.Use(otelhttp.NewMiddleware("api-server"))
@@ -60,7 +56,6 @@ func Serve(ctx context.Context) error {
 	mainRouter.Handle("/*", siteServer)
 
 	go runServer(ctx, "main", config.App.Port, mainRouter)
-	go runServer(ctx, "admin", config.App.AdminPort, adminRouter)
 
 	return err
 }
