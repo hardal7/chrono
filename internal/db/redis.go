@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/hardal7/chrono/internal/util/config"
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -12,7 +13,7 @@ import (
 var RDB *redis.Client
 
 func CreateRedisConnection(ctx context.Context) (*redis.Client, error) {
-	logger.Info("Connecting to redis server", "host", config.App.RedisHost)
+	logger.With("host", config.App.RedisHost).Info("Connecting to redis server")
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.App.RedisHost + ":" + config.App.RedisPort,
 		Password: config.App.RedisPassword,
@@ -21,10 +22,10 @@ func CreateRedisConnection(ctx context.Context) (*redis.Client, error) {
 
 	err := RDB.Ping(ctx).Err()
 	if err != nil {
-		RDB.Close()
-		return RDB, errors.New("Failed to ping redis server")
+		err = errors.Join(err, RDB.Close())
+		return RDB, fmt.Errorf("ping server: %w", err)
 	}
 
-	logger.Info("Connected to redis server", "host", config.App.RedisHost)
+	logger.With("host", config.App.RedisHost).Info("Connected to redis server")
 	return RDB, nil
 }

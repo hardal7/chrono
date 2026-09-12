@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
@@ -15,7 +15,7 @@ func GetAll(ctx context.Context) (dto.GetTopicsAllResponse, error) {
 
 	t, err := db.Queries.GetTopicsByOwner(ctx, userID)
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get all topics: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get all topics: %w: %w", db.ErrRunQuery, err)
 	}
 
 	var topics []dto.TopicSelection

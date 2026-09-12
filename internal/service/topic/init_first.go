@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 const firstTopic string = "General"
@@ -19,7 +19,7 @@ func InitFirst(ctx context.Context) error {
 		OwnerID: userID,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to create topic: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("create topic: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

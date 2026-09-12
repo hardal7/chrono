@@ -15,17 +15,17 @@ const (
 )
 
 func NewWeek(ctx context.Context) {
-	logger.Info("Started runner", "name", "new_week")
+	logger.With("name", "new_week").Info("Started runner")
 	for {
 		timer := time.NewTimer(time.Until(retrieveDate(nextWeek)))
 		<-timer.C
 		err := updateLeaderboard(ctx)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Err(err).Error("update leaderboard")
 		}
 		err = resetWeekTimes(ctx)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Err(err).Error("reset times tracked this week")
 		}
 	}
 }
@@ -35,7 +35,7 @@ func resetWeekTimes(ctx context.Context) error {
 
 	err := db.Queries.ResetUserTimeTrackedWeek(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to reset time tracked for this week: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("reset user time tracked for this week: %w: %w", db.ErrRunQuery, err)
 	}
 
 	logger.Info("Reset times tracked this week")

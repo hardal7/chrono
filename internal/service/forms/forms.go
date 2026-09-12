@@ -20,7 +20,7 @@ func CreateFeatureRequest(ctx context.Context, r dto.CreateFeatureRequest) error
 		Priority: r.Priority,
 	})
 
-	return fmt.Errorf("Failed to create feature request: %w: %w", db.ErrRunQuery, err)
+	return fmt.Errorf("create feature request: %w: %w", db.ErrRunQuery, err)
 }
 
 func CreateBugReport(ctx context.Context, r dto.CreateBugReport) error {
@@ -34,5 +34,5 @@ func CreateBugReport(ctx context.Context, r dto.CreateBugReport) error {
 		Additional:  pgtype.Text{String: r.Additional, Valid: r.Additional != ""},
 	})
 
-	return fmt.Errorf("Failed to create bug report: %w: %w", db.ErrRunQuery, err)
+	return fmt.Errorf("create bug report: %w: %w", db.ErrRunQuery, err)
 }

@@ -87,27 +87,27 @@ func GetUserAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	// Resolved paths need to be handled with care to secure from path traversal attacks
 	dir, err := os.OpenRoot(user.AvatarDirectory)
 	if err != nil {
-		logger.Warn("Failed to open avatar directory", err)
+		logger.Warn("open avatar directory", err)
 		http.NotFound(w, r)
 		return
 	}
 	defer func() {
 		err = dir.Close()
 		if err != nil {
-			logger.Warn("Failed to close avatar directory")
+			logger.Warn("close avatar directory")
 		}
 	}()
 
 	file, err := dir.Open(avatarID)
 	if err != nil {
-		logger.Debug("Failed to open avatar file", err)
+		logger.Debug("open avatar file", err)
 		http.NotFound(w, r)
 		return
 	}
 	defer func() {
 		err = file.Close()
 		if err != nil {
-			logger.Warn("Failed to close avatar file")
+			logger.Warn("close avatar file")
 		}
 	}()
 

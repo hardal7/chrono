@@ -19,7 +19,7 @@ import (
 
 const (
 	maxBytes = 1024 * 1024 * 5 // 5 MB
-	filePerm = 0644            // Don't execute the file
+	filePerm = 0o644           // Don't execute the file
 
 	AvatarDirectory        = "/srv/avatars"
 	DefaultAvatarDirectory = "default"
@@ -32,27 +32,27 @@ func UploadAvatar(ctx context.Context, avatarFile io.Reader) error {
 
 	err := DeleteAvatar(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to delete previous avatar: %w", err)
+		return fmt.Errorf("delete previous avatar: %w", err)
 	}
 
 	limited := io.LimitReader(avatarFile, maxBytes)
 	fileBytes, err := io.ReadAll(limited)
 	if err != nil {
-		return fmt.Errorf("Failed to read file: %w", err)
+		return fmt.Errorf("read file: %w", err)
 	}
 
 	if len(fileBytes) > maxBytes {
-		return errors.New("File size too large")
+		return errors.New("file size too large")
 	}
 
 	filetype := http.DetectContentType(fileBytes)
 	if filetype != "image/jpeg" && filetype != "image/png" {
-		return errors.New("Invalid filetype")
+		return fmt.Errorf("invalid filetype: %q", filetype)
 	}
 
 	err = createFile(fileBytes, userID.String())
 	if err != nil {
-		return fmt.Errorf("Failed to create file: %w", err)
+		return fmt.Errorf("create file: %w", err)
 	}
 
 	return nil
@@ -62,12 +62,12 @@ func createFile(fileBytes []byte, filename string) error {
 	path := filepath.Join(AvatarDirectory, filename)
 	err := os.Remove(path)
 	if err != nil {
-		return fmt.Errorf("Failed to delete file: %w", err)
+		return fmt.Errorf("delete file: %w", err)
 	}
 
 	err = os.WriteFile(path, fileBytes, filePerm)
 	if err != nil {
-		return fmt.Errorf("Failed to write file: %w", err)
+		return fmt.Errorf("write file: %w", err)
 	}
 
 	return nil
@@ -79,12 +79,12 @@ func DeleteAvatar(ctx context.Context) error {
 	path := filepath.Join(AvatarDirectory, userID.String())
 	err := os.Remove(path)
 	if err != nil {
-		return fmt.Errorf("Failed to delete user avatar: %w", err)
+		return fmt.Errorf("delete user avatar: %w", err)
 	}
 
 	err = InitAvatar(ctx)
 	if err != nil {
-		logger.Warn("Failed to initialize user avatar")
+		logger.Err(err).Warn("initialize user avatar")
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func InitAvatar(ctx context.Context) error {
 	userID := requestctx.GetUserID(ctx)
 	n, err := rand.Int(rand.Reader, big.NewInt(defaultAvatarsNum))
 	if err != nil {
-		logger.Warn("Failed to generate random number")
+		logger.Err(err).Warn("generate random number")
 		return err
 	}
 	randomAvatar := n.String()
@@ -109,7 +109,7 @@ func createSymlink(source, filename string) error {
 	path := filepath.Join(AvatarDirectory, filename)
 	err := os.Symlink(source, path)
 	if err != nil {
-		return fmt.Errorf("Failed to create symlink: %w", err)
+		return fmt.Errorf("create symlink: %w", err)
 	}
 
 	return nil

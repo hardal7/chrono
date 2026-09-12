@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsResponse, error) {
@@ -15,7 +15,7 @@ func Get(ctx context.Context, r dto.GetTopicEventsRequest) (dto.GetTopicEventsRe
 
 	topicEvents, err := db.Queries.GetTopicEventsAll(ctx, userID)
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get topic events: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get topic events: %w: %w", db.ErrRunQuery, err)
 	}
 
 	for i, event := range topicEvents {

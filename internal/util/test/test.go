@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
 	"uuid"
 
 	"github.com/hardal7/chrono/internal/middleware"
@@ -39,7 +38,7 @@ func (test Test) Run(t *testing.T) {
 	for _, c := range test.Cases {
 		payload, err := c.marshalBody()
 		if err != nil {
-			logger.Fatal("Failed to marshal test body", err)
+			logger.Fatal("marshal test body", err)
 		}
 
 		res := httptest.NewRecorder()
@@ -48,12 +47,12 @@ func (test Test) Run(t *testing.T) {
 
 		req, err := http.NewRequestWithContext(ctx, test.Method, test.Endpoint, bytes.NewBuffer(payload))
 		if err != nil {
-			logger.Fatal("Failed to create test request", err)
+			logger.Fatal("create test request", err)
 		}
 
 		req.Header.Add("X-Forwarded-For", "1.1.1.1")
 
-		logger.Info("=== RUNNING TEST ===", "case", c.Name)
+		logger.With("case", c.Name).Info("=== RUNNING TEST ===")
 		handler := middleware.LogRequest(test.Handler)
 		handler.ServeHTTP(res, req)
 

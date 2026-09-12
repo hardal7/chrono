@@ -12,6 +12,12 @@ func Bootstrap() {
 	config.Load()
 	logger.Init()
 
-	db.CreateDBConnection(context.Background())
-	db.CreateRedisConnection(context.Background())
+	_, err := db.CreateDBConnection(context.Background())
+	if err != nil {
+		logger.Fatal("Failed to connect to DB", err)
+	}
+	_, err = db.CreateRedisConnection(context.Background())
+	if err != nil {
+		logger.Fatal("Failed to connect to Redis", err)
+	}
 }

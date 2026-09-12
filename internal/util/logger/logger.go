@@ -59,27 +59,57 @@ func getLevel(level string) slog.Level {
 	return slog.LevelDebug
 }
 
+type Logger struct {
+	*slog.Logger
+}
+
+var defaultLogger = &Logger{
+	Logger: slog.Default(),
+}
+
+func (l *Logger) Trace(msg string, args ...any) {
+	l.Log(context.Background(), LevelTrace, msg, args...)
+}
+
 func Trace(msg string, args ...any) {
-	slog.Log(context.Background(), LevelTrace, msg, args...)
+	defaultLogger.Trace(msg, args...)
 }
 
 func Debug(msg string, args ...any) {
-	slog.Debug(msg, args...)
+	defaultLogger.Debug(msg, args...)
 }
 
 func Info(msg string, args ...any) {
-	slog.Info(msg, args...)
+	defaultLogger.Info(msg, args...)
 }
 
 func Warn(msg string, args ...any) {
-	slog.Warn(msg, args...)
+	defaultLogger.Warn(msg, args...)
 }
 
 func Error(msg string, args ...any) {
-	slog.Error(msg, args...)
+	defaultLogger.Error(msg, args...)
 }
 
-func Fatal(msg string, args ...any) {
-	slog.Log(context.Background(), LevelFatal, msg, args...)
+func Fatal(msg string, err error) {
+	defaultLogger.Log(context.Background(), LevelFatal, msg, "error", err.Error())
 	os.Exit(1)
+}
+
+func With(args ...any) *Logger {
+	return defaultLogger.With(args...)
+}
+
+func Err(err error) *Logger {
+	return defaultLogger.Err(err)
+}
+
+func (l *Logger) With(args ...any) *Logger {
+	return &Logger{
+		Logger: l.Logger.With(args...),
+	}
+}
+
+func (l *Logger) Err(err error) *Logger {
+	return l.With("error", err)
 }

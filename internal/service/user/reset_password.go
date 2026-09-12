@@ -22,7 +22,7 @@ const mailTimeout = time.Second * 10
 
 func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetRequest) error {
 	if r.Email == "" && r.Username == "" {
-		return errors.New("Both email and username fields cannot be empty")
+		return errors.New("both email and username fields cannot be empty")
 	}
 
 	var err error
@@ -30,12 +30,12 @@ func RequestPasswordReset(ctx context.Context, r dto.RequestUserPasswordResetReq
 	if r.Email == "" {
 		user, err = db.Queries.GetUserByUsername(ctx, r.Username)
 		if err != nil {
-			return fmt.Errorf("Failed to get user by username: %w: %w", db.ErrRunQuery, err)
+			return fmt.Errorf("get user by username: %w: %w", db.ErrRunQuery, err)
 		}
 	} else {
 		user, err = db.Queries.GetUserByEmail(ctx, r.Email)
 		if err != nil {
-			return fmt.Errorf("Failed to get user by username: %w: %w", db.ErrRunQuery, err)
+			return fmt.Errorf("get user by username: %w: %w", db.ErrRunQuery, err)
 		}
 	}
 
@@ -68,7 +68,7 @@ func sendResetEmail(ctx context.Context, email string) error {
 	mg := mailgun.NewMailgun(config.App.MailAPIKey)
 	err := mg.SetAPIBase(mailgun.APIBaseEU)
 	if err != nil {
-		logger.Warn("Failed to set API Base for email")
+		logger.Err(err).Warn("set API Base for email")
 		return err
 	}
 

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
 	"uuid"
 
 	"github.com/hardal7/chrono/internal/util/logger"
@@ -20,7 +19,7 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			logger.Debug("Failed to read body", "error", err)
+			logger.Err(err).Debug("Failed to read body")
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
@@ -35,15 +34,10 @@ func LogRequest(next http.Handler) http.Handler {
 		if strings.HasPrefix(contentType, "application/json") ||
 			strings.HasPrefix(contentType, "text/plain") {
 			// TODO: Do not print sensitive information
-			logger.Debug(string(body), "requestID", requestID)
+			logger.With("requestID", requestID).Debug(string(body))
 		} else {
-			logger.Debug(
-				fmt.Sprintf(
-					"Request body omitted (Content-Type: %s, %d bytes)",
-					contentType,
-					len(body),
-				),
-			)
+			logger.With("Content-Type", contentType, "bytes", len(body)).
+				Debug("Request body omitted")
 		}
 
 		address := r.Header.Get("X-Forwarded-For")

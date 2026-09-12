@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"uuid"
 
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
@@ -15,7 +16,6 @@ import (
 	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"uuid"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,14 +25,14 @@ const bcryptCost int = 12
 func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.Password), bcryptCost)
 	if err != nil {
-		return fmt.Errorf("Failed to hash password: %w", err)
+		return fmt.Errorf("hash password: %w", err)
 	}
 	_, err = db.Queries.GetUserByUsername(ctx, r.Username)
 	if !errors.Is(err, pgx.ErrNoRows) {
 		if err == nil {
-			return fmt.Errorf("User already exists: %w", apierror.ErrAlreadyExists)
+			return fmt.Errorf("user already exists: %w", apierror.ErrAlreadyExists)
 		}
-		return fmt.Errorf("Failed to check if user is duplicate: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("check if user is duplicate: %w: %w", db.ErrRunQuery, err)
 	}
 
 	country := location.IPToCountry(ctx.Value(requestctx.IP).(string))
@@ -46,7 +46,7 @@ func Register(ctx context.Context, r dto.RegisterUserRequest) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to create user: %w", err)
+		return fmt.Errorf("create user: %w", err)
 	}
 
 	initAccount(ctx, userID)
@@ -57,10 +57,10 @@ func initAccount(ctx context.Context, userID uuid.UUID) {
 	ctx = requestctx.AsUserID(ctx, userID)
 	err := topic.InitFirst(ctx)
 	if err != nil {
-		logger.Warn("Failed to initialize first topic", err)
+		logger.Err(err).Warn("initialize first topic")
 	}
 	err = InitAvatar(ctx)
 	if err != nil {
-		logger.Warn("Failed to init user avatar", err)
+		logger.Err(err).Warn("init user avatar")
 	}
 }

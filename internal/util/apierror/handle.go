@@ -1,53 +1,57 @@
-package api
+package apierror
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
 	"github.com/hardal7/chrono/internal/db"
-	"github.com/hardal7/chrono/internal/util/apierror"
 	"github.com/hardal7/chrono/internal/util/logger"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
-func handleErrors(err error, w http.ResponseWriter) {
+func Handle(ctx context.Context, w http.ResponseWriter, err error) {
+	e := logger.Err(err).With("requestID", requestctx.GetRequestID(ctx))
+	msg := "Request Failed"
+
 	if errors.Is(err, db.ErrRunQuery) {
-		logger.Warn(err.Error())
+		e.Warn(msg)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	if errors.Is(err, db.ErrBeginTransaction) {
-		logger.Error(err.Error())
+		e.Error(msg)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	if errors.Is(err, db.ErrCommitTransaction) {
-		logger.Error(err.Error())
+		e.Error(msg)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	if errors.Is(err, db.ErrNotFound) {
-		logger.Debug(err.Error())
+		e.Debug(msg)
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
-	if errors.Is(err, apierror.ErrAlreadyExists) {
-		logger.Debug(err.Error())
+	if errors.Is(err, ErrAlreadyExists) {
+		e.Debug(msg)
 		http.Error(w, "Already Exists", http.StatusConflict)
 		return
 	}
 
-	if errors.Is(err, apierror.ErrUnauthorized) {
-		logger.Debug(err.Error())
+	if errors.Is(err, ErrUnauthorized) {
+		e.Debug(msg)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	if err != nil {
-		logger.Debug(err.Error())
+		e.Debug(msg)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

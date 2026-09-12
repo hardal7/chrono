@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -22,7 +22,7 @@ func Edit(ctx context.Context, r dto.EditSessionRequest) error {
 		ExpiresAt:       pgtype.Timestamptz{Time: r.NewExpiresAt, Valid: !r.NewExpiresAt.IsZero()},
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to update session: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("update session: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

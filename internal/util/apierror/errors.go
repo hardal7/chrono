@@ -1,6 +1,8 @@
 package apierror
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrAlreadyExists = errors.New("resource already exists")

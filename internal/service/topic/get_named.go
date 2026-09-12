@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicNamedResponse, error) {
@@ -19,7 +19,7 @@ func GetNamed(ctx context.Context, r dto.GetTopicNamedRequest) (dto.GetTopicName
 		OwnerID: userID,
 	})
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get topic by username: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get topic by username: %w: %w", db.ErrRunQuery, err)
 	}
 
 	resp = dto.GetTopicNamedResponse{

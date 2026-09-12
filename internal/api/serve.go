@@ -67,22 +67,21 @@ func runServer(ctx context.Context, name, port string, handler http.Handler) {
 		Handler:           handler,
 	}
 
-	go func() {
-		logger.Info("Started HTTP server", "type", name, "port", ":"+port)
+	logger.With("type", name, "port", port).Info("Started HTTP server")
 
-		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatal("Fatal errror on HTTP server", "type", name, "error", err)
-		}
-	}()
+	err := server.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Fatal("Error listening and serving HTTP server", err)
+	}
 
-	<-ctx.Done()
-	logger.Info("Shutting down HTTP server", "type", name)
-	err := server.Shutdown(ctx)
+	logger.With("type", name).Info("Shutting down HTTP server")
+	err = server.Shutdown(ctx)
 	if err == nil {
-		logger.Info("Shut down HTTP server", "type", name)
+		logger.With("type", name).Info("Shut down HTTP server")
 	} else {
-		logger.Error("Failed to shut down HTTP server", "type", name, "error", err)
+		logger.Err(err).
+			With("type", name).
+			Error("shut down HTTP server")
 	}
 }
 

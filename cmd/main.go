@@ -15,12 +15,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func init() {
+func main() {
 	config.Load()
 	logger.Init()
-}
 
-func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -30,14 +28,14 @@ func main() {
 		pool, err = db.CreateDBConnection(ctx)
 
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Err(err).Error("Failed to create DB connection")
 		} else {
 			break
 		}
 
 		select {
 		case <-ctx.Done():
-			logger.Info("Shutdown requested:", "error", ctx.Err())
+			logger.Err(ctx.Err()).Info("Shutdown requested")
 			return
 		case <-time.After(time.Second):
 		}
@@ -49,14 +47,14 @@ func main() {
 		rdb, err = db.CreateRedisConnection(ctx)
 
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Err(err).Error("Failed to create Redis connection")
 		} else {
 			break
 		}
 
 		select {
 		case <-ctx.Done():
-			logger.Info("Shutdown requested:", "error", ctx.Err())
+			logger.Err(ctx.Err()).Info("Shutdown requested")
 			return
 		case <-time.After(time.Second):
 		}
@@ -69,7 +67,7 @@ func main() {
 
 	err = api.Serve(ctx)
 	if err != nil {
-		logger.Fatal("Failed to start API server", "error", err)
+		logger.Fatal("Failed to start API server", err)
 	}
 
 	<-ctx.Done()

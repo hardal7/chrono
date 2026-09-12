@@ -2,9 +2,9 @@ package requestctx
 
 import (
 	"context"
+	"uuid"
 
 	"github.com/hardal7/chrono/internal/util/logger"
-	"uuid"
 )
 
 func GetUserID(ctx context.Context) uuid.UUID {
@@ -12,7 +12,7 @@ func GetUserID(ctx context.Context) uuid.UUID {
 
 	id, ok := ctx.Value(UserID).(uuid.UUID)
 	if !ok {
-		logger.Warn("Failed to fetch userID")
+		logger.Warn("fetch userID")
 		return uuid.Nil()
 	}
 	return id
@@ -27,7 +27,7 @@ func GetSessionID(ctx context.Context) string {
 
 	sessionID, ok := ctx.Value(SessionID).(string)
 	if !ok {
-		logger.Warn("Failed to fetch sessionID")
+		logger.Warn("fetch sessionID")
 		return ""
 	}
 	return sessionID
@@ -38,7 +38,7 @@ func GetRequestID(ctx context.Context) string {
 
 	requestID, ok := ctx.Value(RequestID).(string)
 	if !ok {
-		logger.Warn("Failed to fetch requestID")
+		logger.Warn("fetch requestID")
 		return ""
 	}
 	return requestID

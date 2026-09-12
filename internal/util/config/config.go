@@ -46,7 +46,7 @@ func Load() {
 	}
 	err := godotenv.Load(file)
 	if err != nil {
-		slog.Error("Failed to load environment variables")
+		slog.Error("load environment variables")
 		slog.Debug(err.Error())
 		os.Exit(1)
 	}

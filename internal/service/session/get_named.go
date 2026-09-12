@@ -22,12 +22,12 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 		OwnerUsername: r.OwnerUsername,
 	})
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get session by username: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get session by username: %w: %w", db.ErrRunQuery, err)
 	}
 
 	p, err := db.Queries.GetSessionParticipants(ctx, s.ID)
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get participants of the session: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get participants of the session: %w: %w", db.ErrRunQuery, err)
 	}
 
 	participants := []dto.Participant{}
@@ -49,7 +49,7 @@ func GetNamed(ctx context.Context, r dto.GetSessionNamedRequest) (dto.GetSession
 	}
 
 	if !isParticipant {
-		return resp, fmt.Errorf("Unauthorized session details requested: %w", apierror.ErrUnauthorized)
+		return resp, fmt.Errorf("unauthorized session details requested: %w", apierror.ErrUnauthorized)
 	}
 
 	expiresAt := &s.ExpiresAt.Time

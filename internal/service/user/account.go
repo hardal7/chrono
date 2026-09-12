@@ -19,12 +19,12 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 	if r.NewPassword != "" {
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(r.NewPassword), bcryptCost)
 		if err != nil {
-			return fmt.Errorf("Failed to hash password: %w", err)
+			return fmt.Errorf("hash password: %w", err)
 		}
 
 		err = auth.DeleteSession(ctx)
 		if err != nil {
-			return fmt.Errorf("Failed to invalidate session tokens of user: %w: %w", db.ErrRunQuery, err)
+			return fmt.Errorf("invalidate session tokens of user: %w: %w", db.ErrRunQuery, err)
 		}
 
 		password = string(passwordHash)
@@ -36,7 +36,7 @@ func EditAccount(ctx context.Context, r dto.EditUserAccountRequest) error {
 		Password: password,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to update user: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("update user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil
@@ -47,7 +47,7 @@ func DeleteAccount(ctx context.Context) error {
 
 	err := db.Queries.DeleteUser(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("Failed to delete user: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("delete user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func GetAccount(ctx context.Context) (dto.GetUserAccountResponse, error) {
 
 	u, err := db.Queries.GetUserByID(ctx, userID)
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	resp = dto.GetUserAccountResponse{

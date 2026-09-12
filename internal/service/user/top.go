@@ -43,7 +43,7 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		var user query.User
 		user, err = db.Queries.GetUserByID(ctx, userID)
 		if err != nil {
-			return resp, fmt.Errorf("Failed to retrieve user: %w: %w", db.ErrRunQuery, err)
+			return resp, fmt.Errorf("retrieve user: %w: %w", db.ErrRunQuery, err)
 		}
 		users = append(users, user)
 
@@ -68,25 +68,13 @@ func GetTopUsers(ctx context.Context, r dto.GetTopUsersRequest) (dto.GetTopUsers
 		}
 
 	default:
-		return resp, errors.New("Invalid scope queried")
+		return resp, errors.New("invalid scope queried")
 	}
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get users: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get users: %w: %w", db.ErrRunQuery, err)
 	}
 
 	// TODO: Rank changes
-	if r.Scope != scopeGlobal {
-		for i, user := range users {
-			resp.Users = append(resp.Users, dto.TopUser{
-				Rank:       i + 1,
-				RankChange: 7,
-				Username:   user.Username,
-				TotalTime:  int(user.TotalTimeTrackedSeconds),
-				TodayTime:  int(user.TodayTimeTrackedSeconds),
-				AvatarPath: GetAvatarPath(user.ID),
-			})
-		}
-	}
 
 	return resp, nil
 }

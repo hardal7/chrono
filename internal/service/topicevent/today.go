@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTopicEventsTodayResponse, error) {
@@ -17,7 +17,7 @@ func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTop
 	if len(r.Topics) == 0 {
 		events, err := db.Queries.GetTopicEventsTodayAll(ctx, userID)
 		if err != nil {
-			return resp, fmt.Errorf("Failed to get all topic events today: %w: %w", db.ErrRunQuery, err)
+			return resp, fmt.Errorf("get all topic events today: %w: %w", db.ErrRunQuery, err)
 		}
 
 		for _, event := range events {
@@ -32,7 +32,7 @@ func GetToday(ctx context.Context, r dto.GetTopicEventsTodayRequest) (dto.GetTop
 			Name:   topic,
 		})
 		if err != nil {
-			return resp, fmt.Errorf("Failed to get topic events today: %w: %w", db.ErrRunQuery, err)
+			return resp, fmt.Errorf("get topic events today: %w: %w", db.ErrRunQuery, err)
 		}
 
 		var time int

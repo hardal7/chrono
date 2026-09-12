@@ -24,14 +24,14 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 	user, err := db.Queries.GetUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return resp, fmt.Errorf("User not found: %w", db.ErrNotFound)
+			return resp, fmt.Errorf("user not found: %w", db.ErrNotFound)
 		}
-		return resp, fmt.Errorf("Failed to check if user exists: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("check if user exists: %w: %w", db.ErrRunQuery, err)
 	}
 
 	topics, err := db.Queries.GetTopicsByOwner(ctx, user.ID)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return resp, fmt.Errorf("Failed to get user topics: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get user topics: %w: %w", db.ErrRunQuery, err)
 	}
 	var bestTopic string
 	var mostTime int32
@@ -46,7 +46,7 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 	isAccepted, err := db.Queries.GetFriendStatus(ctx, username)
 	if err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			return resp, fmt.Errorf("Failed to get friend status: %w: %w", db.ErrRunQuery, err)
+			return resp, fmt.Errorf("get friend status: %w: %w", db.ErrRunQuery, err)
 		} else {
 			friendStatus = friendStatusNone
 		}
@@ -67,9 +67,14 @@ func GetProfile(ctx context.Context, username string) (dto.GetUserProfileRespons
 
 	var statistics [7]int
 	events, err := db.Queries.GetTopicEventsWeek(ctx, user.ID)
+	if err != nil {
+		return resp, fmt.Errorf("get topic events this week: %w", db.ErrRunQuery)
+	}
+
 	for _, event := range events {
 		// Shift in values since Sunday = 0 and not Monday = 0
-		day := (int(event.CreatedAt.Weekday()) + 6) % 7
+		sundayOffset, weekDays := 6, 7
+		day := (int(event.CreatedAt.Weekday()) + sundayOffset) % weekDays
 		statistics[day] += int(event.TimeTrackedSeconds)
 	}
 

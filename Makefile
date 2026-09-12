@@ -6,7 +6,7 @@ DOCKER=docker compose
 
 build:
 	mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/$(APP_NAME) ./cmd
+	CGO_ENABLED=0 go build -o $(BUILD_DIR)/$(APP_NAME) ./cmd
 
 run: build
 	./$(BUILD_DIR)/$(APP_NAME)

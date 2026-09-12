@@ -16,7 +16,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 
 	s, err := db.Queries.GetSessionsAll(ctx, userID)
 	if err != nil {
-		return resp, fmt.Errorf("Failed to get all sessions of friends: %w: %w", db.ErrRunQuery, err)
+		return resp, fmt.Errorf("get all sessions of friends: %w: %w", db.ErrRunQuery, err)
 	}
 
 	joined := false
@@ -25,7 +25,7 @@ func GetAll(ctx context.Context) (dto.GetSessionsAllResponse, error) {
 	for _, session := range s {
 		p, err := db.Queries.GetSessionParticipants(ctx, session.ID)
 		if err != nil {
-			return resp, fmt.Errorf("Failed to get participants of session %q: %w: %w", session.Name, db.ErrRunQuery, err)
+			return resp, fmt.Errorf("get participants of session %q: %w: %w", session.Name, db.ErrRunQuery, err)
 		}
 
 		minParticipants := []dto.MinParticipant{}

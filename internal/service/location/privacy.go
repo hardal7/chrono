@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func EditLocationPrivacy(ctx context.Context, r dto.EditLocationPrivacyRequest) error {
@@ -15,7 +15,7 @@ func EditLocationPrivacy(ctx context.Context, r dto.EditLocationPrivacyRequest) 
 
 	err := db.Queries.SetLocationPrivacy(ctx, query.SetLocationPrivacyParams{ID: userID, HideCountry: r.Hide})
 	if err != nil {
-		return fmt.Errorf("Failed to update user location privacy: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("update user location privacy: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

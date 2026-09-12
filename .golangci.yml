@@ -56,7 +56,6 @@ linters:
     staticcheck:
       checks:
         - all
-        - -ST1005
         - -ST1000
         - -ST1020
     godot:

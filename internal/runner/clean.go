@@ -13,7 +13,7 @@ import (
 )
 
 func NewMinute(ctx context.Context) {
-	logger.Info("Started runner", "name", "new_minute")
+	logger.With("name", "new_minute").Info("Started runner")
 	for {
 		timer := time.NewTimer(time.Minute)
 		<-timer.C
@@ -30,27 +30,27 @@ func cleanExpiredSessions(ctx context.Context) error {
 
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return fmt.Errorf("Failed to begin new transaction: %w", err)
+		return fmt.Errorf("failed to begin new transaction: %w", err)
 	}
 	defer func() {
 		err = tx.Rollback(ctx)
 		if err != nil && !errors.Is(err, pgx.ErrTxClosed) {
-			logger.Warn("Failed to rollback transaction")
+			logger.Err(err).Warn("rollback transaction")
 		}
 	}()
 
 	err = db.Queries.WithTx(tx).DeleteExpiredSessions(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to delete expired sessions: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("delete expired sessions: %w: %w", db.ErrRunQuery, err)
 	}
 	err = db.Queries.WithTx(tx).DeleteExpiredSessionParticipants(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to delete expired session participants: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("delete expired session participants: %w: %w", db.ErrRunQuery, err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to commit transaction: %w: %w", db.ErrCommitTransaction, err)
+		return fmt.Errorf("commit transaction: %w: %w", db.ErrCommitTransaction, err)
 	}
 	return nil
 }

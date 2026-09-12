@@ -15,7 +15,7 @@ func Leave(ctx context.Context, r dto.LeaveSessionRequest) error {
 
 	err := db.Queries.LeaveSession(ctx, query.LeaveSessionParams{UserID: userID, Name: r.Name, OwnerUsername: r.OwnerUsername})
 	if err != nil {
-		return fmt.Errorf("Failed to leave session: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("leave session: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil

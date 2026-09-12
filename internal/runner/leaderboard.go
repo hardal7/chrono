@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"uuid"
 
 	"github.com/hardal7/chrono/internal/db"
@@ -22,18 +21,18 @@ func updateLeaderboard(ctx context.Context) error {
 
 	tx, err := db.DB.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return fmt.Errorf("Failed to begin new transaction: %w", err)
+		return fmt.Errorf("begin new transaction: %w", err)
 	}
 	defer func() {
 		err = tx.Rollback(ctx)
 		if err != nil && !errors.Is(err, pgx.ErrTxClosed) {
-			logger.Warn("Failed to rollback transaction")
+			logger.Warn("rollback transaction")
 		}
 	}()
 
 	snapshotID, err := db.Queries.WithTx(tx).CreateLeaderboardSnapshot(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create new leaderboard snapshot: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("create new leaderboard snapshot: %w: %w", db.ErrRunQuery, err)
 	}
 
 	users, err := db.Queries.WithTx(tx).GetTopUsers(ctx, query.GetTopUsersParams{
@@ -42,7 +41,7 @@ func updateLeaderboard(ctx context.Context) error {
 		MatchName: pgtype.Text{Valid: false},
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to get leaderboard users: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("get leaderboard users: %w: %w", db.ErrRunQuery, err)
 	}
 
 	var leaderboardUsers []query.CreateLeaderboardUsersParams
@@ -55,17 +54,17 @@ func updateLeaderboard(ctx context.Context) error {
 	}
 	_, err = db.Queries.WithTx(tx).CreateLeaderboardUsers(ctx, leaderboardUsers)
 	if err != nil {
-		return fmt.Errorf("Failed to create leaderboard users: %w: %w", db.ErrCommitTransaction, err)
+		return fmt.Errorf("create leaderboard users: %w: %w", db.ErrCommitTransaction, err)
 	}
 
 	lastUsers, err := db.Queries.WithTx(tx).GetLastLeaderboardUsers(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to get last leaderboard users: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("get last leaderboard users: %w: %w", db.ErrRunQuery, err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to commit transaction: %w: %w", db.ErrCommitTransaction, err)
+		return fmt.Errorf("commit transaction: %w: %w", db.ErrCommitTransaction, err)
 	}
 
 	topUsers := calculateRanks(users, lastUsers)
@@ -112,12 +111,12 @@ func updateLeaderboardCache(ctx context.Context, topUsers []dto.TopUser) error {
 	body := dto.GetTopUsersResponse{Users: topUsers}
 	data, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal cache body: %w", err)
+		return fmt.Errorf("marshal cache body: %w", err)
 	}
 
 	err = db.RDB.Set(ctx, user.TopUsersKey, data, 0).Err()
 	if err != nil {
-		return fmt.Errorf("Failed to save top users to cache: %w", err)
+		return fmt.Errorf("save top users to cache: %w", err)
 	}
 
 	return nil

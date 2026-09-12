@@ -23,6 +23,9 @@ config:
       check_interval: 5s
       limit_percentage: 80
       spike_limit_percentage: 25
+    batch:
+      timeout: 200ms
+      send_batch_size: 512
 
   exporters:
     otlp_http/victoriametrics:

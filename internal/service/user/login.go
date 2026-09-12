@@ -27,16 +27,16 @@ func Login(ctx context.Context, r dto.LoginUserRequest) (http.Cookie, error) {
 		u, err = db.Queries.GetUserByEmail(ctx, r.Email)
 	}
 	if errors.Is(err, pgx.ErrNoRows) {
-		return cookie, errors.New("User not found")
+		return cookie, fmt.Errorf("user not found: %w", db.ErrNotFound)
 	} else if err != nil {
-		return cookie, fmt.Errorf("Failed to get user: %w: %w", db.ErrRunQuery, err)
+		return cookie, fmt.Errorf("get user: %w: %w", db.ErrRunQuery, err)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password))
 	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-		return cookie, fmt.Errorf("Wrong password: %w", err)
+		return cookie, fmt.Errorf("wrong password: %w", err)
 	} else if err != nil {
-		return cookie, fmt.Errorf("Failed to hash password: %w", err)
+		return cookie, fmt.Errorf("hash password: %w", err)
 	}
 
 	ctx = requestctx.AsUserID(ctx, u.ID)

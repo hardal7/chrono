@@ -15,7 +15,7 @@ func Activity(next http.Handler) http.Handler {
 		userID := requestctx.GetUserID(r.Context())
 		err := db.Queries.UpdateUserActivity(r.Context(), userID)
 		if err != nil {
-			logger.Warn("Failed to update user activity")
+			logger.Warn("update user activity")
 		}
 
 		next.ServeHTTP(w, r)

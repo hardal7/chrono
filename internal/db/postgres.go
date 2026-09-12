@@ -18,27 +18,29 @@ var (
 )
 
 func CreateDBConnection(ctx context.Context) (*pgxpool.Pool, error) {
-	logger.Info("Connecting to database server", "host", config.App.PostgresHost)
+	logger.With("host", config.App.PostgresHost).
+		Info("Connecting to database server")
 
 	cfg, err := pgxpool.ParseConfig(getConnectionString())
 	if err != nil {
-		return DB, fmt.Errorf("Invalid database connection string: %w", err)
+		return DB, fmt.Errorf("invalid database connection string: %w", err)
 	}
 
 	cfg.ConnConfig.Tracer = queryTracer{}
 	DB, err = pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
-		return DB, fmt.Errorf("Failed to create connection pool: %w", err)
+		return DB, fmt.Errorf("creating connection pool: %w", err)
 	}
 	logger.Info("Created connection pool")
 
 	if err := DB.Ping(ctx); err != nil {
 		DB.Close()
-		return DB, fmt.Errorf("Failed to connect to connection pool: %w", err)
+		return DB, fmt.Errorf("connecting to connection pool: %w", err)
 	}
 	Queries = db.New(DB)
 
-	logger.Info("Connected to database server", "host", config.App.PostgresHost)
+	logger.With("host", config.App.PostgresHost).
+		Info("Connected to database server")
 	return DB, nil
 }
 
@@ -54,10 +56,13 @@ func getConnectionString() string {
 type queryTracer struct{}
 
 func (t queryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
-	logger.Trace(data.SQL, "requestID", requestctx.GetRequestID(ctx))
+	logger.With("requestID", requestctx.GetRequestID(ctx)).
+		Trace(data.SQL)
 	return ctx
 }
 
 func (t queryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
-	logger.Trace(data.CommandTag.String(), "error", data.Err, "requestID", requestctx.GetRequestID(ctx))
+	logger.Err(data.Err).
+		With("requestID", requestctx.GetRequestID(ctx)).
+		Trace(data.CommandTag.String())
 }

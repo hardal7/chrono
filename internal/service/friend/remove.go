@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hardal7/chrono/internal/util/requestctx"
 	db "github.com/hardal7/chrono/internal/db"
 	query "github.com/hardal7/chrono/internal/db/sqlc"
 	"github.com/hardal7/chrono/internal/dto"
+	"github.com/hardal7/chrono/internal/util/requestctx"
 )
 
 func Remove(ctx context.Context, r dto.RemoveFriendRequest) error {
@@ -18,7 +18,7 @@ func Remove(ctx context.Context, r dto.RemoveFriendRequest) error {
 		Username: r.Username,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to remove friend: %w: %w", db.ErrRunQuery, err)
+		return fmt.Errorf("remove friend: %w: %w", db.ErrRunQuery, err)
 	}
 
 	return nil
